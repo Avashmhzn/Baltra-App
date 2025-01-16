@@ -1,0 +1,150 @@
+import 'dart:developer';
+
+import 'package:baltra/features/applicationCare/controller/myProductController.dart';
+import 'package:baltra/features/applicationCare/data/productRepository.dart';
+import 'package:baltra/features/applicationCare/models/myProduct.dart';
+import 'package:baltra/features/applicationCare/presentation/widgets/add_product_dialog.dart';
+import 'package:baltra/features/applicationCare/presentation/widgets/myProduct_card.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+
+class MyProductPage extends StatefulWidget {
+  const MyProductPage({super.key});
+
+  @override
+  State<MyProductPage> createState() => _MyProductPageState();
+}
+
+final Myproductcontroller myproductcontroller =
+    Get.put(Myproductcontroller(productRepository: MyProductRepository()));
+
+class _MyProductPageState extends State<MyProductPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 20),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xffC8C8C8)),
+                      ),
+                      child: const Text(
+                        'View Product History',
+                        style:
+                            TextStyle(color: Color(0xff1B1919), fontSize: 14),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return const QRScannerScreen();
+                        },
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      color: Theme.of(context).primaryColor,
+                      child: const Text(
+                        'Add Product',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              Obx(() {
+                if (myproductcontroller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (myproductcontroller.myProducts.isEmpty) {
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height / 6,
+                      ),
+                      const Center(
+                          child: Text(
+                              'You have not added any product.\nplease scan the QR code of package to add.')),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height / 6,
+                      ),
+                    ],
+                  );
+                }
+                return SizedBox(
+                  height: 510,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 00.0),
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      itemCount: myproductcontroller.myProducts.length,
+                      itemBuilder: (context, index) {
+                        log(myproductcontroller.myProducts[index].toString());
+                        Myproduct myproduct =
+                            myproductcontroller.myProducts[index];
+
+                        return MyProdductCard(
+                          product: myproduct,
+                        );
+                      },
+                    ),
+                  ),
+                );
+              }),
+              Container(
+                height: 135,
+                margin:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xffD7D7D7)),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SvgPicture.asset('assets/icons/what.svg'),
+                    const Text(
+                      'How do I add products?',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14),
+                    ),
+                    const Text(
+                      'To add more products, scan the QR code in the product',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

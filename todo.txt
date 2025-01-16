@@ -1,0 +1,13 @@
+1. Breadcrums -- not required
+2. Reward page
+
+4. product detail page
+5. reset password page
+// N
+ 
+
+
+ IOS client id
+ 109308031091-tl7v924l7o31230q7gi7suuuvrame18s.apps.googleusercontent.com
+ Android client
+ 109308031091-0295fgstp87grs1gl98g5p9b0t83vva0.apps.googleusercontent.com
