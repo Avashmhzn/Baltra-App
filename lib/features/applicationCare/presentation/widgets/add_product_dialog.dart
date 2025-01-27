@@ -78,25 +78,40 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         log('DATAAAAAA:::::${result!.code.toString()}');
         Navigator.pop(context);
       });
+  String scannedUrl = scanData.code ?? '';
+   if (scannedUrl.isNotEmpty) {
+      Uri uri = Uri.parse(scannedUrl);
+       var queryParams = uri.queryParameters;
+      
+      // Example: Extract specific query parameters
+      String? param1 = queryParams['model_name']; // Example parameter
+      String? param2 = queryParams['model_number']; // Another parameter
+      String? param3 = queryParams['serial_number']; // Another parameter
+      // Log or use the query parameters
+      log('param1: $param1');
+      log('param2: $param2');
+      log('param3: $param3');
 
-      _navigateToResultScreen(scanData.code!);
-    });
+      _navigateToResultScreen(param1,param2,param3);
+  }});
   }
 
-  void _navigateToResultScreen(String qrCodeData) {
+  void _navigateToResultScreen(String? param1,String? param2,String? param3) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ResultScreen(qrCodeData: qrCodeData),
+        builder: (context) => ResultScreen( model_name:  param1, model_num:  param2, serial_number: param3),
       ),
     );
   }
 }
 
 class ResultScreen extends StatefulWidget {
-  final String qrCodeData;
+  final String? model_name;
+  final String? model_num;
+  final String? serial_number;
 
-  const ResultScreen({super.key, required this.qrCodeData});
+  const ResultScreen({super.key, required this.model_name, required this.model_num, required this.serial_number, });
 
   @override
   State<ResultScreen> createState() => _ResultScreenState();
@@ -109,6 +124,9 @@ class _ResultScreenState extends State<ResultScreen> {
   final TextEditingController storeName = TextEditingController();
   final TextEditingController storeLocation = TextEditingController();
   final TextEditingController stroePhone = TextEditingController();
+  final TextEditingController model_nameController = TextEditingController();
+  final TextEditingController model_numController = TextEditingController();
+  final TextEditingController serial_numberController = TextEditingController();
   final _picker = ImagePicker();
 
   final List<File?> _images = List.filled(3, null);
@@ -122,45 +140,25 @@ class _ResultScreenState extends State<ResultScreen> {
       });
     }
   }
-
+@override
+  void initState() {
+      model_numController.text = widget.model_num ?? '';
+    model_nameController.text = widget.model_name ?? '';
+    serial_numberController.text = widget.serial_number ?? '';
+    super.initState();
+  }
   final Myproductcontroller myproductcontroller =
       Get.put(Myproductcontroller(productRepository: MyProductRepository()));
 
   @override
   Widget build(BuildContext context) {
-    String extractedSerialNumber = '';
-    String extractedModelName = '';
-    String extractedModelNumber = '';
-    log("**************QR DATA: $widget.qrCodeData");
-
-    // Extract data from qrCodeData
-    List<String> lines = widget.qrCodeData.split('\n');
-    for (String line in lines) {
-      List<String> parts = line.trim().split(': ');
-      if (parts.length == 2) {
-        String label = parts[0];
-        String value = parts[1];
-        switch (label) {
-          case 'Model':
-            extractedModelName = value;
-            break;
-          case 'Model Number':
-            extractedModelNumber = value;
-            break;
-          case 'Serial Number':
-            extractedSerialNumber = value;
-            break;
-
-          default:
-            // Handle unexpected labels (optional)
-            break;
-        }
-      }
-    }
-
+ 
     Future<void> submitForm() async {
       log("addding product.....");
       log(_purchaseDateController.text);
+          log(model_nameController.text);
+    log(model_numController.text);
+    log(serial_numberController.text);
       final prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('auth_token');
       var request =
@@ -178,9 +176,9 @@ class _ResultScreenState extends State<ResultScreen> {
       request.fields['store_name'] = storeName.text;
       request.fields['store_location'] = storeLocation.text;
       request.fields['store_number'] = stroePhone.text;
-      request.fields['model_num'] = 'BMG150';
-      request.fields['model_name'] = 'Blender';
-      request.fields['serial_number'] = 'BMG1501';
+      request.fields['model_num'] = model_numController.text;
+      request.fields['model_name'] =model_nameController.text;
+      request.fields['serial_number'] = serial_numberController.text;
       request.fields['purchase_date'] = _purchaseDateController.text;
       request.fields['warranty_issue'] = _warrantyIssueDateController.text;
       request.fields['warranty_expiry'] = _warrantyExpireDateController.text;
@@ -274,6 +272,7 @@ class _ResultScreenState extends State<ResultScreen> {
       child: Scaffold(
         body: Column(
           children: [
+            
             const AppBarWithSVG(
                 backbutton: true,
                 subtitle: 'Add the Baltra products by filling out the form',
@@ -321,26 +320,38 @@ class _ResultScreenState extends State<ResultScreen> {
                           );
                         },
                       ),
-                      NormalTextField(
-                        hint: 'Serial Number',
-                        title: 'Product Serial Number',
-                        type: TextInputType.name,
-                        readonly: true,
-                        initial: 'BMG150',
+                       ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: serial_numberController,
+                        builder: (context, value, child) {
+                          return NormalTextField(
+                            hint: 'Serial number',
+                            title: 'Serial number',
+                            type: TextInputType.name,
+                            controller: serial_numberController,
+                          );
+                        },
                       ),
-                      NormalTextField(
-                        hint: 'Model Name',
-                        title: 'Model Name',
-                        type: TextInputType.name,
-                        readonly: true,
-                        initial: 'Blender',
+                        ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: model_nameController,
+                        builder: (context, value, child) {
+                          return NormalTextField(
+                            hint: 'Model name',
+                            title: 'Model name',
+                            type: TextInputType.name,
+                            controller: model_nameController,
+                          );
+                        },
                       ),
-                      NormalTextField(
-                        hint: 'Model Number',
-                        title: 'Model Number',
-                        type: TextInputType.name,
-                        readonly: true,
-                        initial: 'BMG150',
+                          ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: model_numController,
+                        builder: (context, value, child) {
+                          return NormalTextField(
+                            hint: 'Model number',
+                            title: 'Model number',
+                            type: TextInputType.name,
+                            controller: model_numController,
+                          );
+                        },
                       ),
                       ValueListenableBuilder<TextEditingValue>(
                           valueListenable: _purchaseDateController,
