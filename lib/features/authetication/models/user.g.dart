@@ -23,6 +23,8 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       contact: (json['contact'] as num).toInt(),
       image_url: json['image_url'] as String?,
       reward_points: (json['reward_points'] as num?)?.toInt(),
+      gender: json['gender'] as String?,
+      dob: json['dob'] as String?,
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{

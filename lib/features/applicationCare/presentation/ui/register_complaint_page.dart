@@ -1,25 +1,35 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:baltra/core/utils/constants.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/application_care_page.dart';
+import 'package:baltra/features/authetication/presentation/pages/buttomNavbar.dart';
 import 'package:baltra/features/authetication/presentation/widgets/textform.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 class ComplaintRegistrationPage extends StatefulWidget {
-  const ComplaintRegistrationPage({
+  ComplaintRegistrationPage({
     super.key,
     required this.productId,
+    required this.modelName,
+    required this.modelNo,
     required this.serialNo,
     required this.status,
+
+
   });
 
   final int productId;
+  final String modelName;
+  final String modelNo;
   final String serialNo;
   final String status;
+
 
   @override
   State<ComplaintRegistrationPage> createState() =>
@@ -30,10 +40,52 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
   File? _productImage;
   File? _warrantyImage;
   File? _problemVideo;
-  VideoPlayerController? _videoController;
   final TextEditingController _problemTypeController = TextEditingController();
   final TextEditingController _problemDescriptionController =
       TextEditingController();
+
+  List<Map<String, dynamic>> zones = [];
+  String? selectedZone = null;
+  String? selectedArea;
+
+  String? customerName;
+  String? customerContact;
+  String? email;
+
+  // Method to load zones from the assets
+  Future<void> loadZones() async {
+    final String response = await rootBundle.loadString('assets/zones.json');
+    final List<dynamic> data = json.decode(response);
+    setState(() {
+      zones = data.cast<Map<String, dynamic>>();
+      if (zones.isNotEmpty && selectedZone == null) {
+        selectedZone = null;
+        selectedArea = null;
+      }
+    });
+  }
+
+  List<Map<String, dynamic>> get availableAreas {
+    if (selectedZone == null) return [];
+    return zones
+        .firstWhere((zone) => zone['zoneName'] == selectedZone)['zoneArea']
+        .cast<Map<String, dynamic>>();
+  }
+
+  // load customer detail from SharedPreferences
+  Future<void> _loadCustomerDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      String firstName = prefs.getString('firstname') ?? '';
+      String lastName = prefs.getString('lastname') ?? '';
+      customerName = "$firstName $lastName".trim().isEmpty ? 'Unknown' : "$firstName $lastName";
+      customerContact = prefs.getString('contact') ?? 'Not Available';
+      email = prefs.getString('email') ?? 'Not Available';
+    });
+    print('Customer Name: $customerName');
+    print('Customer Contact: $customerContact');
+    print('Email: $email');
+  }
 
   Future<void> _pickImage(ImageSource source, bool isProductImage) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
@@ -50,7 +102,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
 
   Future<void> _pickVideo() async {
     final pickedFile =
-        await ImagePicker().pickVideo(source: ImageSource.gallery);
+    await ImagePicker().pickVideo(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _problemVideo = File(pickedFile.path);
@@ -58,8 +110,10 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
     }
   }
 
+
   Future<void> submitForm() async {
     try {
+      await _loadCustomerDetails();
       final prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('auth_token');
 
@@ -81,10 +135,24 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
             'damaged_video', _problemVideo!.path));
       }
 
+      request.fields['model_name'] = widget.modelName;
+      request.fields['model_number'] = widget.modelNo;
       request.fields['serial_number'] = widget.serialNo;
       request.fields['problem_type'] = _problemTypeController.text;
       request.fields['problem_description'] =
           _problemDescriptionController.text;
+
+      // customer details
+      request.fields['customerName'] = customerName ?? 'Unknown';
+      request.fields['customerContact'] = customerContact ?? 'Not Available';
+      request.fields['email'] = email ?? 'Not Available';
+
+      if (selectedZone != null) {
+        request.fields['zone'] = selectedZone!;
+      }
+      if (selectedArea != null) {
+        request.fields['area'] = selectedArea!;
+      }
 
       request.headers['Authorization'] = 'Bearer $token';
 
@@ -95,10 +163,12 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
       if (response.statusCode == 201) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const ApplicationCarePage()),
+          MaterialPageRoute(
+            builder: (context) => ButtomNavBar(pageno: 2,),
+          ),
         );
       } else {
-        throw Exception('Failed to submit data');
+        throw Exception('Failed to submit data : ${response.statusCode}');
       }
     } catch (error) {
       // Handle general errors
@@ -109,6 +179,13 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
   void showSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Complain can be placed only for verified products')));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadZones();
+    _loadCustomerDetails();
   }
 
   @override
@@ -130,7 +207,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                   children: [
                     const SizedBox(height: 16),
                     const Text(
-                      'Product Image',
+                      'Damaged Image',
                       style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                     GestureDetector(
@@ -143,7 +220,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                             ? Image.file(_productImage!, fit: BoxFit.cover)
                             : const Center(
                                 child: Text(
-                                  'Add Product Image',
+                                  'Upload a picture of your damaged product',
                                   style: TextStyle(
                                       fontSize: 14, color: Colors.black),
                                 ),
@@ -152,7 +229,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'Warranty Card',
+                      'Warranty Card Image',
                       style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                     GestureDetector(
@@ -165,7 +242,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                             ? Image.file(_warrantyImage!, fit: BoxFit.cover)
                             : const Center(
                                 child: Text(
-                                  'Warranty Card Image',
+                                  'Upload a picture of your warranty card',
                                   style: TextStyle(
                                       fontSize: 14, color: Colors.black),
                                 ),
@@ -173,39 +250,72 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Problem Video',
-                      style: TextStyle(fontSize: 14, color: Colors.black),
+                    // Select Zone Dropdown
+                    const Text('Select Zone'),
+                    DropdownButton<String>(
+                      value: selectedZone,
+                      isExpanded: true,
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null,
+                          child: Text('Select Zone',style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),),
+                        ),
+                        ...zones.map((zone) => DropdownMenuItem<String>(
+                          value: zone['zoneName'],
+                          child: Text(zone['zoneName'],style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),),
+                        )),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          selectedZone = value;
+                          selectedArea = null;
+                        });
+                      },
+                      hint: const Text('Choose a zone'),
                     ),
-                    GestureDetector(
-                      onTap: _pickVideo,
-                      child: Container(
-                        height: 150,
-                        width: double.infinity,
-                        color: Colors.grey[300],
-                        child: _problemVideo != null
-                            ? const Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.video_file,
-                                      size: 50, color: Colors.blue),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    'Video Selected',
-                                    style: TextStyle(
-                                        fontSize: 14, color: Colors.black),
-                                  ),
-                                ],
-                              )
-                            : const Center(
-                                child: Text(
-                                  'Select the video',
-                                  style: TextStyle(
-                                      fontSize: 14, color: Colors.black),
-                                ),
-                              ),
-                      ),
+
+                    const SizedBox(height: 16),
+
+                    // Select Area Dropdown
+                    const Text('Select Area'),
+                    DropdownButton<String>(
+                      value: selectedArea,
+                      isExpanded: true,
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null,
+                          child: Text('Select Area', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),),
+                        ),
+                        ...availableAreas.map((area) => DropdownMenuItem<String>(
+                          value: area['areaName'],
+                          child: Text(area['areaName'],style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),),
+                        )),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          selectedArea = value;
+                        });
+                      },
+                      hint: const Text('Choose an area'),
                     ),
+
+                    const SizedBox(height: 16),
+                    NormalTextField(
+                      hint: 'Model Name.',
+                      title: 'Model Name.',
+                      type: TextInputType.name,
+                      readonly: true,
+                      initial: widget.modelName,
+                    ),
+
+                    NormalTextField(
+                      hint: 'Model Name.',
+                      title: 'Model Name.',
+                      type: TextInputType.name,
+                      readonly: true,
+                      initial: widget.modelNo,
+                    ),
+
                     NormalTextField(
                       hint: 'Product Serial No.',
                       title: 'Product Serial No.',
@@ -213,6 +323,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       readonly: true,
                       initial: widget.serialNo,
                     ),
+
                     const Padding(
                       padding: EdgeInsets.only(bottom: 8.0, top: 5),
                       child: Text('Problem'),
@@ -240,6 +351,41 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                           border: OutlineInputBorder(),
                         ),
                         maxLength: 100,
+                      ),
+                    ),
+
+                    const SizedBox(height: 5),
+                    const Text(
+                      'Problem Video',
+                      style: TextStyle(fontSize: 14, color: Colors.black),
+                    ),
+                    GestureDetector(
+                      onTap: _pickVideo,
+                      child: Container(
+                        height: 150,
+                        width: double.infinity,
+                        color: Colors.grey[300],
+                        child: _problemVideo != null
+                            ? const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.video_file,
+                                size: 50, color: Colors.blue),
+                            SizedBox(height: 10),
+                            Text(
+                              'Video Selected',
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.black),
+                            ),
+                          ],
+                        )
+                            : const Center(
+                          child: Text(
+                            'Select the video',
+                            style: TextStyle(
+                                fontSize: 14, color: Colors.black),
+                          ),
+                        ),
                       ),
                     ),
                     GestureDetector(
