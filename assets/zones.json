@@ -1,0 +1,931 @@
+[
+  {
+    "id": 1,
+    "zoneName": "BAGMATI",
+    "zoneArea": [
+      { "id": 1, "areaName": "AIRPORT" },
+      { "id": 2, "areaName": "ANAMNAGAR" },
+      { "id": 3, "areaName": "ASON" },
+      { "id": 4, "areaName": "BABARMAHAL" },
+      { "id": 5, "areaName": "BAGBAZAAR" },
+      { "id": 6, "areaName": "BAGDOL" },
+      { "id": 7, "areaName": "BAIRENI" },
+      { "id": 8, "areaName": "BALKHU" },
+      { "id": 9, "areaName": "BALUWATAR" },
+      { "id": 10, "areaName": "BALKUMARI" },
+      { "id": 11, "areaName": "BANSBARI" },
+      { "id": 12, "areaName": "BANEPA" },
+      { "id": 13, "areaName": "BARFHEDI" },
+      { "id": 14, "areaName": "BARHABISE" },
+      { "id": 15, "areaName": "BATTISPUTALI" },
+      { "id": 16, "areaName": "BELKOTGADHI" },
+      { "id": 17, "areaName": "BENIGHAT" },
+      { "id": 18, "areaName": "BHAISEPATI" },
+      { "id": 19, "areaName": "BHIMSENGOLA" },
+      { "id": 20, "areaName": "BIDUR" },
+      { "id": 21, "areaName": "BOUDHA" },
+      { "id": 22, "areaName": "BUDDHANAGAR" },
+      { "id": 23, "areaName": "BUDHANILKANTHA" },
+      { "id": 24, "areaName": "CHANGUNARAYAN" },
+      { "id": 25, "areaName": "CHANDRAGIRI" },
+      { "id": 26, "areaName": "CHABAHIL" },
+      { "id": 27, "areaName": "CHAUTARA" },
+      { "id": 28, "areaName": "CHARIKOT" },
+      { "id": 29, "areaName": "CHETTRAPATI" },
+      { "id": 30, "areaName": "DAKSHINKALI" },
+      { "id": 31, "areaName": "DALLU" },
+      { "id": 32, "areaName": "DHADING" },
+      { "id": 33, "areaName": "DHAPAKHEL" },
+      { "id": 34, "areaName": "DHOBICHAUR" },
+      { "id": 35, "areaName": "DHOBIGHAT" },
+      { "id": 36, "areaName": "DHUNIBESI" },
+      { "id": 37, "areaName": "DHULIKHEL" },
+      { "id": 38, "areaName": "EKANTAKUNA" },
+      { "id": 39, "areaName": "GAIRIGAON" },
+      { "id": 40, "areaName": "GAJURI" },
+      { "id": 41, "areaName": "GALCHHI" },
+      { "id": 42, "areaName": "GAUSHALA" },
+      { "id": 43, "areaName": "GAURIGHAT" },
+      { "id": 44, "areaName": "GHATTEKULO" },
+      { "id": 45, "areaName": "GODAWARI" },
+      { "id": 46, "areaName": "GOKARNA" },
+      { "id": 47, "areaName": "GOKARNESHWOR" },
+      { "id": 48, "areaName": "GOLFUTAR" },
+      { "id": 49, "areaName": "GURJUDHARA" },
+      { "id": 50, "areaName": "GWARKO" },
+      { "id": 51, "areaName": "HARISIDDHI" },
+      { "id": 52, "areaName": "HATTIGAUDA" },
+      { "id": 53, "areaName": "HATTIBAN" },
+      { "id": 54, "areaName": "IMADOL" },
+      { "id": 55, "areaName": "JADIBUTI" },
+      { "id": 56, "areaName": "JAGATI" },
+      { "id": 57, "areaName": "JAMAL" },
+      { "id": 58, "areaName": "JAWALAKHEL" },
+      { "id": 59, "areaName": "JORPATI" },
+      { "id": 60, "areaName": "KAGESHWOR-MANOHARA" },
+      { "id": 61, "areaName": "KALANKI" },
+      { "id": 62, "areaName": "KALIMATI" },
+      { "id": 63, "areaName": "KAMLADI" },
+      { "id": 64, "areaName": "KANKIPADU" },
+      { "id": 65, "areaName": "KAPAN" },
+      { "id": 66, "areaName": "KATHMANDU" },
+      { "id": 67, "areaName": "KAUSHALTAR" },
+      { "id": 68, "areaName": "KIRTIPUR" },
+      { "id": 69, "areaName": "KOTESHWOR" },
+      { "id": 70, "areaName": "KULESHWOR" },
+      { "id": 71, "areaName": "KUMARIPATI" },
+      { "id": 72, "areaName": "KUPANDOLE" },
+      { "id": 73, "areaName": "KUSUNTI" },
+      { "id": 74, "areaName": "LAGANKHEL" },
+      { "id": 75, "areaName": "LAINCHAUR" },
+      { "id": 76, "areaName": "LAZIMPAT" },
+      { "id": 77, "areaName": "LOKANTHALI" },
+      { "id": 78, "areaName": "LUBU" },
+      { "id": 79, "areaName": "MADHYAPUR THIMI" },
+      { "id": 80, "areaName": "MAHARAJGUNJ" },
+      { "id": 81, "areaName": "MAHALAXMISTAN" },
+      { "id": 82, "areaName": "MAHALAXMI" },
+      { "id": 83, "areaName": "MAITIDEVI" },
+      { "id": 84, "areaName": "MALKABARI" },
+      { "id": 85, "areaName": "MANBHAWAN" },
+      { "id": 86, "areaName": "MELAMCHI" },
+      { "id": 87, "areaName": "MINBHAWAN" },
+      { "id": 88, "areaName": "NAGARJUN" },
+      { "id": 89, "areaName": "NAIKAP" },
+      { "id": 90, "areaName": "NAKHHU" },
+      { "id": 91, "areaName": "NAMOBOUDHA" },
+      { "id": 92, "areaName": "NAUBISE" },
+      { "id": 93, "areaName": "NAXAL" },
+      { "id": 94, "areaName": "NAYABAZAAR" },
+      { "id": 95, "areaName": "NEW BANESHWOR" },
+      { "id": 96, "areaName": "NEW ROAD" },
+      { "id": 97, "areaName": "NILKANTHA" },
+      { "id": 98, "areaName": "NUWAKOT" },
+      { "id": 99, "areaName": "OLD BANESHWOR" },
+      { "id": 100, "areaName": "PANIPOKHARI" },
+      { "id": 101, "areaName": "PANAUTI" },
+      { "id": 102, "areaName": "PANCHKHAL" },
+      { "id": 103, "areaName": "PEPSICOLA" },
+      { "id": 104, "areaName": "PUTALISADAK" },
+      { "id": 105, "areaName": "PANIBARI" },
+      { "id": 106, "areaName": "RASUWA" },
+      { "id": 107, "areaName": "SALLAGHARI" },
+      { "id": 108, "areaName": "SAMAKHUSI" },
+      { "id": 109, "areaName": "SANEPA" },
+      { "id": 110, "areaName": "SATUNGAL" },
+      { "id": 111, "areaName": "SATDOBATO" },
+      { "id": 112, "areaName": "SHANKARAPUR" },
+      { "id": 113, "areaName": "SINAMANGAL" },
+      { "id": 114, "areaName": "SINDHUPALCHOWK" },
+      { "id": 115, "areaName": "SUBIDHANAGAR" },
+      { "id": 116, "areaName": "SUNDHARA" },
+      { "id": 117, "areaName": "SUNDARIJAL" },
+      { "id": 118, "areaName": "SUNAKOTI" },
+      { "id": 119, "areaName": "SURYABINAYAK" },
+      { "id": 120, "areaName": "TANGAL" },
+      { "id": 121, "areaName": "TARKESHWOR" },
+      { "id": 122, "areaName": "TEENTHANA" },
+      { "id": 123, "areaName": "TEENKUNE" },
+      { "id": 124, "areaName": "TEKU" },
+      { "id": 125, "areaName": "THANKOT" },
+      { "id": 126, "areaName": "THAMEL" },
+      { "id": 127, "areaName": "THASIKHEL" },
+      { "id": 128, "areaName": "THIMI" },
+      { "id": 129, "areaName": "TIKATHALI" },
+      { "id": 130, "areaName": "TOKHA" },
+      { "id": 131, "areaName": "TRIPURESHWOR" }
+    ]
+  },
+  {
+    "id": 2,
+    "zoneName": "BHERI",
+    "zoneArea": [
+      {
+        "id": 1,
+        "areaName": "AATHABIS"
+      },
+      {
+        "id": 2,
+        "areaName": "BANSGADHI"
+      },
+      {
+        "id": 3,
+        "areaName": "BARBARDIYA"
+      },
+      {
+        "id": 4,
+        "areaName": "BEHRIGANGA"
+      },
+      {
+        "id": 5,
+        "areaName": "DULLU"
+      },
+      {
+        "id": 6,
+        "areaName": "GULERIA"
+      },
+      {
+        "id": 7,
+        "areaName": "GURBHAKOT"
+      },
+      {
+        "id": 8,
+        "areaName": "KANCHANPUR"
+      },
+      {
+        "id": 9,
+        "areaName": "KOHALPUR"
+      },
+      {
+        "id": 10,
+        "areaName": "LEKBESHI"
+      },
+      {
+        "id": 11,
+        "areaName": "MADHUVAN"
+      },
+      {
+        "id": 12,
+        "areaName": "NALGARH"
+      },
+      {
+        "id": 13,
+        "areaName": "NARAYAN"
+      },
+      {
+        "id": 14,
+        "areaName": "NEPALGUNJ"
+      },
+      {
+        "id": 15,
+        "areaName": "PANCHAPURI"
+      },
+      {
+        "id": 16,
+        "areaName": "RAJAPUR"
+      },
+      {
+        "id": 17,
+        "areaName": "RUPEHDIYA"
+      },
+      {
+        "id": 18,
+        "areaName": "SURKHET"
+      },
+      {
+        "id": 19,
+        "areaName": "THAKURBABA"
+      }
+    ]
+  },
+
+  {
+    "id": 3,
+    "zoneName": "DHAULAGIRI",
+    "zoneArea": [
+      {
+        "id": 1,
+        "areaName": "BAGLUNG"
+      }
+    ]
+  },
+
+  {
+    "id": 4,
+    "zoneName": "GANDAKI",
+    "zoneArea": [
+      {
+        "id": 1,
+        "areaName": "BESISAHAR"
+      },
+      {
+        "id": 2,
+        "areaName": "BHANU"
+      },
+      {
+        "id": 3,
+        "areaName": "BHIRKOT"
+      },
+      {
+        "id": 4,
+        "areaName": "BHIMAD"
+      },
+      {
+        "id": 5,
+        "areaName": "CHAPAKOT"
+      },
+      {
+        "id": 6,
+        "areaName": "DAMAULI"
+      },
+      {
+        "id": 7,
+        "areaName": "GALYAN"
+      },
+      {
+        "id": 8,
+        "areaName": "GORKHA"
+      },
+      {
+        "id": 9,
+        "areaName": "PALUNGTAR"
+      },
+      {
+        "id": 10,
+        "areaName": "POKHARA"
+      },
+      {
+        "id": 11,
+        "areaName": "PUTALIBAZAAR"
+      },
+      {
+        "id": 12,
+        "areaName": "SHUKLAGANDAKI"
+      },
+      {
+        "id": 13,
+        "areaName": "SUNDAR BAZAAR"
+      },
+      {
+        "id": 14,
+        "areaName": "VYAS"
+      },
+      {
+        "id": 15,
+        "areaName": "WALING"
+      }
+    ]
+  },
+
+  {
+    "id": 5,
+    "zoneName": "JANAKPUR",
+    "zoneArea": [
+      {
+        "id": 1,
+        "areaName": "AURAHI"
+      },
+      {
+        "id": 2,
+        "areaName": "BAGMATI"
+      },
+      {
+        "id": 3,
+        "areaName": "BALAWA"
+      },
+      {
+        "id": 4,
+        "areaName": "BALARA"
+      },
+      {
+        "id": 5,
+        "areaName": "BARBIBAS"
+      },
+      {
+        "id": 6,
+        "areaName": "BHANGAHA"
+      },
+      {
+        "id": 7,
+        "areaName": "BHARATHAWA"
+      },
+      {
+        "id": 8,
+        "areaName": "BHIMESHWOR"
+      },
+      {
+        "id": 9,
+        "areaName": "BIDEHA"
+      },
+      {
+        "id": 10,
+        "areaName": "DHANUSHADHAM"
+      },
+      {
+        "id": 11,
+        "areaName": "DOLAKHA"
+      },
+      {
+        "id": 12,
+        "areaName": "DUDHAULI"
+      },
+      {
+        "id": 13,
+        "areaName": "GANESHMAN CHARNATH"
+      },
+      {
+        "id": 14,
+        "areaName": "GAUSHALA"
+      },
+      {
+        "id": 15,
+        "areaName": "HANSAPUR"
+      },
+      {
+        "id": 16,
+        "areaName": "HARIWAN"
+      },
+      {
+        "id": 17,
+        "areaName": "HARIPUR"
+      },
+      {
+        "id": 18,
+        "areaName": "ISHWARPUR"
+      },
+      {
+        "id": 19,
+        "areaName": "JALESHWOR"
+      },
+      {
+        "id": 20,
+        "areaName": "JANAKPUR"
+      },
+      {
+        "id": 21,
+        "areaName": "JIRI"
+      },
+      {
+        "id": 22,
+        "areaName": "KABILASI"
+      },
+      {
+        "id": 23,
+        "areaName": "KAMALAXMI"
+      },
+      {
+        "id": 24,
+        "areaName": "KAMALA"
+      },
+      {
+        "id": 25,
+        "areaName": "KSHIRESHWARNATH"
+      },
+      {
+        "id": 26,
+        "areaName": "LALBANDHI"
+      },
+      {
+        "id": 27,
+        "areaName": "LOHARPATTI"
+      },
+      {
+        "id": 28,
+        "areaName": "MALANGWA"
+      },
+      {
+        "id": 29,
+        "areaName": "MANTHALI"
+      },
+      {
+        "id": 30,
+        "areaName": "MANARA SHISHAWA"
+      },
+      {
+        "id": 31,
+        "areaName": "MATIHANI"
+      },
+      {
+        "id": 32,
+        "areaName": "MITHILA BIHARI"
+      },
+      {
+        "id": 33,
+        "areaName": "MITHILA"
+      },
+      {
+        "id": 34,
+        "areaName": "NAGARAIN"
+      },
+      {
+        "id": 35,
+        "areaName": "RAMECHHAP"
+      },
+      {
+        "id": 36,
+        "areaName": "RAMGOPALPUR"
+      },
+      {
+        "id": 37,
+        "areaName": "SABAILA"
+      },
+      {
+        "id": 38,
+        "areaName": "SHAHIDNAGAR"
+      },
+      {
+        "id": 39,
+        "areaName": "SINDHULI"
+      }
+    ]
+  },
+
+  {
+    "id": 6,
+    "zoneName": "KARNALI",
+    "zoneArea": [
+      {
+        "id": 1,
+        "areaName": "CHANDANATH"
+      },
+      {
+        "id": 2,
+        "areaName": "CHAAYANATH RARA"
+      },
+      {
+        "id": 3,
+        "areaName": "HUMLA"
+      },
+      {
+        "id": 4,
+        "areaName": "KHANDACHAKRA"
+      },
+      {
+        "id": 5,
+        "areaName": "RASKOT"
+      },
+      {
+        "id": 6,
+        "areaName": "THULI BHERI"
+      },
+      {
+        "id": 7,
+        "areaName": "TILAGUFA"
+      },
+      {
+        "id": 8,
+        "areaName": "TRIPURA SUNDARI"
+      }
+    ]
+  },
+
+  {
+    "id": 7,
+    "zoneName": "KOSHI",
+    "zoneArea": [
+      {
+        "id": 1,
+        "areaName": "BARAHACHETRA"
+      },
+      {
+        "id": 2,
+        "areaName": "BELBARI"
+      },
+      {
+        "id": 3,
+        "areaName": "BIRATNAGAR"
+      },
+      {
+        "id": 4,
+        "areaName": "CHAINPUR"
+      },
+      {
+        "id": 5,
+        "areaName": "DHANKUTA"
+      },
+      {
+        "id": 6,
+        "areaName": "DHARMADEVI"
+      },
+      {
+        "id": 7,
+        "areaName": "DHARAN"
+      },
+      {
+        "id": 8,
+        "areaName": "DUHABI"
+      },
+      {
+        "id": 9,
+        "areaName": "HILE"
+      },
+      {
+        "id": 10,
+        "areaName": "INARUWA"
+      },
+      {
+        "id": 11,
+        "areaName": "ITIHARI"
+      },
+      {
+        "id": 12,
+        "areaName": "KHANDBARI"
+      },
+      {
+        "id": 13,
+        "areaName": "LALIGURANS"
+      },
+      {
+        "id": 14,
+        "areaName": "LETANG BHOGATENI"
+      },
+      {
+        "id": 15,
+        "areaName": "MADI"
+      },
+      {
+        "id": 16,
+        "areaName": "MAHALAXMI"
+      },
+      {
+        "id": 17,
+        "areaName": "MYANGLUNG"
+      },
+      {
+        "id": 18,
+        "areaName": "PAKHRIBAS"
+      },
+      {
+        "id": 19,
+        "areaName": "PANCHKAPAN"
+      },
+      {
+        "id": 20,
+        "areaName": "PATHARI"
+      },
+      {
+        "id": 21,
+        "areaName": "RATUWAMAI"
+      },
+      {
+        "id": 22,
+        "areaName": "SADHANANDH"
+      },
+      {
+        "id": 23,
+        "areaName": "SANISCHARE"
+      },
+      {
+        "id": 24,
+        "areaName": "SUNDAR HARAICHA"
+      },
+      {
+        "id": 25,
+        "areaName": "SUNWARSHI"
+      },
+      {
+        "id": 26,
+        "areaName": "URLABARI"
+      }
+    ]
+  },
+
+  {
+    "id": 8,
+    "zoneName": "LUMBINI",
+    "zoneArea": [
+      {
+        "id": 1,
+        "areaName": "BANGANGA"
+      },
+      {
+        "id": 2,
+        "areaName": "BHAIRAHAWA"
+      },
+      {
+        "id": 3,
+        "areaName": "BHUMIKASTAN"
+      },
+      {
+        "id": 4,
+        "areaName": "BUDDHABHUMI"
+      },
+      {
+        "id": 5,
+        "areaName": "BUTWAL"
+      },
+      {
+        "id": 6,
+        "areaName": "DEVDAHA"
+      },
+      {
+        "id": 7,
+        "areaName": "KAPILVASTU"
+      },
+      {
+        "id": 8,
+        "areaName": "KRISHNANAGAR"
+      },
+      {
+        "id": 9,
+        "areaName": "LUMBINI SANSKRITIK"
+      },
+      {
+        "id": 10,
+        "areaName": "MAHARAJGUNJ"
+      },
+      {
+        "id": 11,
+        "areaName": "MUSIKOT"
+      },
+      {
+        "id": 12,
+        "areaName": "RAMPUR"
+      },
+      {
+        "id": 13,
+        "areaName": "RESHUNGA"
+      },
+      {
+        "id": 14,
+        "areaName": "SAINAMAINA"
+      },
+      {
+        "id": 15,
+        "areaName": "SANDHIKHARKA"
+      },
+      {
+        "id": 16,
+        "areaName": "SHIVARAJ"
+      },
+      {
+        "id": 17,
+        "areaName": "SIDDHARTHANAGAR"
+      },
+      {
+        "id": 18,
+        "areaName": "SITGANGA"
+      },
+      {
+        "id": 19,
+        "areaName": "TANSEN"
+      },
+      {
+        "id": 20,
+        "areaName": "TILOTTHAMA"
+      }
+    ]
+  },
+
+  {
+    "id": 9,
+    "zoneName": "MAHAKALI",
+    "zoneArea": [
+      {
+        "id": 1,
+        "areaName": "AMARGADHI"
+      },
+      {
+        "id": 2,
+        "areaName": "BEDKOT"
+      },
+      {
+        "id": 3,
+        "areaName": "BELAURI"
+      },
+      {
+        "id": 4,
+        "areaName": "BHIMDATTA"
+      },
+      {
+        "id": 5,
+        "areaName": "DADELDHURA"
+      },
+      {
+        "id": 6,
+        "areaName": "KRISHNAPUR"
+      },
+      {
+        "id": 7,
+        "areaName": "MAHENDRANAGAR"
+      },
+      {
+        "id": 8,
+        "areaName": "MELAULI"
+      },
+      {
+        "id": 9,
+        "areaName": "PARSHURAM"
+      },
+      {
+        "id": 10,
+        "areaName": "PATAN"
+      },
+      {
+        "id": 11,
+        "areaName": "PURCHAUDI"
+      },
+      {
+        "id": 12,
+        "areaName": "PURNABAS"
+      },
+      {
+        "id": 13,
+        "areaName": "SHUKLAPHANTH"
+      }
+    ]
+  },
+
+  {
+    "id": 10,
+    "zoneName": "MECHI",
+    "zoneArea": [
+      {
+        "id": 1,
+        "areaName": "ARJUNDHARA"
+      },
+      {
+        "id": 2,
+        "areaName": "BHARAPUR"
+      },
+      {
+        "id": 3,
+        "areaName": "BIRTAMOD"
+      },
+      {
+        "id": 4,
+        "areaName": "DAMAK"
+      },
+      {
+        "id": 5,
+        "areaName": "DAUMAI"
+      },
+      {
+        "id": 6,
+        "areaName": "GAURADAHA"
+      },
+      {
+        "id": 7,
+        "areaName": "ILLAM"
+      },
+      {
+        "id": 8,
+        "areaName": "KANKAI"
+      },
+      {
+        "id": 9,
+        "areaName": "PHIDIM"
+      },
+      {
+        "id": 10,
+        "areaName": "SURYODAYA"
+      },
+      {
+        "id": 11,
+        "areaName": "TAPLEJUNG"
+      }
+    ]
+  },
+
+  {
+    "id": 11,
+    "zoneName": "NARAYANI",
+    "zoneArea": [
+      { "id": 1, "areaName": "BAHUDHARMI" },
+      { "id": 2, "areaName": "BARDGHAT" },
+      { "id": 3, "areaName": "BAUDHMAI" },
+      { "id": 4, "areaName": "BHARATPUR" },
+      { "id": 5, "areaName": "BIRGUNJ" },
+      { "id": 6, "areaName": "BRINDAVAN" },
+      { "id": 7, "areaName": "CHANDRAPUR" },
+      { "id": 8, "areaName": "DEVCHULI" },
+      { "id": 9, "areaName": "DEVAHI" },
+      { "id": 10, "areaName": "GADHIMAI" },
+      { "id": 11, "areaName": "GAIDAKOT" },
+      { "id": 12, "areaName": "GARUDA" },
+      { "id": 13, "areaName": "GAUR" },
+      { "id": 14, "areaName": "GUJARA" },
+      { "id": 15, "areaName": "HETAUDA" },
+      { "id": 16, "areaName": "ISHNATH" },
+      { "id": 17, "areaName": "JITPUR" },
+      { "id": 18, "areaName": "KALAIYA" },
+      { "id": 19, "areaName": "KALIKA" },
+      { "id": 20, "areaName": "KATHARIYA" },
+      { "id": 21, "areaName": "KAWASOTI" },
+      { "id": 22, "areaName": "KHAIRENI" },
+      { "id": 23, "areaName": "KOLHABI" },
+      { "id": 24, "areaName": "MADHYABINDU" },
+      { "id": 25, "areaName": "MADI" },
+      { "id": 26, "areaName": "MAHAGADHIMAI" },
+      { "id": 27, "areaName": "MAULAPUR" },
+      { "id": 28, "areaName": "NARAYANGHAT" },
+      { "id": 29, "areaName": "NIJGARH" },
+      { "id": 30, "areaName": "PACHRAUTA" },
+      { "id": 31, "areaName": "PARSAGADHI" },
+      { "id": 32, "areaName": "PAROHA" },
+      { "id": 33, "areaName": "PHATUWA BIJAYPUR" },
+      { "id": 34, "areaName": "POKHARIYA" },
+      { "id": 35, "areaName": "PAJPUR" },
+      { "id": 36, "areaName": "RAJDEVI" },
+      { "id": 37, "areaName": "RAMGRAM" },
+      { "id": 38, "areaName": "RAPTI" },
+      { "id": 39, "areaName": "RATNANAGAR" },
+      { "id": 40, "areaName": "SIMRAUGARH" },
+      { "id": 41, "areaName": "SUNWAL" },
+      { "id": 42, "areaName": "THAHA" }
+    ]
+  },
+
+  {
+    "id": 12,
+    "zoneName": "RAPTI",
+    "zoneArea": [
+      { "id": 1, "areaName": "AATHABISKOT" },
+      { "id": 2, "areaName": "BAGCHAUR" },
+      { "id": 3, "areaName": "CHAURJAHARI" },
+      { "id": 4, "areaName": "GHORAHI" },
+      { "id": 5, "areaName": "LAMAHI" },
+      { "id": 6, "areaName": "PYUTHAN" },
+      { "id": 7, "areaName": "ROLPA" },
+      { "id": 8, "areaName": "SHARDA" },
+      { "id": 9, "areaName": "SWARGADWARI" },
+      { "id": 10, "areaName": "TULSIPUR" }
+    ]
+  },
+
+  {
+    "id": 13,
+    "zoneName": "SAGARMATHA",
+    "zoneArea": [
+      { "id": 1, "areaName": "BELAKHA" },
+      { "id": 2, "areaName": "BODEBARSAIN" },
+      { "id": 3, "areaName": "CHAUDHANDIGADHI" },
+      { "id": 4, "areaName": "DAKNESHWARI" },
+      { "id": 5, "areaName": "DHANGADHIMAI" },
+      { "id": 6, "areaName": "DUDHKUNDA" },
+      { "id": 7, "areaName": "GOLBAZAAR" },
+      { "id": 8, "areaName": "HALESHI" },
+      { "id": 9, "areaName": "HANUMANNAGAR" },
+      { "id": 10, "areaName": "KALYANPUR" },
+      { "id": 11, "areaName": "KANCHANPUR" },
+      { "id": 12, "areaName": "KARJANHA" },
+      { "id": 13, "areaName": "KATARI" },
+      { "id": 14, "areaName": "KHADAK" },
+      { "id": 15, "areaName": "LAHAN" },
+      { "id": 16, "areaName": "MIRCHAIYA" },
+      { "id": 17, "areaName": "RUPAKOT" },
+      { "id": 18, "areaName": "SAPTAKOSHI" },
+      { "id": 19, "areaName": "SHAMBHUNATH" },
+      { "id": 20, "areaName": "SIDDHICHARAN" },
+      { "id": 21, "areaName": "SIRAHA" },
+      { "id": 22, "areaName": "SUKHIPUR" },
+      { "id": 23, "areaName": "SURUNGA" },
+      { "id": 24, "areaName": "TRIYUGA" }
+    ]
+  },
+
+  {
+    "id": 14,
+    "zoneName": "SETI",
+    "zoneArea": [
+      { "id": 1, "areaName": "BADIMALIKA" },
+      { "id": 2, "areaName": "BHAJANI" },
+      { "id": 3, "areaName": "BUDHIGANGA" },
+      { "id": 4, "areaName": "BUDHINANDA" },
+      { "id": 5, "areaName": "BUNGAL" },
+      { "id": 6, "areaName": "DHANGADI" },
+      { "id": 7, "areaName": "DIPAYAL" },
+      { "id": 8, "areaName": "GAURIGANGA" },
+      { "id": 9, "areaName": "GHODAGHODI" },
+      { "id": 10, "areaName": "GODAWARI" },
+      { "id": 11, "areaName": "JAYA PRTHVI" },
+      { "id": 12, "areaName": "KAMALBAZZAR" },
+      { "id": 13, "areaName": "LAMKI" },
+      { "id": 14, "areaName": "MANGALSEN" },
+      { "id": 15, "areaName": "PANCHADEWAL" },
+      { "id": 16, "areaName": "SANPHEBAGAR" },
+      { "id": 17, "areaName": "TIKAPUR" },
+      { "id": 18, "areaName": "TRIVENI" }
+    ]
+  }
+]

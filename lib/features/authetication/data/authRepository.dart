@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:baltra/core/utils/constants.dart';
 import 'package:baltra/core/utils/sessionController.dart';
 import 'package:baltra/features/authetication/models/user.dart';
+import 'package:baltra/features/authetication/presentation/pages/loginPage.dart';
 import 'package:baltra/features/authetication/presentation/pages/otp_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -46,7 +47,7 @@ class Authrepository extends GetxController {
         } else {
           // Navigate to OTP page if the number is not verified
           Get.to(
-            () => OtpPage(
+                () => OtpPage(
               phone: number,
               reset: false,
             ),
@@ -65,53 +66,53 @@ class Authrepository extends GetxController {
     }
   }
 
- Future<int> verifyOTP(int number, int otp) async {
-  try {
-    final response = await http
-        .post(
-          Uri.parse('$URL/customer/verifyotp'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(<String, dynamic>{'contact': number, 'otp': otp}),
-        )
-        .timeout(Duration(seconds: 10));
-
-    log("Verify OTP Response: ${response.body}");
-
-    dynamic data;
+  Future<int> verifyOTP(int number, int otp) async {
     try {
-      data = json.decode(response.body);
-    } catch (_) {
-      errorMessage.value = 'Invalid response from server';
-      return -1;
-    }
+      final response = await http
+          .post(
+        Uri.parse('$URL/customer/verifyotp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(<String, dynamic>{'contact': number, 'otp': otp}),
+      )
+          .timeout(Duration(seconds: 10));
 
-    if (response.statusCode == 200) {
-      return response.statusCode;
-    } else {
-      errorMessage.value = 'Failed to login: ${data['message'] ?? "Unknown error"}';
-      return response.statusCode;
+      log("Verify OTP Response: ${response.body}");
+
+      dynamic data;
+      try {
+        data = json.decode(response.body);
+      } catch (_) {
+        errorMessage.value = 'Invalid response from server';
+        return -1;
+      }
+
+      if (response.statusCode == 200) {
+        return response.statusCode;
+      } else {
+        errorMessage.value = 'Failed to login: ${data['message'] ?? "Unknown error"}';
+        return response.statusCode;
+      }
+    } on SocketException {
+      // Specific handling for no internet connection
+      errorMessage.value = 'No internet connection';
+      return -1;
+    } catch (e) {
+      // Generic fallback for any other unexpected errors
+      errorMessage.value = 'Unexpected error: $e';
+      return -1;
+    } finally {
+      isLoading.value = false;
     }
-  } on SocketException {
-    // Specific handling for no internet connection
-    errorMessage.value = 'No internet connection';
-    return -1;
-  } catch (e) {
-    // Generic fallback for any other unexpected errors
-    errorMessage.value = 'Unexpected error: $e';
-    return -1;
-  } finally {
-    isLoading.value = false;
   }
-}
 
 
   Future<int> registerCustomer(
-    String firstname,
-    String lastName,
-    String email,
-    String password,
-    int phone,
-  ) async {
+      String firstname,
+      String lastName,
+      String email,
+      String password,
+      int phone,
+      ) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 // TODo: ADD DOB ON SIGNUP
     try {
@@ -269,10 +270,74 @@ class Authrepository extends GetxController {
     }
   }
 
+  //changepassword
+  Future<int> changePassword(
+      int number,
+      String oldPassword,
+      String newPassword,
+      String confirmNewPassword,
+      ) async {
+    if (number <= 0 || oldPassword.isEmpty || newPassword.isEmpty || confirmNewPassword.isEmpty) {
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        const SnackBar(
+          content: Text('All fields are required.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return -1;
+    }
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    try {
+      final requestBody = jsonEncode(<String, dynamic>{
+        'contact': number.toString(), // Ensure proper type
+        'old_password': oldPassword.trim(),
+        'new_password': newPassword.trim(),
+        'confirm_newpassword': confirmNewPassword.trim(),
+      });
+
+      log('Request Body: $requestBody');
+
+      final response = await http.put(
+        Uri.parse('$URL/customer/changepassword'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${prefs.getString('auth_token')}', // Add the token
+        },
+        body: requestBody,
+      );
+
+      log("Change Password Response: ${response.body}");
+
+      final dynamic data = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return response.statusCode;
+      } else if (response.statusCode == 401) {
+        errorMessage.value = 'Session expired. Please log in again.';
+        Get.offAll(Loginpage()); // Navigate to login page
+        return response.statusCode;
+      } else {
+        errorMessage.value = data['message'] ?? 'Failed to change password';
+        return response.statusCode;
+      }
+    } on SocketException catch (_) {
+      errorMessage.value = 'No internet connection';
+      return -1;
+    } catch (e) {
+      errorMessage.value = 'Unexpected error: $e';
+      return -1;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
   Future<int> loginUser(
-    int phone,
-    String password,
-  ) async {
+      int phone,
+      String password,
+      ) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     isLoading.value = true;
     errorMessage.value = '';

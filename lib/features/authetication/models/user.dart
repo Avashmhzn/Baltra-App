@@ -25,16 +25,27 @@ class User {
     required this.lastname,
     required this.email,
     required this.contact,
+    this.gender,
+    this.address,
+    this.dob,
+    this.district,
+    this.city,
     this.image_url,
     this.reward_points,
   });
 
-  final String firstname;
-  final String lastname;
-  final String email;
-  final int contact;
-  String? image_url;
-  int? reward_points;
+   String firstname;
+   String lastname;
+   String email;
+   int contact;
+   String? image_url;
+   String? gender;
+   int? reward_points;
+   String? dob;
+   String? address;
+   String? district;
+   String? city;
+
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
   Map<String, dynamic> toJson() => _$UserToJson(this);
