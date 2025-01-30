@@ -32,7 +32,7 @@ class Myproductcontroller extends GetxController {
     super.onInit();
   }
 
-  Future<void> fetchMyProduct() async {
+  /*Future<void> fetchMyProduct() async {
     isLoading(true);
     final Either<Exception, List<Myproduct>> result =
         await productRepository.fetchMyProduct();
@@ -47,6 +47,28 @@ class Myproductcontroller extends GetxController {
       },
     );
     isLoading(false);
+  }*/
+  Future<void> fetchMyProduct() async {
+    isLoading(true);
+    try {
+      final Either<Exception, List<Myproduct>> result = await productRepository.fetchMyProduct();
+      log(result.toString());
+
+      result.fold(
+            (failure) {
+          showErrorDialog(Get.context!, failure);
+          errorMessage(failure.toString());
+        },
+            (myProductList) {
+          myProducts.assignAll(myProductList);  // Update the products list
+        },
+      );
+    } catch (e) {
+      errorMessage('An unexpected error occurred');
+      showErrorDialog(Get.context!, Exception('An unexpected error occurred'));
+    } finally {
+      isLoading(false);
+    }
   }
 
   Future<int> deleteMyProduct(int id) async {

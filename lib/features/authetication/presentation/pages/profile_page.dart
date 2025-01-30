@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
+
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
@@ -97,8 +98,9 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => Editprofile(
+                                      builder: (context) => EditProfile(
                                             data: user,
+
                                           )));
                             },
                             child: Container(

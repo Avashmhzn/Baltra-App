@@ -11,7 +11,7 @@ class CongratulationPage extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
-          const CustomAppbar(),
+           CustomAppbar(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15.0),
             child: Column(

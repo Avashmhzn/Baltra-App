@@ -2,6 +2,8 @@ import 'package:baltra/features/authetication/data/authRepository.dart';
 import 'package:baltra/features/authetication/presentation/pages/buttomNavbar.dart';
 import 'package:baltra/features/authetication/presentation/pages/forgot_phone.dart';
 import 'package:baltra/features/authetication/presentation/pages/phoneNumber.dart';
+import 'package:baltra/features/authetication/presentation/widgets/appbar.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -32,20 +34,22 @@ class _LoginpageState extends State<Loginpage> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      body: Stack(
-        children: [
+          appBar: CustomAppbar(height: 80,),
+          body: Stack(
+            children: [
           Container(
             height: double.infinity,
             width: double.infinity,
-            decoration: const BoxDecoration(
+            /*decoration: const BoxDecoration(
               image: DecorationImage(
                 fit: BoxFit.cover,
                 image: AssetImage('assets/images/doodle.png'),
               ),
-            ),
-            child: Center(
+            ),*/
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Container(
-                color: Colors.white,
+                color: Colors.transparent,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
                 child: Form(
@@ -242,7 +246,7 @@ class _LoginpageState extends State<Loginpage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text(
-                              'Not a User?',
+                              "If you  don't have account?",
                               style: TextStyle(color: Colors.black),
                             ),
                             TextButton(
@@ -256,7 +260,7 @@ class _LoginpageState extends State<Loginpage> {
                                 },
                                 child: const Text(
                                   'Signup',
-                                  style: TextStyle(color: Colors.grey),
+                                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                                 )),
                           ],
                         ),

@@ -32,7 +32,7 @@ class Resetpassword extends StatelessWidget {
                 child: Container(
                   color: Colors.white,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -65,9 +65,8 @@ class Resetpassword extends StatelessWidget {
                             if (value.length < 8) {
                               return 'Password must be at least 8 characters';
                             }
-                            // Check for at least one digit, one uppercase letter, one lowercase letter, and one special character
                             if (!RegExp(
-                                    r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#$&*]).{8,}$')
+                                r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#$&*]).{8,}$')
                                 .hasMatch(value)) {
                               return 'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character';
                             }
@@ -96,7 +95,7 @@ class Resetpassword extends StatelessWidget {
                             if (_formKey.currentState!.validate()) {
                               try {
                                 int status =
-                                    await Authrepository().resetpassword(
+                                await Authrepository().resetpassword(
                                   phone!,
                                   password.text.trim(),
                                   confirmPassword.text.trim(),
@@ -106,7 +105,7 @@ class Resetpassword extends StatelessWidget {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content:
-                                          Text('Password reset successful.'),
+                                      Text('Password reset successful.'),
                                       duration: Duration(seconds: 2),
                                     ),
                                   );
@@ -156,3 +155,4 @@ class Resetpassword extends StatelessWidget {
     );
   }
 }
+

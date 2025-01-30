@@ -44,11 +44,10 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: Center(
         child: Lottie.asset(
-            'assets/BSC.json', // Replace with the path to your Lottie JSON file
+            'assets/BSC.json',
             fit: BoxFit.cover,
-            width: double.infinity, // Adjust the width and height as needed
+            width: double.infinity,
             height: double.infinity,
-            // Set to true if you want the animation to loop
             repeat: false),
       ),
     );

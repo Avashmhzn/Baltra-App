@@ -1,19 +1,39 @@
 import 'package:flutter/material.dart';
 
-class CustomAppbar extends StatelessWidget {
-  const CustomAppbar({
-    super.key,
-  });
+class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
+
+  @override
+  final Size preferredSize;
+
+  CustomAppbar({Key? key, double height = 56.0})
+      : preferredSize = Size.fromHeight(height),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 100,
-      decoration: const BoxDecoration(
-          gradient:
-              LinearGradient(colors: [Color(0xffE91C1C), Color(0xff831010)])),
-      child: Image.asset('assets/images/logo_white.png'),
+    return AppBar(
+      automaticallyImplyLeading: false,  // Explicitly disable the back button
+      toolbarHeight: 80.0,
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            colors: [
+              Theme.of(context).primaryColor,
+              Color(0xFF8B0000),
+            ],
+            center: Alignment.centerLeft,
+            radius: 3.5,
+          ),
+        ),
+      ),
+      title: Center(
+        child: Image.asset(
+          'assets/images/logo_white.png',
+          height: 35,
+        ),
+      ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
     );
   }
 }

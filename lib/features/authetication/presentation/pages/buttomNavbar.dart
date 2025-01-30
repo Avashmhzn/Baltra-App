@@ -47,9 +47,10 @@ class _ButtomNavBarState extends State<ButtomNavBar> {
           ],
         ),
       ),
+
       bottomNavigationBar: SizedBox(
         height:
-            55.0, // Adjust this height to make sure the FAB is outside of the bottom navigation bar
+            55.0,
         child: CustomBottomAppBar(
           height: 50.0,
           curveHeight: 30.0,

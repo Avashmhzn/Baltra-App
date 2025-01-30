@@ -15,8 +15,7 @@ class ApplicationCarePage extends StatefulWidget {
 Future<String> _getNameFromSharedPrefs() async {
   final prefs = await SharedPreferences.getInstance();
   final name = prefs.getString('name');
-  return 'Hello, $name' ??
-      'Hello, Guest'; // Return an empty string if 'name' is not found
+  return 'Hello, $name' ?? 'Hello, Guest';
 }
 
 class _ApplicationCarePageState extends State<ApplicationCarePage>

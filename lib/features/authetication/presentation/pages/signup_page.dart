@@ -38,7 +38,7 @@ class _SignupPageState extends State<SignupPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CustomAppbar(),
+            CustomAppbar(),
             Container(
               color: Colors.white,
               child: Padding(

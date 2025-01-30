@@ -84,7 +84,7 @@ class _OtpPageState extends State<OtpPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CustomAppbar(),
+            CustomAppbar(),
             Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12),
