@@ -8,6 +8,7 @@ import 'package:baltra/features/applicationCare/presentation/widgets/myProduct_c
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class MyProductPage extends StatefulWidget {
   const MyProductPage({super.key});
@@ -20,6 +21,28 @@ final Myproductcontroller myproductcontroller =
     Get.put(Myproductcontroller(productRepository: MyProductRepository()));
 
 class _MyProductPageState extends State<MyProductPage> {
+  final PageController _pageController = PageController(viewportFraction: 0.85);
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController.addListener(() {
+      final newIndex = _pageController.page?.round() ?? 0;
+      if (newIndex != _currentIndex) {
+        setState(() {
+          _currentIndex = newIndex;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +74,7 @@ class _MyProductPageState extends State<MyProductPage> {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return const QRScannerScreen();
+                          return QRScannerScreen();
                         },
                       );
                     },
@@ -89,25 +112,58 @@ class _MyProductPageState extends State<MyProductPage> {
                     ],
                   );
                 }
-                return SizedBox(
-                  height: 510,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 00.0),
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      itemCount: myproductcontroller.myProducts.length,
-                      itemBuilder: (context, index) {
-                        log(myproductcontroller.myProducts[index].toString());
-                        Myproduct myproduct =
-                            myproductcontroller.myProducts[index];
+                return Column(
+                  children: [
+                    /*SizedBox(
+                      height: 510,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 00.0),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          shrinkWrap: true,
 
-                        return MyProdductCard(
-                          product: myproduct,
-                        );
-                      },
+                          itemCount: myproductcontroller.myProducts.length,
+                          itemBuilder: (context, index) {
+                            log(myproductcontroller.myProducts[index].toString());
+                            Myproduct myproduct =
+                                myproductcontroller.myProducts[index];
+
+                            return MyProdductCard(
+                              product: myproduct,
+                            );
+                          },
+                        ),
+                      ),
+                    ),*/
+                    SizedBox(
+                      height: 510,
+                      child: PageView.builder(
+                        scrollDirection: Axis.horizontal,
+                        controller: _pageController,
+                        itemCount: myproductcontroller.myProducts.length,
+                        itemBuilder: (context, index) {
+                          log(myproductcontroller.myProducts[index].toString());
+                          Myproduct myproduct =
+                          myproductcontroller.myProducts[index];
+
+                          return MyProdductCard(
+                            product: myproduct,
+                          );
+                        },
+                      ),
                     ),
-                  ),
+
+                    AnimatedSmoothIndicator(
+                      activeIndex: _currentIndex,
+                      count: myproductcontroller.myProducts.length,
+                      effect: ScrollingDotsEffect(
+                        dotWidth: 8.0,
+                        dotHeight: 8.0,
+                        activeDotColor: Theme.of(context).primaryColor,
+                        dotColor: Colors.grey.shade300,
+                      ),
+                    )
+                  ],
                 );
               }),
               Container(
