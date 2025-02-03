@@ -1,6 +1,8 @@
 // import 'package:baltra/core/router/router.dart';
 import 'package:baltra/core/utils/sessionController.dart';
 import 'package:baltra/core/utils/splashScreen.dart';
+import 'package:baltra/features/applicationCare/controller/crmController.dart';
+import 'package:baltra/features/applicationCare/data/crm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -9,6 +11,8 @@ void main() async {
   // await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(SessionController());
+  Get.put(CrmServices());
+  Get.put(CrmController(crmService: Get.find<CrmServices>()));
 
   runApp(const Zero());
 }

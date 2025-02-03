@@ -52,23 +52,9 @@ class _MyProductPageState extends State<MyProductPage> {
           child: Column(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 20),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xffC8C8C8)),
-                      ),
-                      child: const Text(
-                        'View Product History',
-                        style:
-                            TextStyle(color: Color(0xff1B1919), fontSize: 14),
-                      ),
-                    ),
-                  ),
+                
                   GestureDetector(
                     onTap: () {
                       showDialog(

@@ -7,7 +7,6 @@ import 'package:baltra/features/applicationCare/presentation/ui/extend_warranty_
 import 'package:baltra/features/applicationCare/presentation/ui/product_maintainance_page.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/register_complaint_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 class MyProdductCard extends StatelessWidget {
   MyProdductCard({
@@ -43,10 +42,10 @@ class MyProdductCard extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProductMaintainancePage()),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => ProductMaintainancePage()),
+                  // );
                 },
                 child: ClipRRect(
                   borderRadius: const BorderRadius.only(

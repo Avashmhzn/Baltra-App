@@ -1,5 +1,6 @@
 import 'package:baltra/core/utils/sessionExpirationMixin.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/myProduct_page.dart';
+import 'package:baltra/features/applicationCare/presentation/ui/product_maintainance_page.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/product_tracking_page.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';
@@ -74,7 +75,7 @@ class _ApplicationCarePageState extends State<ApplicationCarePage>
                     physics: NeverScrollableScrollPhysics(),
                     children: [
                       MyProductPage(),
-                      TrackingPage(),
+                      ProductMaintainancePage(),
                       // RewardsPage(),
                       // Text('History'),
                     ],
