@@ -100,12 +100,12 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
     }
   }
 
-  Future<void> _pickVideo() async {
+  Future<void> _pickVideo(ImageSource gallery, bool isProblemVideo) async {
     final pickedFile =
     await ImagePicker().pickVideo(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _problemVideo = File(pickedFile.path);
+        _problemVideo = File(pickedFile.path) as File?;
       });
     }
   }
@@ -132,7 +132,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
       }
       if (_problemVideo != null) {
         request.files.add(await http.MultipartFile.fromPath(
-            'damaged_video', _problemVideo!.path));
+            'damaged_Video', _problemVideo!.path));
       }
 
       request.fields['model_name'] = widget.modelName;
@@ -360,7 +360,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                     GestureDetector(
-                      onTap: _pickVideo,
+                      onTap: () => _pickVideo(ImageSource.gallery, false),
                       child: Container(
                         height: 150,
                         width: double.infinity,
