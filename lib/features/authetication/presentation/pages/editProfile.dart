@@ -33,65 +33,119 @@ class _EditProfileState extends State<EditProfile> {
   TextEditingController _districtController = TextEditingController();
   TextEditingController _cityController = TextEditingController();
 
-
   String? _phone;
   String? _profileImagePath;
   String? _gender;
   DateTime? _dob;
-  String? _Address;
 
   @override
   void initState() {
     super.initState();
+    _initializeData();
+    _saveInitialProfileData(); // <-- Added: Save initial profile data to SharedPreferences.
+    _loadProfileImage();
+    _fetchProfileData();
+    // _loadProfileData(); // Not used currently.
+  }
+
+  void _initializeData() {
     _phone = widget.data.contact.toString();
-    _fullNameController.text = "${widget.data.firstname} ${widget.data.lastname}";
+    _fullNameController.text =
+    "${widget.data.firstname} ${widget.data.lastname}";
     _emailController.text = widget.data.email;
     _gender = widget.data.gender;
+
     if (widget.data.dob != null && widget.data.dob!.isNotEmpty) {
-      _dobController.text = DateTime.tryParse(widget.data.dob!) != null
-          ? '${DateTime.parse(widget.data.dob!).month}/${DateTime.parse(widget.data.dob!).day}/${DateTime.parse(widget.data.dob!).year}'
-          : '';
-      _dob = DateTime.tryParse(widget.data.dob!);
+      final parsedDate = DateTime.tryParse(widget.data.dob!);
+      if (parsedDate != null) {
+        _dobController.text =
+        '${parsedDate.month}/${parsedDate.day}/${parsedDate.year}';
+        _dob = parsedDate;
+      }
     }
+
     _AddressController.text = widget.data.address ?? '';
     _districtController.text = widget.data.district ?? '';
     _cityController.text = widget.data.city ?? '';
-    _loadProfileImage();
   }
 
-  // load profile image from sharepreference
+  // <-- Added method to save initial profile data
+  Future<void> _saveInitialProfileData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('firstName', widget.data.firstname);
+    await prefs.setString('lastName', widget.data.lastname);
+    await prefs.setString('email', widget.data.email);
+    await prefs.setString('contact', widget.data.contact.toString());
+    await prefs.setString('gender', widget.data.gender ?? '');
+    await prefs.setString('dob', widget.data.dob ?? '');
+    await prefs.setString('customerAddress', widget.data.address ?? '');
+    await prefs.setString('district', widget.data.district ?? '');
+    await prefs.setString('city', widget.data.city ?? '');
+    log('Initial profile data saved to SharedPreferences');
+  }
+
+  Future<void> _fetchProfileData() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('auth_token');
+      if (token == null) {
+        log('Error: Missing authentication token');
+        return;
+      }
+
+      // Using PUT as the endpoint rejects GET (405 error)
+      final response = await http.put(
+        Uri.parse('$URL/customer/updateprofile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      log('Fetch Profile Response Status: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['success'] == true) {
+          final data = responseData['data'];
+
+          setState(() {
+            widget.data.firstname = data['firstname'];
+            widget.data.lastname = data['lastname'];
+            widget.data.email = data['email'];
+            widget.data.gender = data['gender'];
+            widget.data.dob = data['dob'];
+            widget.data.address = data['customerAddress'];
+            widget.data.district = data['district'];
+            widget.data.city = data['city'];
+
+            // Update controllers with fetched data
+            _fullNameController.text =
+            "${widget.data.firstname} ${widget.data.lastname}";
+            _emailController.text = widget.data.email;
+            _dobController.text = widget.data.dob ?? '';
+            _AddressController.text = widget.data.address ?? '';
+            _districtController.text = widget.data.district ?? '';
+            _cityController.text = widget.data.city ?? '';
+          });
+        } else {
+          log('Failed to fetch profile: ${responseData['message']}');
+        }
+      } else {
+        log('Failed to fetch profile: ${response.statusCode}');
+      }
+    } catch (e) {
+      log('Error fetching profile: $e');
+    }
+  }
+
   Future<void> _loadProfileImage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _profileImagePath = prefs.getString('profile_image_path') ?? widget.data.image_url;
+      _profileImagePath =
+          prefs.getString('profile_image_path') ?? widget.data.image_url;
     });
+    log('Loaded profile image path: $_profileImagePath');
   }
-
-  //pick image from galary
-  /*Future<void> _pickImage() async{
-    try{
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-      if (pickedFile != null) {
-        final appDir = await getApplicationDocumentsDirectory();
-        final fileName = pickedFile.name;
-        final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
-
-        setState(() {
-          _profileImagePath = savedImage.path;
-        });
-
-        // Save the path to SharedPreferences
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('profile_image_path', savedImage.path);
-
-        log('Profile image saved at: ${savedImage.path}');
-      }
-    } catch (e){
-      log('Error pickeing image: $e');
-    }
-  }*/
 
   Future<void> _pickImage() async {
     try {
@@ -101,17 +155,16 @@ class _EditProfileState extends State<EditProfile> {
       if (pickedFile != null) {
         final appDir = await getApplicationDocumentsDirectory();
         final fileName = pickedFile.name;
-        final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
+        final savedImage =
+        await File(pickedFile.path).copy('${appDir.path}/$fileName');
 
         setState(() {
           _profileImagePath = savedImage.path;
         });
 
-        // Save the path to SharedPreferences
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('profile_image_path', savedImage.path);
 
-        // Upload the image to the server
         await _uploadImage(savedImage);
       }
     } catch (e) {
@@ -119,73 +172,6 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  // Upload image using multipart/form-data
-  /*Future<void> _uploadImage(File imageFile) async {
-    try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('auth_token');
-
-      log('Token: $token');  // Log the token to check if it's null
-      if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: Missing authentication token')),
-        );
-        return;
-      }
-
-      var request = http.MultipartRequest(
-        'PUT',
-        Uri.parse('$URL/customer/updateprofile'),
-      );
-
-      request.headers['Authorization'] = 'Bearer $token';
-      request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
-
-      final response = await request.send();
-
-      if (response.statusCode == 200) {
-        final responseData = await response.stream.bytesToString();
-        final responseJson = json.decode(responseData);
-
-        log('Response Data: $responseData');  // Log the complete response
-
-        if (responseJson['success'] == true) {
-          final imageUrl = responseJson['image_url'];
-          log('Image URL from server: $imageUrl');  // Log the image URL
-
-          if (imageUrl != null && imageUrl is String && Uri.tryParse(imageUrl)?.isAbsolute == true) {
-            // Image URL is valid, proceed to save and update
-            await prefs.setString('image_url', imageUrl);
-            setState(() {
-              widget.data.image_url = imageUrl;
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Profile image updated successfully!')),
-            );
-          } else {
-            // Handle invalid image URL
-            log('Error: Image URL is null or invalid');
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Failed to upload image: Invalid image URL')),
-            );
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to upload image: ${responseJson['message']}')),
-          );
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upload image: ${response.statusCode}')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-      log('Error uploading image: $e');
-    }
-  }*/
   Future<void> _uploadImage(File imageFile) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -194,7 +180,18 @@ class _EditProfileState extends State<EditProfile> {
       log('Token: $token');
       if (token == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: Missing authentication token')),
+          SnackBar(
+            content: Text(
+              'Error: Missing authentication token',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
         );
         return;
       }
@@ -205,7 +202,8 @@ class _EditProfileState extends State<EditProfile> {
       );
 
       request.headers['Authorization'] = 'Bearer $token';
-      request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
+      request.files
+          .add(await http.MultipartFile.fromPath('image', imageFile.path));
 
       final response = await request.send();
 
@@ -213,52 +211,78 @@ class _EditProfileState extends State<EditProfile> {
         final responseData = await response.stream.bytesToString();
         final responseJson = json.decode(responseData);
 
-        // Log the entire response to see the structure
         log('Response Data: $responseData');
         log('Image URL from server: ${responseJson['image_url']}');
 
-        // Adjust the image URL extraction based on the server response format
-        final imageUrl = responseJson['data'] != null ? responseJson['data']['image_url'] : null;
-
+        final imageUrl = responseJson['data'] != null
+            ? responseJson['data']['image_url']
+            : null;
 
         log('Image URL from server: $imageUrl');
 
-        if (imageUrl != null && imageUrl is String && Uri.tryParse(imageUrl)?.isAbsolute == true) {
-
+        if (imageUrl != null &&
+            imageUrl is String &&
+            Uri.tryParse(imageUrl)?.isAbsolute == true) {
           await prefs.setString('image_url', imageUrl);
           setState(() {
             widget.data.image_url = imageUrl;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile image updated successfully!')),
-          );
         } else {
-
           log('Error: Image URL is null or invalid');
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to upload image: Invalid image URL')),
+            SnackBar(
+              content: Text(
+                'Failed to upload image: Invalid image URL',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              duration: const Duration(seconds: 2),
+            ),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upload image: ${response.statusCode}')),
+          SnackBar(
+            content: Text(
+              'Failed to upload image: ${response.statusCode}',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(
+          content: Text(
+            'Error: $e',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
       log('Error uploading image: $e');
     }
   }
 
-
-  // Save profile data
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) {
-      return; // Stop if form is invalid
+      return;
     }
-
 
     _formKey.currentState!.save();
 
@@ -268,19 +292,29 @@ class _EditProfileState extends State<EditProfile> {
 
       if (token == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: Missing authentication token')),
+          SnackBar(
+            content: const Text(
+              'Error: Missing authentication token',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
         );
         return;
       }
 
-      // Split full name into first and last name
       final nameParts = _fullNameController.text.split(' ');
       final firstName = nameParts.isNotEmpty ? nameParts.first : '';
-      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+      final lastName =
+      nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
       log('First Name: $firstName, Last Name: $lastName');
 
-      // Prepare the updated profile data
       final updatedData = {
         'firstname': firstName,
         'lastname': lastName,
@@ -291,15 +325,15 @@ class _EditProfileState extends State<EditProfile> {
         'customerAddress': _AddressController.text,
         'district': _districtController.text,
         'city': _cityController.text,
-
       };
-
 
       log('Sending request to update profile with data: $updatedData');
 
-      final encodedData = updatedData.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value ?? '')}').join('&');
+      final encodedData = updatedData.entries
+          .map((e) =>
+      '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value ?? '')}')
+          .join('&');
 
-      // API request to update the profile
       final response = await http.put(
         Uri.parse('$URL/customer/updateprofile'),
         body: encodedData,
@@ -318,7 +352,6 @@ class _EditProfileState extends State<EditProfile> {
         if (responseData['success'] == true) {
           final updatedUserData = responseData['data'];
 
-          // Update widget.data with new data
           setState(() {
             widget.data.firstname = updatedUserData['firstname'];
             widget.data.lastname = updatedUserData['lastname'];
@@ -329,18 +362,18 @@ class _EditProfileState extends State<EditProfile> {
             widget.data.district = updatedUserData['district'];
             widget.data.city = updatedUserData['city'];
 
-
-            _fullNameController.text = "${widget.data.firstname} ${widget.data.lastname}";
+            _fullNameController.text =
+            "${widget.data.firstname} ${widget.data.lastname}";
             _emailController.text = widget.data.email;
             _dobController.text = widget.data.dob ?? '';
-            _AddressController.text = widget.data.address!;
+            _AddressController.text = widget.data.address ?? '';
             _districtController.text = widget.data.district ?? '';
             _cityController.text = widget.data.city ?? '';
           });
 
-
-          await prefs.setString('firstname', widget.data.firstname);
-          await prefs.setString('lastname', widget.data.lastname);
+          // Save updated profile details using keys that match those used by the Complaint Registration page.
+          await prefs.setString('firstName', widget.data.firstname);
+          await prefs.setString('lastName', widget.data.lastname);
           await prefs.setString('email', widget.data.email);
           await prefs.setString('contact', widget.data.contact.toString());
           await prefs.setString('gender', widget.data.gender ?? '');
@@ -349,30 +382,75 @@ class _EditProfileState extends State<EditProfile> {
           await prefs.setString('district', widget.data.district ?? '');
           await prefs.setString('city', widget.data.city ?? '');
 
-
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile updated successfully!')),
+            SnackBar(
+              content: const Text(
+                'Profile updated successfully!',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              duration: const Duration(seconds: 2),
+            ),
           );
 
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => ButtomNavBar(pageno: 3,),
+              builder: (context) => ButtomNavBar(
+                pageno: 3,
+              ),
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to update profile: ${responseData['message']}')),
+            SnackBar(
+              content: Text(
+                'Failed to update profile: ${responseData['message']}',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              duration: const Duration(seconds: 2),
+            ),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update profile: ${response.body}')),
+          SnackBar(
+            content: Text(
+              'Failed to update profile: ${response.body}',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(
+          content: Text(
+            'Error: $e',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
       log('Error: $e');
     }
@@ -398,14 +476,16 @@ class _EditProfileState extends State<EditProfile> {
                 child: CircleAvatar(
                   radius: 60,
                   foregroundImage: _profileImagePath != null
-                      ? FileImage(File(_profileImagePath!))
+                      ? (_profileImagePath!.startsWith('http')
+                      ? NetworkImage(_profileImagePath!)
+                      : FileImage(File(_profileImagePath!))
+                  as ImageProvider)
                       : const NetworkImage(
                     'https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg',
-                  ) as ImageProvider,
+                  ),
                 ),
               ),
-
-              SizedBox(
+              const SizedBox(
                 height: 18,
               ),
               Padding(
@@ -424,7 +504,6 @@ class _EditProfileState extends State<EditProfile> {
                           return null;
                         },
                         onSaved: (value) {
-
                           final nameParts = value?.split(' ');
                           if (nameParts != null && nameParts.isNotEmpty) {
                             widget.data.firstname = nameParts.first;
@@ -437,10 +516,12 @@ class _EditProfileState extends State<EditProfile> {
                       ProfileTextField(
                         title: "Email",
                         controller: _emailController,
+                        readonly: true,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your email';
-                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                              .hasMatch(value)) {
                             return 'Please enter a valid email';
                           }
                           return null;
@@ -449,40 +530,32 @@ class _EditProfileState extends State<EditProfile> {
                           widget.data.email = value ?? '';
                         },
                       ),
-
-                      // Phone Field
                       ProfileTextField(
                         initialValue: _phone.toString(),
                         title: 'Phone',
                         readonly: true,
-
                       ),
-
                       ProfileTextField(
                         title: 'Address',
                         controller: _AddressController,
                         onSaved: (value) {
-                          _AddressController.text = value!;
-                          _Address = value;
-                          widget.data.address = value;
+                          widget.data.address = value ?? 'N/A';
                         },
                       ),
                       ProfileTextField(
                         title: 'City',
-                        initialValue: _cityController.text,
+                        controller: _cityController,
                         onSaved: (value) {
-                          _cityController.text = value!;
+                          widget.data.city = value ?? 'N/A';
                         },
                       ),
                       ProfileTextField(
                         title: 'District',
-                        initialValue: _districtController.text,
+                        controller: _districtController,
                         onSaved: (value) {
-                          _districtController.text = value!;
+                          widget.data.district = value ?? 'N/A';
                         },
                       ),
-
-
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -506,9 +579,10 @@ class _EditProfileState extends State<EditProfile> {
                               borderRadius: BorderRadius.circular(4.0),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.only(bottom: 20, left: 10),
+                              padding:
+                              const EdgeInsets.only(bottom: 20, left: 10),
                               child: DropdownButtonFormField<String>(
-                                value: _gender,
+                                value: _gender!.isEmpty ? null : _gender,
                                 dropdownColor: Colors.white,
                                 items: ['Male', 'Female'].map((gender) {
                                   return DropdownMenuItem(
@@ -523,7 +597,8 @@ class _EditProfileState extends State<EditProfile> {
                                     ),
                                   );
                                 }).toList(),
-                                onChanged: (value) => setState(() => _gender = value),
+                                onChanged: (value) =>
+                                    setState(() => _gender = value!),
                                 decoration: const InputDecoration(
                                   border: InputBorder.none,
                                   contentPadding: EdgeInsets.zero,
@@ -532,7 +607,9 @@ class _EditProfileState extends State<EditProfile> {
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black,
                                 ),
-                                validator: (value) => value == null ? 'Please select an option' : null,
+                                validator: (value) => value == null
+                                    ? 'Please select an option'
+                                    : null,
                               ),
                             ),
                           ),
@@ -572,8 +649,10 @@ class _EditProfileState extends State<EditProfile> {
                                 ),
                                 suffixIcon: GestureDetector(
                                   onTap: () async {
-                                    FocusScope.of(context).requestFocus(FocusNode());
-                                    final DateTime? pickedDate = await showDatePicker(
+                                    FocusScope.of(context)
+                                        .requestFocus(FocusNode());
+                                    final DateTime? pickedDate =
+                                    await showDatePicker(
                                       context: context,
                                       initialDate: _dob ?? DateTime.now(),
                                       firstDate: DateTime(1900),
@@ -584,11 +663,14 @@ class _EditProfileState extends State<EditProfile> {
                                         _dob = pickedDate;
                                         _dobController.text =
                                         '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
-                                        widget.data.dob = pickedDate.toIso8601String().split('T')[0];
+                                        widget.data.dob = pickedDate
+                                            .toIso8601String()
+                                            .split('T')[0];
                                       });
                                     }
                                   },
-                                  child: Icon(Icons.edit_calendar, color: Colors.grey),
+                                  child: Icon(Icons.edit_calendar,
+                                      color: Colors.grey),
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(4.0),
@@ -617,8 +699,10 @@ class _EditProfileState extends State<EditProfile> {
                                 return null;
                               },
                               onTap: () async {
-                                FocusScope.of(context).requestFocus(FocusNode());
-                                final DateTime? pickedDate = await showDatePicker(
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
+                                final DateTime? pickedDate =
+                                await showDatePicker(
                                   context: context,
                                   initialDate: _dob ?? DateTime.now(),
                                   firstDate: DateTime(1900),
@@ -628,8 +712,10 @@ class _EditProfileState extends State<EditProfile> {
                                   setState(() {
                                     _dobController.text =
                                     '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
-                                    widget.data.dob =
-                                    pickedDate.toLocal().toString().split(' ')[0];
+                                    widget.data.dob = pickedDate
+                                        .toLocal()
+                                        .toString()
+                                        .split(' ')[0];
                                   });
                                 }
                               },
@@ -638,12 +724,10 @@ class _EditProfileState extends State<EditProfile> {
                               },
                             ),
                           ),
-
                           SizedBox(height: 15),
                         ],
                       ),
-
-                      // ResetPassword
+                      // Reset Password
                       GestureDetector(
                         onTap: () {
                           Navigator.push(

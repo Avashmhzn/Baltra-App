@@ -12,7 +12,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(SessionController());
   Get.put(CrmServices());
-  Get.put(CrmController(crmService: Get.find<CrmServices>()));
+  Get.put(CrmController(crmService: CrmServices()), permanent: true);
+
 
   runApp(const Zero());
 }

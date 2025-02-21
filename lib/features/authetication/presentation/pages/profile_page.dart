@@ -4,7 +4,6 @@ import 'package:baltra/features/authetication/controller/profileController.dart'
 import 'package:baltra/features/authetication/presentation/pages/editProfile.dart';
 import 'package:baltra/features/authetication/presentation/pages/loginPage.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,23 +11,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
-
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> with SessionManager {
   final ProfileController controller = Get.put(ProfileController());
+
   @override
   void initState() {
     super.initState();
     checkSession(context);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchUserData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Obx(
-      () {
+    return Scaffold(
+      body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         } else if (controller.error.isNotEmpty) {
@@ -45,34 +48,32 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                   subtitle: 'Edit your profile',
                   title: 'My Profile',
                   backbutton: false),
-              const SizedBox(
-                height: 18,
-              ),
+              const SizedBox(height: 18),
               Center(
                 child: Column(
                   children: [
                     CircleAvatar(
                       radius: 60,
-                      foregroundImage: NetworkImage(user.image_url ??
-                          'https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg'),
+                      foregroundImage: NetworkImage(
+                        user.image_url ??
+                            'https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg',
+                      ),
                     ),
                     Text(
-                      ' ${user.firstname} ${user.lastname}', //name
+                      ' ${user.firstname} ${user.lastname}', // Name
                       style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w500,
                           color: Color(0xff202D31)),
                     ),
                     Text(
-                      user.email, //email
+                      user.email, // Email
                       style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: Color(0xff202D31)),
                     ),
-                    const SizedBox(
-                      height: 50,
-                    ),
+                    const SizedBox(height: 50),
                   ],
                 ),
               ),
@@ -99,9 +100,8 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => EditProfile(
-                                            data: user,
-
-                                          )));
+                                        data: user,
+                                      )));
                             },
                             child: Container(
                               height: 35,
@@ -121,20 +121,18 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                       ),
                     ),
                     ProfileDetailCard(
-                      detail: user.email, //email
+                      detail: user.email, // Email
                       title: 'Email',
                     ),
                     ProfileDetailCard(
-                      detail: "${user.firstname} ${user.lastname}", //name
+                      detail: "${user.firstname} ${user.lastname}", // Name
                       title: 'Name',
                     ),
                     ProfileDetailCard(
-                      detail: user.contact.toString(), // phone
+                      detail: user.contact.toString(), // Phone
                       title: 'Phone',
                     ),
-                    const SizedBox(
-                      height: 25,
-                    ),
+                    const SizedBox(height: 25),
                     const Text(
                       'Logout from this account',
                       style: TextStyle(
@@ -142,9 +140,7 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                           fontWeight: FontWeight.w700,
                           color: Color(0xff1a1a1a)),
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
+                    const SizedBox(height: 20),
                     GestureDetector(
                       onTap: () {
                         showDialog(
@@ -173,16 +169,21 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                                 TextButton(
                                   onPressed: () async {
                                     SharedPreferences prefs =
-                                        await SharedPreferences.getInstance();
+                                    await SharedPreferences.getInstance();
                                     final sessionController =
-                                        Get.find<SessionController>();
+                                    Get.find<SessionController>();
+                                    final profileController =
+                                    Get.find<ProfileController>();
+
+                                    // Clear session and user data
                                     await sessionController.setLoggedOut();
-                                    Navigator.of(context).pushAndRemoveUntil(
-                                      MaterialPageRoute(
-                                          builder: (context) => const Loginpage()),
-                                      (Route<dynamic> route) => false,
-                                    );
-                                    prefs.clear();
+                                    await prefs.clear();
+
+                                    // Reset ProfileController's userData
+                                    profileController.userData.value = null;
+
+                                    // Redirect to login page
+                                    Get.offAll(() => const Loginpage());
                                   },
                                   child: const Text(
                                     'Yes',
@@ -214,17 +215,15 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 20,
-                    )
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
             ],
           ),
         );
-      },
-    ));
+      }),
+    );
   }
 }
 
@@ -234,6 +233,7 @@ class ProfileDetailCard extends StatelessWidget {
     required this.title,
     required this.detail,
   });
+
   final String title;
   final String detail;
 
@@ -267,9 +267,7 @@ class ProfileDetailCard extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(
-          height: 15,
-        )
+        const SizedBox(height: 15),
       ],
     );
   }

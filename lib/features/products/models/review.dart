@@ -53,7 +53,13 @@ class RatingData {
     required this.rating_distribution,
   });
 
-  factory RatingData.fromJson(Map<String, dynamic> json) =>
-      _$RatingDataFromJson(json);
-  Map<String, dynamic> toJson() => _$RatingDataToJson(this);
+
+  factory RatingData.fromJson(Map<String, dynamic> json) {
+    return RatingData(
+      average_rating: json['average_rating'] ?? 0.0,
+      rating_sum: json['rating_sum'] ?? 0,
+      total_reviews: json['total_reviews'] ?? 0,
+      rating_distribution: Map<String, int>.from(json['rating_distribution'] ?? {}),
+    );
+  }
 }

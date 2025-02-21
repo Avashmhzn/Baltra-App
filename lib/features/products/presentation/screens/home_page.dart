@@ -1,8 +1,10 @@
 import 'dart:developer';
 
 import 'package:baltra/core/utils/constants.dart';
+import 'package:baltra/core/utils/sessionExpirationMixin.dart';
 import 'package:baltra/features/products/controller/productController.dart';
 import 'package:baltra/features/products/data/productRepository.dart';
+import 'package:baltra/features/products/models/product.dart';
 import 'package:baltra/features/products/presentation/screens/product_detail_page.dart';
 import 'package:baltra/features/products/presentation/widgets/homepageCard.dart';
 // import 'package:carousel_slider/carousel_slider.dart';
@@ -17,7 +19,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with SessionManager{
   final List _promotionList = [
     'assets/images/promotion_1.png',
     'assets/images/promotion_2.png',
@@ -28,12 +30,13 @@ class _HomePageState extends State<HomePage> {
 
   String name = 'Guest';
   int loyaltyPoint = 1;
+  int _itemsToShow = 4;
 
   @override
   void initState() {
     super.initState();
+    checkSession(context);
     _loadName();
-    productController.fetchProducts(1);
   }
 
   Future<void> _loadName() async {
@@ -43,6 +46,11 @@ class _HomePageState extends State<HomePage> {
       log("reward: ${prefs.getInt('reward_points')}");
       loyaltyPoint = prefs.getInt('reward_points') ?? 0;
       log("reward: $loyaltyPoint");
+    });
+  }
+  void _loadMoreItems() {
+    setState(() {
+      _itemsToShow += 4;
     });
   }
 
@@ -185,6 +193,17 @@ class _HomePageState extends State<HomePage> {
                   horizontal: 8.0,
                 ),
                 child: Obx(() {
+                  log("Product list length: ${productController.allProductsList.length}");
+
+                  if (productController.isLoading.isTrue) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (productController.allProductsList.isEmpty) {
+                    log("No products found!");
+                    return const Center(child: Text("No products found!"));
+                  }
+
                   return SingleChildScrollView(
                     child: Column(
                       children: [
@@ -204,28 +223,63 @@ class _HomePageState extends State<HomePage> {
                                         mainAxisSpacing: 8.0,
                                         childAspectRatio: 0.5),
                                 itemCount:
-                                    productController.allProductsList.length,
+                                _itemsToShow < productController.allProductsList.length
+                                    ? _itemsToShow
+                                    : productController.allProductsList.length,
                                 itemBuilder: (context, index) {
                                   final product =
-                                      productController.allProductsList[index];
+                                  productController.allProductsList[index];
                                   return GestureDetector(
                                     onTap: () {
-                                      Get.to(
-                                          ProductDetailPage(product: product));
-                                    },
+                                      log("Navigating to Product Detail: ${product.id} - ${product.name}");
+                                      productController.fetchProduct(product.id ?? 0 );
+                                      Get.to(ProductDetailPage(product: product));
+                                      },
                                     child: Homepagecard(product: product),
                                   );
                                 },
                               ),
                               const SizedBox(height: 20),
                               if (productController.isLoading.isFalse &&
-                                  productController.allProductsList.isNotEmpty)
-                                ElevatedButton(
-                                  onPressed: productController.loadMore,
-                                  child: const Text('Load More'),
+                                  productController.allProductsList.length > _itemsToShow)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                                  child: ElevatedButton(
+                                    onPressed: _loadMoreItems,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.redAccent, // Background color
+                                      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 12.0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30.0), // Rounded corners
+                                      ),
+                                      elevation: 5,
+                                      shadowColor: Colors.black.withOpacity(0.3),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: const [
+                                        Icon(Icons.add, color: Colors.white),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          'Load More',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               if (productController.isLoading.isTrue)
-                                const CircularProgressIndicator(),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent),
+                                  ),
+                                ),
+
                             ],
                           ),
                         ),

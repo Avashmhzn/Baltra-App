@@ -24,6 +24,7 @@ class Myproduct {
   final String customer;
   final int product;
   final String? extended_warranty;
+  String job_No;
 
   Myproduct({
     required this.id,
@@ -46,6 +47,7 @@ class Myproduct {
     required this.customer,
     required this.product,
     this.extended_warranty,
+    required this.job_No,
   });
 
   factory Myproduct.fromJson(Map<String, dynamic> json) =>

@@ -5,29 +5,32 @@ import 'package:dartz/dartz.dart';
 import 'dart:developer';
 
 class CrmController extends GetxController {
-  var isLoading = true.obs;
+  var isLoading = false.obs;
   var errorMessage = ''.obs;
-  var customerProduct = Rxn<CustomerProduct>(); 
+  var customerProduct = Rxn<CustomerProduct>();
+  var complaints = <CustomerProduct>[].obs; // List to store complaints
 
   final CrmServices crmService;
 
   CrmController({required this.crmService});
 
   Future<void> fetchCustomerProduct(int stockId) async {
+    if (customerProduct.value != null) return;
     isLoading.value = true;
     errorMessage.value = '';
+    customerProduct.value = null;
 
     try {
       log("Fetching customer product for Stock ID: $stockId");
 
-      final Either<String, CustomerProduct?> result = await crmService.fetchCustomerProduct(stockId);
+      final Either<String, CustomerProduct?> result =
+      await crmService.fetchCustomerProduct(stockId);
       result.fold(
-        (error) {
+            (error) {
           log("Error fetching product: $error");
           errorMessage.value = error;
-          customerProduct.value = null;
         },
-        (product) {
+            (product) {
           if (product == null) {
             errorMessage.value = "Product not found";
             log("Product not found for Stock ID: $stockId");
@@ -41,7 +44,28 @@ class CrmController extends GetxController {
       log("Unexpected error: $e");
       errorMessage.value = "An unexpected error occurred";
     } finally {
-      isLoading(false);
+      isLoading.value = false;
     }
+  }
+
+  // Fetch all complaints using CrmServices
+  Future<void> fetchAllComplaints() async {
+    isLoading(true);
+    errorMessage('');
+
+    final result = await crmService.fetchAllComplaints();
+
+    result.fold(
+          (error) {
+        log("Error fetching complaints: $error");
+        errorMessage(error.toString());
+      },
+          (data) {
+        complaints.assignAll(data);
+        log("Successfully fetched ${data.length} complaints");
+      },
+    );
+
+    isLoading(false);
   }
 }

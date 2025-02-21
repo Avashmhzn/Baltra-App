@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:baltra/features/applicationCare/data/productRepository.dart';
+import 'package:baltra/features/applicationCare/models/crmModel.dart';
 import 'package:baltra/features/applicationCare/models/loyaltyRedeem.dart';
 import 'package:baltra/features/applicationCare/models/myProduct.dart';
 import 'package:baltra/features/applicationCare/models/warrantyProduct.dart';
@@ -15,12 +16,15 @@ class Myproductcontroller extends GetxController {
   var isLoading = true.obs;
 
   var myProducts = <Myproduct>[].obs;
+  var complaints = <CustomerProduct>[].obs;
   // var myProduct = Rxn<ProductModel>();
   var myProduct = Rxn<ProductModel>(); // Observable for product
   var loyalty = Rxn<LoyaltyRedeem>(); // Observable for product
 
   // var productList = <Products>[].obs;
   var errorMessage = ''.obs;
+  var singleMyProduct = Rxn<Myproduct>();
+
 
   final MyProductRepository productRepository;
 
@@ -70,6 +74,18 @@ class Myproductcontroller extends GetxController {
       isLoading(false);
     }
   }
+
+  Future<void> fetchAllComplaints() async {
+    isLoading(true);
+    errorMessage('');
+    final result = await productRepository.fetchAllComplaints();
+    result.fold(
+          (error) => errorMessage(error.toString()),
+          (data) => complaints.assignAll(data),
+    );
+    isLoading(false);
+  }
+
 
   Future<int> deleteMyProduct(int id) async {
     isLoading(true);
@@ -214,4 +230,33 @@ class Myproductcontroller extends GetxController {
       ),
     );
   }
+
+  Future<void> fetchSingleMyProduct(int id) async {
+    isLoading(true);
+    singleMyProduct.value = null;
+    errorMessage.value = '';
+
+    try {
+      // This repository method should return Either<Exception, Myproduct>.
+      final Either<Exception, Myproduct> result =
+      await productRepository.fetchSingleMyProduct(id);
+
+      result.fold(
+            (failure) {
+          showErrorDialog(Get.context!, failure);
+          errorMessage.value = failure.toString();
+        },
+            (product) {
+          // If successful, store the product in singleMyProduct
+          singleMyProduct.value = product;
+        },
+      );
+    } catch (e) {
+      errorMessage.value = 'An unexpected error occurred: $e';
+      showErrorDialog(Get.context!, Exception('An unexpected error occurred: $e'));
+    } finally {
+      isLoading(false);
+    }
+  }
+
 }

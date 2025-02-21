@@ -20,7 +20,36 @@ class ReviewsSection extends StatefulWidget {
 
 class _ReviewsSectionState extends State<ReviewsSection> {
   final TextEditingController reviewTextController = TextEditingController();
-  int _currentRating = 1;
+  int _currentRating = 0;
+  bool _isSubmitting = false;
+  bool _isLoadingMore = false;
+  final ScrollController _scrollController = ScrollController();
+  bool showAllReviews = false; // Added showAllReviews flag
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isLoadingMore) {
+      _loadMoreReviews();
+    }
+  }
+
+  Future<void> _loadMoreReviews() async {
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    await widget.reviewController.loadMoreReviews(widget.productId);
+
+    setState(() {
+      _isLoadingMore = false;
+    });
+  }
+
   Widget _buildStar(int index) {
     if (index < _currentRating) {
       return const Icon(
@@ -55,37 +84,31 @@ class _ReviewsSectionState extends State<ReviewsSection> {
 
   @override
   Widget build(BuildContext context) {
+    bool hasRatings = widget.reviewController.ratingData.value.total_reviews > 0;
+    bool hasReviews = widget.reviewController.reviews.isNotEmpty;
+    int reviewCount = widget.reviewController.reviews.length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: RatingSummary(
-            counter: widget.reviewController.ratingData.value.total_reviews,
-            average: widget.reviewController.ratingData.value.average_rating,
-            counterFiveStars: widget.reviewController.ratingData.value
-                    .rating_distribution['5'] ??
-                0,
-            counterFourStars: widget.reviewController.ratingData.value
-                    .rating_distribution['4'] ??
-                0,
-            counterThreeStars: widget.reviewController.ratingData.value
-                    .rating_distribution['3'] ??
-                0,
-            counterTwoStars: widget.reviewController.ratingData.value
-                    .rating_distribution['2'] ??
-                0,
-            counterOneStars: widget.reviewController.ratingData.value
-                    .rating_distribution['1'] ??
-                0,
+        if (hasRatings || hasReviews) ...[
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: RatingSummary(
+              counter: widget.reviewController.ratingData.value.total_reviews,
+              average: hasRatings ? widget.reviewController.ratingData.value.average_rating : 0.0,
+              counterFiveStars: widget.reviewController.ratingData.value.rating_distribution['5'] ?? 0,
+              counterFourStars: widget.reviewController.ratingData.value.rating_distribution['4'] ?? 0,
+              counterThreeStars: widget.reviewController.ratingData.value.rating_distribution['3'] ?? 0,
+              counterTwoStars: widget.reviewController.ratingData.value.rating_distribution['2'] ?? 0,
+              counterOneStars: widget.reviewController.ratingData.value.rating_distribution['1'] ?? 0,
+            ),
           ),
-        ),
-        SizedBox(
-          height: 300,
-          child: ListView.builder(
+          ListView.builder(
+            controller: _scrollController,
             shrinkWrap: true,
-            scrollDirection: Axis.vertical,
-            itemCount: widget.reviewController.reviews.length,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: showAllReviews ? reviewCount : (reviewCount > 3 ? 3 : reviewCount),
             itemBuilder: (context, index) {
               Review review = widget.reviewController.reviews[index];
               return Padding(
@@ -94,10 +117,21 @@ class _ReviewsSectionState extends State<ReviewsSection> {
               );
             },
           ),
-        ),
-        const SizedBox(
-          height: 20,
-        ),
+          if (reviewCount > 3 && !showAllReviews)
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  showAllReviews = true;
+                });
+              },
+              child: const Text(
+                "See All Reviews",
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+            ),
+        ] else
+          const Center(child: Text('No reviews yet', style: TextStyle(color: Colors.grey))),
+        const SizedBox(height: 20),
         const Text(
           'Rate this product',
           style: TextStyle(
@@ -113,30 +147,40 @@ class _ReviewsSectionState extends State<ReviewsSection> {
         _buildRatingBar(),
         const SizedBox(height: 16.0),
         Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            height: 120,
-            width: double.infinity,
-            decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-            child: TextFormField(
-              controller: reviewTextController,
-              maxLines: 10,
-              decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Write your review here....',
-                  hintStyle: TextStyle(
-                      color: Color(
-                        0xffA1A1A1,
-                      ),
-                      fontSize: 12)),
-            )),
-        const SizedBox(
-          height: 15,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          height: 120,
+          width: double.infinity,
+          decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+          child: TextFormField(
+            controller: reviewTextController,
+            maxLines: 10,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              hintText: 'Write your review here....',
+              hintStyle: TextStyle(
+                color: Color(0xffA1A1A1),
+                fontSize: 12,
+              ),
+            ),
+          ),
         ),
+        const SizedBox(height: 15),
         GestureDetector(
-          onTap: () {
-            if (reviewTextController.text.isNotEmpty) {
-              widget.reviewController.postReview(
-                  widget.productId, reviewTextController.text, _currentRating);
+          onTap: () async {
+            if (reviewTextController.text.isNotEmpty && !_isSubmitting) {
+              setState(() {
+                _isSubmitting = true;
+              });
+
+              await widget.reviewController.postReview(
+                widget.productId,
+                reviewTextController.text,
+                _currentRating,
+              );
+
+              setState(() {
+                _isSubmitting = false;
+              });
             }
           },
           child: Container(
@@ -145,15 +189,15 @@ class _ReviewsSectionState extends State<ReviewsSection> {
               vertical: 10,
             ),
             color: Theme.of(context).primaryColor,
-            child: const Text(
+            child: _isSubmitting
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text(
               'Submit',
               style: TextStyle(color: Colors.white),
             ),
           ),
         ),
-        const SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
       ],
     );
   }

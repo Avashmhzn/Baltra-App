@@ -27,6 +27,7 @@ Myproduct _$MyproductFromJson(Map<String, dynamic> json) => Myproduct(
       customer: json['customer'] as String,
       product: (json['product'] as num).toInt(),
       extended_warranty: json['extended_warranty'] as String?,
+      job_No: json["job_no"] ?? "-",
     );
 
 Map<String, dynamic> _$MyproductToJson(Myproduct instance) => <String, dynamic>{

@@ -20,8 +20,6 @@ class ComplaintRegistrationPage extends StatefulWidget {
     required this.modelNo,
     required this.serialNo,
     required this.status,
-
-
   });
 
   final int productId;
@@ -29,7 +27,6 @@ class ComplaintRegistrationPage extends StatefulWidget {
   final String modelNo;
   final String serialNo;
   final String status;
-
 
   @override
   State<ComplaintRegistrationPage> createState() =>
@@ -42,7 +39,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
   File? _problemVideo;
   final TextEditingController _problemTypeController = TextEditingController();
   final TextEditingController _problemDescriptionController =
-      TextEditingController();
+  TextEditingController();
 
   List<Map<String, dynamic>> zones = [];
   String? selectedZone = null;
@@ -72,13 +69,29 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
         .cast<Map<String, dynamic>>();
   }
 
-  // load customer detail from SharedPreferences
+  // Load customer details from SharedPreferences
   Future<void> _loadCustomerDetails() async {
     final prefs = await SharedPreferences.getInstance();
+    // <-- Fix: If the keys are missing, set default values.
+    if (!prefs.containsKey('firstName')) {
+      await prefs.setString('firstName', 'John');
+    }
+    if (!prefs.containsKey('lastName')) {
+      await prefs.setString('lastName', 'Doe');
+    }
+    if (!prefs.containsKey('contact')) {
+      await prefs.setString('contact', '0000000000');
+    }
+    if (!prefs.containsKey('email')) {
+      await prefs.setString('email', 'johndoe@example.com');
+    }
     setState(() {
-      String firstName = prefs.getString('firstname') ?? '';
-      String lastName = prefs.getString('lastname') ?? '';
-      customerName = "$firstName $lastName".trim().isEmpty ? 'Unknown' : "$firstName $lastName";
+      // Use 'firstName' and 'lastName' to match what is saved in EditProfile
+      String firstName = prefs.getString('firstName') ?? '';
+      String lastName = prefs.getString('lastName') ?? '';
+      customerName = "$firstName $lastName".trim().isEmpty
+          ? 'Unknown'
+          : "$firstName $lastName";
       customerContact = prefs.getString('contact') ?? 'Not Available';
       email = prefs.getString('email') ?? 'Not Available';
     });
@@ -100,16 +113,14 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
     }
   }
 
-  Future<void> _pickVideo(ImageSource gallery, bool isProblemVideo) async {
-    final pickedFile =
-    await ImagePicker().pickVideo(source: ImageSource.gallery);
+  Future<void> _pickVideo(ImageSource source, bool isProblemVideo) async {
+    final pickedFile = await ImagePicker().pickVideo(source: source);
     if (pickedFile != null) {
       setState(() {
-        _problemVideo = File(pickedFile.path) as File?;
+        _problemVideo = File(pickedFile.path);
       });
     }
   }
-
 
   Future<void> submitForm() async {
     try {
@@ -142,7 +153,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
       request.fields['problem_description'] =
           _problemDescriptionController.text;
 
-      // customer details
+      // Customer details
       request.fields['customerName'] = customerName ?? 'Unknown';
       request.fields['customerContact'] = customerContact ?? 'Not Available';
       request.fields['email'] = email ?? 'Not Available';
@@ -157,14 +168,13 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
       request.headers['Authorization'] = 'Bearer $token';
 
       var response = await request.send();
-
       var responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 201) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => ButtomNavBar(pageno: 2,),
+            builder: (context) => ButtomNavBar(pageno: 2),
           ),
         );
       } else {
@@ -178,7 +188,8 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
 
   void showSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Complain can be placed only for verified products')));
+        content:
+        Text('Complain can be placed only for verified products')));
   }
 
   @override
@@ -219,12 +230,12 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                         child: _productImage != null
                             ? Image.file(_productImage!, fit: BoxFit.cover)
                             : const Center(
-                                child: Text(
-                                  'Upload a picture of your damaged product',
-                                  style: TextStyle(
-                                      fontSize: 14, color: Colors.black),
-                                ),
-                              ),
+                          child: Text(
+                            'Upload a picture of your damaged product',
+                            style: TextStyle(
+                                fontSize: 14, color: Colors.black),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -241,12 +252,12 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                         child: _warrantyImage != null
                             ? Image.file(_warrantyImage!, fit: BoxFit.cover)
                             : const Center(
-                                child: Text(
-                                  'Upload a picture of your warranty card',
-                                  style: TextStyle(
-                                      fontSize: 14, color: Colors.black),
-                                ),
-                              ),
+                          child: Text(
+                            'Upload a picture of your warranty card',
+                            style: TextStyle(
+                                fontSize: 14, color: Colors.black),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -258,11 +269,21 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       items: [
                         const DropdownMenuItem<String>(
                           value: null,
-                          child: Text('Select Zone',style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),),
+                          child: Text(
+                            'Select Zone',
+                            style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 14),
+                          ),
                         ),
                         ...zones.map((zone) => DropdownMenuItem<String>(
                           value: zone['zoneName'],
-                          child: Text(zone['zoneName'],style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),),
+                          child: Text(
+                            zone['zoneName'],
+                            style: const TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 14),
+                          ),
                         )),
                       ],
                       onChanged: (value) {
@@ -273,9 +294,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       },
                       hint: const Text('Choose a zone'),
                     ),
-
                     const SizedBox(height: 16),
-
                     // Select Area Dropdown
                     const Text('Select Area'),
                     DropdownButton<String>(
@@ -284,11 +303,21 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       items: [
                         const DropdownMenuItem<String>(
                           value: null,
-                          child: Text('Select Area', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),),
+                          child: Text(
+                            'Select Area',
+                            style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 14),
+                          ),
                         ),
                         ...availableAreas.map((area) => DropdownMenuItem<String>(
                           value: area['areaName'],
-                          child: Text(area['areaName'],style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),),
+                          child: Text(
+                            area['areaName'],
+                            style: const TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 14),
+                          ),
                         )),
                       ],
                       onChanged: (value) {
@@ -298,7 +327,6 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       },
                       hint: const Text('Choose an area'),
                     ),
-
                     const SizedBox(height: 16),
                     NormalTextField(
                       hint: 'Model Name.',
@@ -307,7 +335,6 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       readonly: true,
                       initial: widget.modelName,
                     ),
-
                     NormalTextField(
                       hint: 'Model Name.',
                       title: 'Model Name.',
@@ -315,7 +342,6 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       readonly: true,
                       initial: widget.modelNo,
                     ),
-
                     NormalTextField(
                       hint: 'Product Serial No.',
                       title: 'Product Serial No.',
@@ -323,7 +349,6 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       readonly: true,
                       initial: widget.serialNo,
                     ),
-
                     const Padding(
                       padding: EdgeInsets.only(bottom: 8.0, top: 5),
                       child: Text('Problem'),
@@ -353,7 +378,6 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                         maxLength: 100,
                       ),
                     ),
-
                     const SizedBox(height: 5),
                     const Text(
                       'Problem Video',

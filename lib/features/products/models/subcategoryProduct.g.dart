@@ -13,9 +13,10 @@ Subcategoryproduct _$SubcategoryproductFromJson(Map<String, dynamic> json) =>
       main_image_url: json['main_image_url'] as String,
       warranty: (json['warranty'] as num).toInt(),
       power: json['power'] as String,
-      model_no: json['model_no'] as String,
+      model_no: json['model_num'] as String,
       model_name: json['model_name'] as String,
       price: (json['price'] as num?)?.toInt(),
+      sub_category: json['sub_category'] as String,
     );
 
 Map<String, dynamic> _$SubcategoryproductToJson(Subcategoryproduct instance) =>
@@ -25,7 +26,8 @@ Map<String, dynamic> _$SubcategoryproductToJson(Subcategoryproduct instance) =>
       'main_image_url': instance.main_image_url,
       'warranty': instance.warranty,
       'power': instance.power,
-      'model_no': instance.model_no,
+      'model_num': instance.model_no,
       'model_name': instance.model_name,
       'price': instance.price,
+      'sub_category': instance.sub_category,
     };

@@ -21,9 +21,14 @@ class ProfileController extends GetxController {
   Future<void> fetchUserData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
-    log('token: $token');
+    if (token == null || token.isEmpty) {
+      error('User is not authenticated');
+      return;
+    }
+
+    log('Fetching user data with token: $token');
     try {
-      isLoading(true);
+      isLoading.value = true;
       final response =
           await http.get(Uri.parse('$URL/customer/getprofiledata'), headers: {
         'Content-Type': 'application/json',

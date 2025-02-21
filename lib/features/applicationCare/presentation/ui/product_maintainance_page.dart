@@ -1,258 +1,27 @@
-
-
-/*
-import 'package:baltra/features/applicationCare/presentation/widgets/product_tracking_card.dart';
-
-import 'package:baltra/features/applicationCare/controller/myProductController.dart';
-import 'package:baltra/features/applicationCare/data/productRepository.dart';
-import 'package:baltra/features/applicationCare/models/myProduct.dart';
+import 'package:baltra/features/applicationCare/controller/crmController.dart';
+import 'package:baltra/features/applicationCare/data/crm.dart';
+import 'package:baltra/features/applicationCare/models/crmModel.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/product_tracking_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ProductMaintainancePage extends StatefulWidget {
-  const ProductMaintainancePage({Key? key}) : super(key: key);
-
-  @override
-  State<ProductMaintainancePage> createState() => _ProductMaintainancePageState();
-}
-
-class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
-  final Myproductcontroller myproductcontroller =
-      Get.put(Myproductcontroller(productRepository: MyProductRepository()));
-
-  @override
-  void initState() {
-    super.initState();
-    myproductcontroller.fetchMyProduct();
-    
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return  Obx(() {
-        if (myproductcontroller.isLoading.value) {
-          return Center(child: CircularProgressIndicator());
-        } else if (myproductcontroller.errorMessage.value.isNotEmpty) {
-          return Center(child: Text("Error: ${myproductcontroller.errorMessage.value}"));
-        }
-
-        return ListView.builder(
-          itemCount: myproductcontroller.myProducts.length,
-          itemBuilder: (context, index) {
-             Myproduct product =
-                          myproductcontroller.myProducts[index];
-
-            return GestureDetector(
-              onTap: () {
-                // Navigate to TrackingPage with stockId
-                Get.to(() => TrackingPage(stockId: product.id));
-              },
-              child: Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 20),
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6.0,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image Section
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                ),
-                child: Image(
-                  image: NetworkImage(product.product_image),
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-             
-            ],
-          ),
-
-          // Product Details
-          Padding(
-            padding: const EdgeInsets.all(14.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                detailRow(title: 'Model Name: ', value: product.model_name),
-                detailRow(title: 'Model Number: ', value: product.model_num),
-                detailRow(title: 'Purchase Date: ', value: product.purchase_date),
-                detailRow(
-                    title: 'Serial Number: ', value: product.serial_number),
-              ],
-            ),
-          ),         
-        ],
-      ),
-    ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  TableRow _buildTableRow(String title, String? value) {
-    return TableRow(
-      children: [
-        TableCell(
-          child: Text(title, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500)),
-        ),
-        TableCell(
-          child: Text(value?? 'null', style: TextStyle(fontSize: 10)),
-        ),
-      ],
-    );
+// Helper function to return color based on status.
+Color getStatusColor(String? status) {
+  if (status == null) return Colors.black;
+  switch (status.toLowerCase()) {
+    case 'assigned':
+      return Colors.green;
+    case 'un-assigned':
+      return Colors.red;
+    default:
+      return Colors.blue;
   }
 }
 
-class ProcessStep {
-  final String title;
-  final String date;
-  final bool isCompleted;
-
-  ProcessStep(
-      {required this.title, required this.date, required this.isCompleted});
-}
-*/
-
-import 'dart:math';
-
-import 'package:baltra/features/applicationCare/controller/myProductController.dart';
-import 'package:baltra/features/applicationCare/data/productRepository.dart';
-import 'package:baltra/features/applicationCare/models/myProduct.dart';
-import 'package:baltra/features/applicationCare/presentation/ui/product_tracking_page.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-class ProductMaintainancePage extends StatefulWidget {
-  const ProductMaintainancePage({Key? key}) : super(key: key);
-
-  @override
-  State<ProductMaintainancePage> createState() => _ProductMaintainancePageState();
-}
-
-class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
-  final Myproductcontroller myproductcontroller =
-  Get.put(Myproductcontroller(productRepository: MyProductRepository()));
-
-  @override
-  void initState() {
-    super.initState();
-    myproductcontroller.fetchMyProduct();
-
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return  Obx(() {
-      if (myproductcontroller.isLoading.value) {
-        return Center(child: CircularProgressIndicator());
-      } else if (myproductcontroller.errorMessage.value.isNotEmpty) {
-        return Center(child: Text("Error: ${myproductcontroller.errorMessage.value}"));
-      }
-
-      return ListView.builder(
-        itemCount: myproductcontroller.myProducts.length,
-        itemBuilder: (context, index) {
-          Myproduct product =
-          myproductcontroller.myProducts[index];
-
-          return GestureDetector(
-            onTap: () {
-              // Navigate to TrackingPage with stockId
-              Get.to(() => TrackingPage(stockId: product.id));
-            },
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 20),
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6.0,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image Section
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          topRight: Radius.circular(10),
-                        ),
-                        child: Image(
-                          image: NetworkImage(product.product_image),
-                          height: 150,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-
-                    ],
-                  ),
-
-                  // Product Details
-                  Padding(
-                    padding: const EdgeInsets.all(14.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        detailRow(title: 'Model Name: ', value: product.model_name),
-                        detailRow(title: 'Model Number: ', value: product.model_num),
-                        detailRow(title: 'Purchase Date: ', value: product.purchase_date),
-                        detailRow(
-                            title: 'Serial Number: ', value: product.serial_number),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    },
-    );
-  }
-
-  TableRow _buildTableRow(String title, String? value) {
-    return TableRow(
-      children: [
-        TableCell(
-          child: Text(title, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500)),
-        ),
-        TableCell(
-          child: Text(value?? 'null', style: TextStyle(fontSize: 10)),
-        ),
-      ],
-    );
-  }
-}
-Widget detailRow({required String title, required String value}) {
+// Widget for displaying complaint details with conditional color for "Status:".
+Widget detailRow({required String title, required String? value}) {
+  // Check if this row is the status row.
+  bool isStatusRow = title.toLowerCase().contains('status');
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
     child: Row(
@@ -268,16 +37,147 @@ Widget detailRow({required String title, required String value}) {
         ),
         Expanded(
           child: Text(
-            value,
+            value ?? "Not Available",
             textAlign: TextAlign.end,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.black54,
+              color: isStatusRow ? getStatusColor(value) : Colors.black54,
             ),
           ),
         ),
       ],
     ),
   );
+}
+
+class ProductMaintainancePage extends StatefulWidget {
+  const ProductMaintainancePage({Key? key}) : super(key: key);
+
+  @override
+  State<ProductMaintainancePage> createState() => _ProductMaintainancePageState();
+}
+
+class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
+  final CrmController crmController =
+  Get.put(CrmController(crmService: CrmServices()));
+
+  @override
+  void initState() {
+    super.initState();
+    // Schedule the fetchAllComplaints call after the current build is complete.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      crmController.fetchAllComplaints();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // Wrap the Obx widget inside a FutureBuilder with a zero‑duration delay.
+      body: FutureBuilder(
+        future: Future.delayed(Duration.zero),
+        builder: (context, snapshot) {
+          return Obx(() {
+            if (crmController.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (crmController.errorMessage.value.isNotEmpty) {
+              return Center(
+                  child: Text("Error: ${crmController.errorMessage.value}"));
+            } else if (crmController.complaints.isEmpty) {
+              return const Center(
+                child: Text(
+                  "No complaints found!",
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey),
+                ),
+              );
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    "Complaints",
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: crmController.complaints.length,
+                    itemBuilder: (context, index) {
+                      CustomerProduct complaint =
+                      crmController.complaints[index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          // Navigate to TrackingPage with stockId
+                          Get.to(() => TrackingPage(stockId: complaint.id));
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 10),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6.0,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              detailRow(
+                                  title: 'Product Name:',
+                                  value: complaint.modelName),
+                              detailRow(
+                                  title: 'Model Code:',
+                                  value: complaint.modelNum),
+                              detailRow(
+                                  title: 'Job No:',
+                                  value: complaint.jobNo ?? "Not Available"),
+                              detailRow(
+                                  title: 'Sent For:',
+                                  value: complaint.problemType),
+                              detailRow(
+                                  title: 'Complaint:',
+                                  value: complaint.problemDescription),
+                              detailRow(
+                                  title: 'Status:',
+                                  value: complaint.status),
+                              detailRow(
+                                  title: 'Complaint Date:',
+                                  value: complaint.dateJoined),
+                              if ((complaint.damagedImage ?? "").isNotEmpty)
+                                Image.network(
+                                  complaint.damagedImage,
+                                  height: 100,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          });
+        },
+      ),
+    );
+  }
 }

@@ -6,36 +6,30 @@ import 'package:get/get.dart';
 mixin SessionManager {
   void checkSession(BuildContext context) {
     final sessionController = Get.find<SessionController>();
+
     if (sessionController.isSessionExpired) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        showSessionExpiredDialog(context);
+        _showSessionExpiredDialog(context);
       });
     }
   }
 
-  void showSessionExpiredDialog(BuildContext context) {
+  void _showSessionExpiredDialog(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false,
-      
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Session Expired'),
-          content: const Text(
-              'Your session has expired. Please log in again to continue.'),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const Loginpage()),
-                  (Route<dynamic> route) => false,
-                );
-              },
-            ),
-          ],
-        );
-      },
+      barrierDismissible: false, // Prevent dismissal by tapping outside
+      builder: (context) => AlertDialog(
+        title: const Text('Session Expired'),
+        content: const Text('Your session has expired. Please log in again.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.offAll(() => const Loginpage());
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -21,10 +21,13 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       lastname: json['lastname'] as String,
       email: json['email'] as String,
       contact: (json['contact'] as num).toInt(),
+      gender: json['gender'] as String?,
+      address: json['address'] as String?,
+      dob: json['dob'] as String?,
+      district: json['district'] as String?,
+      city: json['city'] as String?,
       image_url: json['image_url'] as String?,
       reward_points: (json['reward_points'] as num?)?.toInt(),
-      gender: json['gender'] as String?,
-      dob: json['dob'] as String?,
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -33,5 +36,10 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'email': instance.email,
       'contact': instance.contact,
       'image_url': instance.image_url,
+      'gender': instance.gender,
       'reward_points': instance.reward_points,
+      'dob': instance.dob,
+      'address': instance.address,
+      'district': instance.district,
+      'city': instance.city,
     };

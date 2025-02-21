@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:baltra/core/utils/constants.dart';
+import 'package:baltra/features/applicationCare/models/crmModel.dart';
 import 'package:baltra/features/applicationCare/models/loyaltyRedeem.dart';
 import 'package:baltra/features/applicationCare/models/myProduct.dart';
 import 'package:baltra/features/applicationCare/models/warrantyProduct.dart';
@@ -199,4 +200,65 @@ class MyProductRepository {
           Exception("Unknown error occurred: $e")); // Return unknown error
     }
   }
+
+  Future<Either<Exception, List<CustomerProduct>>> fetchAllComplaints() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
+
+    try {
+      final response = await http.get(
+        Uri.parse('$URL/stocks/getallcomplaintsbycustomer'),
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+        },
+      );
+
+      log(response.body);
+
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+      if (jsonResponse['success']) {
+        final List<dynamic> data = jsonResponse['data'];
+        final List<CustomerProduct> complaints =
+        data.map((json) => CustomerProduct.fromJson(json)).toList();
+        return Right(complaints);
+      } else {
+        return const Left(HttpException("Failed to fetch complaints"));
+      }
+    } on SocketException catch (e) {
+      return Left(e);
+    } catch (e) {
+      return Left(Exception("Unknown error occurred: $e"));
+    }
+  }
+  // my_product_repository.dart
+  Future<Either<Exception, Myproduct>> fetchSingleMyProduct(int id) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('auth_token');
+
+      final response = await http.get(
+        Uri.parse('$URL/stocks/customerproductbyidcustomer/$id'),
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+      if (jsonResponse['success'] == true) {
+        // 'data' should be the JSON for a single product
+        final data = jsonResponse['data'];
+        final Myproduct product = Myproduct.fromJson(data);
+        return Right(product);
+      } else {
+        return Left(HttpException("Failed to fetch product details"));
+      }
+    } on SocketException catch (e) {
+      return Left(e);
+    } catch (e) {
+      return Left(Exception("Unknown error occurred: $e"));
+    }
+  }
+
+
+
 }

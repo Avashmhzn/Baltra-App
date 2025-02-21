@@ -18,7 +18,7 @@ class CrmServices extends GetxService {
       return Left("Authentication token not found");
     }
 
-    final String url = '$URL/stocks/customerproductbyidcustomer/$stockId';
+    final String url = '$URL/stocks/getcomplaintbyidcustomer/$stockId';
 
     log("Fetching data from: $url");
     log("Bearer Token (masked): ${token.substring(0, 6)}...${token.substring(token.length - 4)}");
@@ -51,6 +51,46 @@ class CrmServices extends GetxService {
       return Left("No Internet connection");
     } catch (e) {
       return Left("Unknown error occurred: $e");
+    }
+  }
+
+  Future<Either<Exception, List<CustomerProduct>>> fetchAllComplaints() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('auth_token');
+
+    if (token == null) {
+      return Left(Exception("Authentication token not found"));
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('$URL/stocks/getallcomplaintsbycustomer'),
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+        },
+      );
+
+      log("Response Code: ${response.statusCode}");
+      log("Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+        if (jsonResponse['success']) {
+          final List<dynamic> data = jsonResponse['data'];
+          final List<CustomerProduct> complaints =
+          data.map((json) => CustomerProduct.fromJson(json)).toList();
+          return Right(complaints);
+        } else {
+          return const Left(HttpException("Failed to fetch complaints"));
+        }
+      } else {
+        return Left(HttpException("Server Error: ${response.statusCode}"));
+      }
+    } on SocketException {
+      return const Left(SocketException("No internet connection"));
+    } catch (e) {
+      return Left(Exception("Unknown error occurred: $e"));
     }
   }
 }
