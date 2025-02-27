@@ -7,6 +7,7 @@ import 'package:baltra/features/products/models/product.dart';
 import 'package:baltra/features/products/models/subcategoryProduct.dart';
 import 'package:baltra/features/products/presentation/screens/review_section.dart';
 import 'package:baltra/features/products/presentation/widgets/function.dart';
+import 'package:easy_rich_text/easy_rich_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
@@ -34,23 +35,31 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   Timer? _hidePlayPauseTimer;
   final ScrollController _scrollController = ScrollController();
 
+
+  // Current active tab index.
+  int _currentTabIndex = 0;
+
   @override
   void initState() {
     super.initState();
     initializeVideo();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {
+          _currentTabIndex = _tabController.index;
+        });
+      }
+    });
 
-    // Log to see which product is initially loaded
     print("NEW ProductDetailPage initState: product id = ${widget.product?.id}");
 
-    // If a product is provided (or in the controller), fetch its reviews & related products.
-    final initialProductId = widget.product?.id ?? controller.productDetails.value?.id;
+    final initialProductId =
+        widget.product?.id ?? controller.productDetails.value?.id;
     if (initialProductId != null) {
       reviewController.fetchReviewsAndRatings(initialProductId);
       if (widget.relatedProducts == null || widget.relatedProducts!.isEmpty) {
         controller.fetchRelatedProducts(initialProductId);
-      } else {
-        print("Using passed related products: ${widget.relatedProducts}");
       }
     }
   }
@@ -59,11 +68,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     controller.isLoading(true);
     await controller.fetchSelectedProduct(productId);
     reviewController.fetchReviewsAndRatings(productId);
-
     await controller.fetchRelatedProducts(productId);
-
     controller.isLoading(false);
-
     if (controller.productDetails.value != null) {
       _scrollController.jumpTo(0);
       Get.to(() => ProductDetailPage(
@@ -76,7 +82,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           snackPosition: SnackPosition.BOTTOM);
     }
   }
-  
+
   void initializeVideo() {
     String? productVideoUrl = widget.product?.product_video;
     if (productVideoUrl != null && productVideoUrl.isNotEmpty) {
@@ -95,7 +101,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           setState(() {
             _isVideoInitialized = true;
             _videoPlayerController!.setLooping(true);
-            log("Video initialized successfully");
           });
         }).catchError((error) {
           log("Error initializing video: $error");
@@ -130,7 +135,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   }
 
   void _onVisibilityChanged(VisibilityInfo info) {
-    // Auto-play/pause the video based on visibility
     if (info.visibleFraction > 0.5) {
       if (!_isPlaying) {
         _videoPlayerController!.play();
@@ -149,21 +153,11 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   }
 
   String removeListContent(String htmlText) {
-    // Removes <ul> items from HTML and returns the cleaned text
     var document = parse(htmlText);
     document.body?.getElementsByTagName("ul").forEach((element) {
       element.remove();
     });
     return document.body?.text.trim() ?? '';
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _videoPlayerController?.dispose();
-    _hidePlayPauseTimer?.cancel();
-    _scrollController.dispose();
-    super.dispose();
   }
 
   List<Map<String, String>> parseDimensionsText(String text) {
@@ -181,7 +175,258 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    _videoPlayerController?.dispose();
+    _hidePlayPauseTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  ///--- Begin Tab Content Functions ---///
+  Widget _buildDescriptionTab(List<String> specifications, List<Map<String, String>> specImages) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Product Specifications',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 10),
+        for (var spec in specifications)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '• ',
+                style: TextStyle(fontSize: 18),
+              ),
+              Expanded(
+                child: Text(
+                  spec,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+        for (var i = 0; i < specImages.length; i++)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Image.network(
+              specImages[i]['image_url'] ?? '',
+              width: double.infinity,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => Image.asset(
+                'assets/images/pp.png',
+                height: 120,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSizingTab(String sizing, List<Map<String, String>> sizingImages) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Sizing",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: EasyRichText(
+            removeListContent(sizing),
+            defaultStyle: const TextStyle(fontSize: 14),
+            patternList: [
+              EasyRichTextPattern(
+                targetString: r'\bimportant\b',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.black),
+              ),
+              EasyRichTextPattern(
+                targetString: r'\d+',
+                style: const TextStyle(color: Colors.black),
+              ),
+            ],
+            textAlign: TextAlign.justify,
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          child: Center(
+            child: Text(
+              "Box Dimension: ",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+        for (var i = 0; i < sizingImages.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Image.network(
+              sizingImages[i]['image_url'] ?? '',
+              width: MediaQuery.of(context).size.width * 0.95,
+              // Do not force a height so it shrink wraps to content.
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => Image.asset(
+                'assets/images/pp.png',
+                width: MediaQuery.of(context).size.width * 0.95,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildUsageTab(String usage, List<String> usageItems, List<Map<String, String>> extraItems, List<Map<String, String>> usageImages) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Usage",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        if (usage.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              removeListContent(usage),
+              style: const TextStyle(fontSize: 14),
+              textAlign: TextAlign.justify,
+            ),
+          ),
+        if (usageItems.isNotEmpty)
+          for (var item in usageItems)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '• ',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: const TextStyle(fontSize: 14),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        if (extraItems.isNotEmpty)
+          for (var map in extraItems)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '• ',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Expanded(
+                    child: Text(
+                      map.values.first,
+                      style: const TextStyle(fontSize: 14),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        if (usageImages.isNotEmpty)
+          for (var i = 0; i < usageImages.length; i++)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Image.network(
+                usageImages[i]['image_url'] ?? '',
+                width: double.infinity,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => Image.asset(
+                  'assets/images/pp.png',
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+      ],
+    );
+  }
+
+  Widget buildTabSection(
+      BuildContext context, {
+        required TabController tabController,
+        required List<String> specifications,
+        required List<Map<String, String>> specImages,
+        required String sizing,
+        required List<Map<String, String>> sizingImages,
+        required String usage,
+        required List<String> usageItems,
+        required List<Map<String, String>> extraItems,
+        required List<Map<String, String>> usageImages,
+      }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: TabBar(
+            dividerColor: Colors.white,
+            controller: tabController,
+            isScrollable: false,
+            indicatorColor: Colors.black,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicatorWeight: 2.5,
+            labelColor: const Color(0xff201E1E),
+            unselectedLabelColor: const Color(0xff797474),
+            labelStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Color(0xff201E1E),
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Color(0xff797474),
+            ),
+            tabs: const [
+              Tab(text: 'DESCRIPTION'),
+              Tab(text: 'SIZING'),
+              Tab(text: 'USAGE'),
+            ],
+            onTap: (index) {
+              setState(() {
+                _currentTabIndex = index;
+              });
+            },
+          ),
+        ),
+        // Show only the active tab's content
+        if (_currentTabIndex == 0)
+          _buildDescriptionTab(specifications, specImages)
+        else if (_currentTabIndex == 1)
+          _buildSizingTab(sizing, sizingImages)
+        else if (_currentTabIndex == 2)
+            _buildUsageTab(usage, usageItems, extraItems, usageImages),
+      ],
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Outer SingleChildScrollView for entire page.
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -190,28 +435,37 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
             child: Obx(() {
-              // If there's no product in the controller, fallback to the widget's product
               final product = controller.productDetails.value ?? widget.product;
               if (product == null) {
                 return const Center(child: CircularProgressIndicator());
               }
-
-              // Filter out the currently displayed product from related list
               final displayRelatedProducts = controller.relatedProductsList;
-              print("Total Related Products: ${displayRelatedProducts.length}");
-              for (var product in displayRelatedProducts) {
-                print("Related Product ID: ${product.id}, Name: ${product.name}");
-              }
-
-
-
-              // Parse any dimension text, specification text, etc.
               List<Map<String, String>> items = parseDimensionsText(product.sizing ?? '');
               List<String> specifications = extractSpecifications(product.specification ?? '');
-
+              List<String> usageItems = extractUsageItems(product.usage ?? '');
+              // Build image lists with null-safety fixes.
+              List<Map<String, String>> specImages = [];
+              if (product.specification_images != null) {
+                for (var img in product.specification_images!.take(3)) {
+                  specImages.add({'image_url': img.image_url ?? ''});
+                }
+              }
+              List<Map<String, String>> sizingImages = [];
+              if (product.sizing_images != null) {
+                for (var img in product.sizing_images!) {
+                  sizingImages.add({'image_url': img.image_url ?? ''});
+                }
+              }
+              List<Map<String, String>> usageImageList = [];
+              if (product.usage_images != null) {
+                for (var img in product.usage_images!) {
+                  usageImageList.add({'image_url': img.image_url ?? ''});
+                }
+              }
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Back button
                   IconButton(
                     onPressed: () {
                       Navigator.pop(context);
@@ -222,28 +476,24 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       size: 20,
                     ),
                   ),
-
                   // Main Image
-                  Container(
-                    child: Image.network(
-                      product.main_image ?? '',
+                  Image.network(
+                    product.main_image ?? '',
+                    height: 300,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Image.asset(
+                      'assets/images/pp.png',
                       height: 300,
                       width: double.infinity,
-                      errorBuilder: (context, error, stackTrace) => Image.asset(
-                        'assets/images/pp.png',
-                        height: 300,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
+                      fit: BoxFit.cover,
                     ),
                   ),
-
                   // Image Gallery
                   Container(
                     height: 80,
                     margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                     child: ListView.builder(
-                      shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
                       itemCount: product.images?.length ?? 0,
                       itemBuilder: (context, index) {
@@ -257,37 +507,42 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                             fit: BoxFit.contain,
                             height: 75,
                             width: 75,
-                            errorBuilder: (context, error, stackTrace) => Image.asset(
-                              'assets/images/pp.png',
-                              height: 75,
-                              width: 75,
-                              fit: BoxFit.cover,
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Image.asset(
+                                  'assets/images/pp.png',
+                                  height: 75,
+                                  width: 75,
+                                  fit: BoxFit.cover,
+                                ),
                           ),
                         );
                       },
                     ),
                   ),
                   const SizedBox(height: 18),
-
                   // Product Name and Model
-                  Text(
-                    product.name ?? 'Product Name',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff202D31),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(
+                      product.name ?? 'Product Name',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff202D31),
+                      ),
                     ),
                   ),
-                  Text(
-                    product.model_num ?? 'Model Number',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w300,
-                      color: Color(0xff77777E),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(
+                      product.model_num ?? 'Model Number',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                        color: Color(0xff77777E),
+                      ),
                     ),
                   ),
-
                   // Divider
                   Container(
                     margin: EdgeInsets.only(
@@ -299,49 +554,58 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     width: double.infinity,
                     color: const Color(0xffbbbbbb),
                   ),
-
                   // Color Options
-                  const Text(
-                    'Color',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff4d5159),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(
+                      'Color',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff47494c),
+                      ),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: (product.color_styles ?? []).map((hexColor) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2.5),
-                        child: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: hexToColor(hexColor),
-                        ),
-                      );
-                    }).toList(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Row(
+                      children: (product.color_styles ?? []).map((hexColor) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                          child: CircleAvatar(
+                            radius: 10,
+                            backgroundColor: hexToColor(hexColor),
+                          ),
+                        );
+                      }).toList(),
+                    ),
                   ),
                   const SizedBox(height: 15),
-
                   // Pricing
-                  const Text(
-                    'Pricing',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff4d5159),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(
+                      'Pricing',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff47494c),
+                      ),
                     ),
                   ),
-                  Text(
-                    'MRP. ${product.price?.toString() ?? '0.00'}',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff4d5159),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(
+                      'MRP. ${product.price?.toString() ?? '0.00'}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff4d5159),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 15),
-
+                  // Horizontal divider
                   Container(
                     decoration: const BoxDecoration(
                       color: Colors.white,
@@ -350,241 +614,20 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       ),
                     ),
                   ),
-
-                  // Tab Bar
-                  PreferredSize(
-                    preferredSize: const Size.fromHeight(50),
-                    child: TabBar(
-                      dividerColor: Colors.white,
-                      controller: _tabController,
-                      isScrollable: false,
-                      indicatorColor: Colors.black,
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      indicatorWeight: 2.5,
-                      labelColor: const Color(0xff201E1E),
-                      unselectedLabelColor: const Color(0xff797474),
-                      labelStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xff201E1E),
-                      ),
-                      unselectedLabelStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff797474),
-                      ),
-                      tabs: const [
-                        Tab(text: 'DESCRIPTION'),
-                        Tab(text: 'SIZING'),
-                        Tab(text: 'USAGE'),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: 1200,
-                    padding: const EdgeInsets.only(top: 10),
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        // Description Tab
-                        ListView(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: [
-                            const Text(
-                              'Product Specifications',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: specifications.length,
-                              itemBuilder: (context, index) {
-                                return Row(
-                                  children: [
-                                    const Text(
-                                      '• ',
-                                      style: TextStyle(fontSize: 18),
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        specifications[index],
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: product.specification_images?.take(3).length ?? 0,
-                              itemBuilder: (context, index) {
-                                if (index >= (product.specification_images?.length ?? 0)) {
-                                  return const SizedBox.shrink();
-                                }
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                                  child: Image.network(
-                                    product.specification_images?[index].image_url ?? '',
-                                    width: double.infinity,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) => Image.asset(
-                                      'assets/images/pp.png',
-                                      height: 120,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-
-                        // Sizing Tab
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (product.usage != null && product.usage!.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Text(
-                                    removeListContent(product.usage!),
-                                    style: const TextStyle(fontSize: 14),
-                                    textAlign: TextAlign.justify,
-                                  ),
-                                ),
-                              if (specifications.isNotEmpty)
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: specifications.length,
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            '• ',
-                                            style: TextStyle(fontSize: 18),
-                                          ),
-                                          Expanded(
-                                            child: Text(
-                                              specifications[index],
-                                              style: const TextStyle(fontSize: 14),
-                                              textAlign: TextAlign.start,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                            ],
-                          ),
-                        ),
-
-                        // Usage Tab
-                        ListView(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: [
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: product.sizing_images?.length ?? 0,
-                              itemBuilder: (context, index) {
-                                double screenWidth = MediaQuery.of(context).size.width;
-                                double screenHeight = MediaQuery.of(context).size.height;
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Image.network(
-                                    product.sizing_images?[index].image_url ?? '',
-                                    width: screenWidth * 0.95,
-                                    height: screenHeight * 0.3,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) => Image.asset(
-                                      'assets/images/pp.png',
-                                      width: screenWidth * 0.95,
-                                      height: screenHeight * 0.3,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 10),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                removeListContent(product.usage ?? ''),
-                                style: const TextStyle(fontSize: 14),
-                                textAlign: TextAlign.justify,
-                              ),
-                            ),
-                            (product.usage_images?.take(3).length ?? 0) == 1
-                                ? Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: product.usage_images?.length ?? 0,
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Image.network(
-                                        product.usage_images?[index].image_url ?? '',
-                                        width: double.infinity,
-                                        fit: BoxFit.contain,
-                                        errorBuilder: (context, error, stackTrace) => Image.asset(
-                                          'assets/images/pp.png',
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            )
-                                : ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: product.usage_images?.length ?? 0,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Image.network(
-                                    product.usage_images?[index].image_url ?? '',
-                                    width: double.infinity,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) => Image.asset(
-                                      'assets/images/pp.png',
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  // Tab Section
+                  buildTabSection(
+                    context,
+                    tabController: _tabController,
+                    specifications: specifications,
+                    specImages: specImages,
+                    sizing: product.sizing ?? '',
+                    sizingImages: sizingImages,
+                    usage: product.usage ?? '',
+                    usageItems: usageItems,
+                    extraItems: items,
+                    usageImages: usageImageList,
                   ),
                   const SizedBox(height: 10),
-
                   // Additional images / icons
                   Container(
                     decoration: BoxDecoration(
@@ -594,6 +637,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       image: NetworkImage(product.warranty_icon ?? ''),
                       height: 300,
                       width: double.infinity,
+                      fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) => Image.asset(
                         'assets/images/pp.png',
                         height: 430,
@@ -604,11 +648,13 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                    decoration:
+                    BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: Image(
                       image: NetworkImage(product.galleryimageone ?? ''),
                       height: 430,
                       width: double.infinity,
+                      fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Image.asset(
                         'assets/images/pp.png',
                         height: 430,
@@ -619,11 +665,13 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                    decoration:
+                    BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: Image(
                       image: NetworkImage(product.galleryimagetwo ?? ''),
                       height: 430,
                       width: double.infinity,
+                      fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Image.asset(
                         'assets/images/pp.png',
                         height: 430,
@@ -633,7 +681,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ),
                   ),
                   const SizedBox(height: 10),
-
                   // Video Player
                   VisibilityDetector(
                     key: const Key('video-player'),
@@ -647,8 +694,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       },
                       child: Container(
                         height: 220,
-                        decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
                         width: double.infinity,
+                        decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
                         child: _isVideoInitialized
                             ? Stack(
                           alignment: Alignment.center,
@@ -678,165 +725,166 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ),
                   ),
                   const SizedBox(height: 30),
-
-                  const Text(
-                    'Rating and Reviews',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(
+                      'Rating and Reviews',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Reviews Section
+                  // Reviews Section: Sorting the reviews to show latest first.
                   Obx(() {
                     if (reviewController.isLoading.value) {
                       return const Center(child: CircularProgressIndicator());
                     }
+                    reviewController.reviews.sort(
+                          (a, b) => b.reviewDate.compareTo(a.reviewDate),
+                    );
+
                     return ReviewsSection(
                       reviewController: reviewController,
                       productId: product.id ?? 0,
                     );
                   }),
-
                   // Related Products Section
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Related Products',
-                        style: TextStyle(
-                          color: Color(0xff101623),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Related Products',
+                          style: TextStyle(
+                            color: Color(0xff101623),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 15),
-                      Obx(() {
-                        if (controller.isLoading.value) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-                        if (displayRelatedProducts.isEmpty) {
-                          return const Center(child: Text("No related products available"));
-                        }
-                        return Container(
-                          height: 400,
-                          child: GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                              childAspectRatio: 0.3
-                            ),
-                            itemCount: displayRelatedProducts.length,
-                            itemBuilder: (context, index) {
-                              final relatedProduct = displayRelatedProducts[index];
-                              return GestureDetector(
-                                  onTap: () => navigateToProductDetails(relatedProduct.id ?? 0),
+                        const SizedBox(height: 15),
+                        Obx(() {
+                          if (controller.isLoading.value) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          if (displayRelatedProducts.isEmpty) {
+                            return const Center(child: Text("No related products available"));
+                          }
+                          return Container(
+                            height: 400,
+                            child: GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 10,
+                                  childAspectRatio: 0.3),
+                              itemCount: displayRelatedProducts.length,
+                              itemBuilder: (context, index) {
+                                final relatedProduct = displayRelatedProducts[index];
+                                return GestureDetector(
+                                  onTap: () =>
+                                      navigateToProductDetails(relatedProduct.id ?? 0),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
                                       color: Colors.white,
                                       boxShadow: [
                                         BoxShadow(
-                                            color: Colors.grey.withOpacity(0.2),
-                                            blurRadius: 5,
-                                            spreadRadius: 2
+                                          color: Colors.grey.withOpacity(0.2),
+                                          blurRadius: 5,
+                                          spreadRadius: 2,
                                         )
                                       ],
                                     ),
                                     child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-                                        child: Image.network(
-                                          relatedProduct.main_image_url ?? '',
-                                          height: 180,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) => Image.asset(
-                                            'assets/images/pp.png',
-                                            height: 120,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: const BorderRadius.vertical(
+                                              top: Radius.circular(10)),
+                                          child: Image.network(
+                                            relatedProduct.main_image_url ?? '',
+                                            height: 180,
                                             width: double.infinity,
                                             fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) =>
+                                                Image.asset(
+                                                  'assets/images/pp.png',
+                                                  height: 120,
+                                                  width: double.infinity,
+                                                  fit: BoxFit.cover,
+                                                ),
                                           ),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min, // Let the text take only the space it needs.
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Model Name: ${relatedProduct.name ?? 'No Name'}',
-                                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              'Model No: ${relatedProduct.model_no ?? 'N/A'}',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Model Name: ${relatedProduct.name ?? 'No Name'}',
+                                                style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              'Sub Category: ${relatedProduct.sub_category ?? 'N/A'}',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                'Sub Category: ${relatedProduct.sub_category ?? 'N/A'}',
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              'Warranty: ${relatedProduct.warranty ?? 'N/A'}',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                'Warranty: ${relatedProduct.warranty ?? 'N/A'}',
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              'Price: Rs. ${relatedProduct.price ?? 'N/A'}',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                'Price: Rs. ${relatedProduct.price ?? 'N/A'}',
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              'Power: ${relatedProduct.power ?? 'N/A'}',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                'Power: ${relatedProduct.power ?? 'N/A'}',
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                          ],
+                                              const SizedBox(height: 6),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-
-                              )
-                              );
-                            },
-                          ),
-                        );
-                      }),
-                    ],
+                                );
+                              },
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
                   )
                 ],
               );

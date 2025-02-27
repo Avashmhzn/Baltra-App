@@ -8,6 +8,7 @@ class Review {
   final String review;
   final String date_joined;
   final Customer customer;
+  DateTime get reviewDate => DateTime.parse(date_joined);
 
   Review({
     required this.rating,

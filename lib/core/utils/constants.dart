@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 // final CLIENT_ID = dotenv.env['CLIENT_ID']!;
 // final SECRET_KEY = dotenv.env['SECRET_KEY'];
 
-const String URL = 'http://192.168.1.84:8000/api';
+const String URL = 'http://192.168.1.118:7000/api';
 
 extension StringCasingExtension on String {
   String toCapitalized() =>

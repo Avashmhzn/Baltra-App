@@ -17,3 +17,21 @@ List<String> extractSpecifications(String? htmlContent) {
 
   return specifications;
 }
+
+
+List<String> extractUsageItems(String? htmlContent) {
+  if (htmlContent == null || htmlContent.isEmpty) {
+    return [];
+  }
+
+  // Parse the HTML content
+  final document = parse(htmlContent);
+
+  // Extract the text inside each <li> tag
+  final List<String> usageItems = [];
+  document.querySelectorAll('li').forEach((element) {
+    usageItems.add(element.text);
+  });
+
+  return usageItems;
+}

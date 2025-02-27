@@ -68,6 +68,8 @@ dependencies:
   easy_stepper: ^0.8.5+1
   gallery_saver: ^2.3.2
   collection: ^1.16.0
+  easy_rich_text: ^2.2.0
+  flutter_lints: ^4.0.0
 
 dependency_overrides:
   http: ^1.3.0
@@ -75,6 +77,15 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.3
+  package_info_plus: ^8.3.0
+
+flutter_icons:
+  image_path: "assets/images/baltra_logo.png"
+  android: true
+  ios: true
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/images/baltra_logo.png"
 
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
