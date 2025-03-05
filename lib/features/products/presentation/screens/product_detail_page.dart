@@ -85,28 +85,80 @@ class _ProductDetailPageState extends State<ProductDetailPage>
 
   void initializeVideo() {
     String? productVideoUrl = widget.product?.product_video;
+    print("Attempting to initialize video with URL: $productVideoUrl");
+
     if (productVideoUrl != null && productVideoUrl.isNotEmpty) {
-      _videoPlayerController = VideoPlayerController.network(productVideoUrl)
-        ..addListener(() {
-          if (_videoPlayerController!.value.hasError) {
-            log("Error playing video: ${_videoPlayerController!.value.errorDescription}");
+      try {
+        // Ensure URL is properly formatted
+        final Uri? uri = Uri.tryParse(productVideoUrl);
+        if (uri == null) {
+          print("Invalid video URL format");
+          setState(() => _isVideoInitialized = false);
+          return;
+        }
+
+        _videoPlayerController?.dispose();
+        _videoPlayerController = VideoPlayerController.network(
+          productVideoUrl,
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+          httpHeaders: {
+            'Access-Control-Allow-Origin': '*',
+            'Accept': '*/*',
+            'Connection': 'keep-alive',
+          },
+        );
+
+        _videoPlayerController!.addListener(() {
+          if (!mounted) return;
+
+          final player = _videoPlayerController!;
+          if (player.value.hasError) {
+            print("Video player error: ${player.value.errorDescription}");
+            // Show error to user
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Error playing video: ${player.value.errorDescription}")),
+            );
           }
-          if (_videoPlayerController!.value.isInitialized) {
+
+          // Update playing state
+          if (_isPlaying != player.value.isPlaying) {
+            setState(() => _isPlaying = player.value.isPlaying);
+          }
+        });
+
+        print("Initializing video player...");
+        _videoPlayerController!.initialize().then((_) {
+          print("Video player initialized successfully");
+          if (mounted) {
             setState(() {
               _isVideoInitialized = true;
+              _videoPlayerController!.setLooping(true);
+              // Don't auto-play, let user control playback
+              _isPlaying = false;
+              _showPlayPauseButton = true;
             });
           }
-        })
-        ..initialize().then((_) {
-          setState(() {
-            _isVideoInitialized = true;
-            _videoPlayerController!.setLooping(true);
-          });
         }).catchError((error) {
-          log("Error initializing video: $error");
+          print("Video initialization error: $error");
+          if (mounted) {
+            setState(() => _isVideoInitialized = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error loading video: ${error.toString()}'),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
         });
+      } catch (e) {
+        print("Exception during video controller creation: $e");
+        if (mounted) {
+          setState(() => _isVideoInitialized = false);
+        }
+      }
     } else {
-      log("No video URL available");
+      print("No video URL provided");
+      setState(() => _isVideoInitialized = false);
     }
   }
 
@@ -135,15 +187,17 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   }
 
   void _onVisibilityChanged(VisibilityInfo info) {
+    if (_videoPlayerController == null) return;
+
     if (info.visibleFraction > 0.5) {
-      if (!_isPlaying) {
+      if (!_isPlaying && mounted) {
         _videoPlayerController!.play();
         setState(() {
           _isPlaying = true;
         });
       }
     } else {
-      if (_isPlaying) {
+      if (_isPlaying && mounted) {
         _videoPlayerController!.pause();
         setState(() {
           _isPlaying = false;
@@ -682,48 +736,62 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   // Video Player
-                  VisibilityDetector(
-                    key: const Key('video-player'),
-                    onVisibilityChanged: _onVisibilityChanged,
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _showPlayPauseButton = true;
-                          _startHidePlayPauseTimer();
-                        });
-                      },
-                      child: Container(
-                        height: 220,
-                        width: double.infinity,
-                        decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-                        child: _isVideoInitialized
-                            ? Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            AspectRatio(
-                              aspectRatio: _videoPlayerController!.value.aspectRatio,
-                              child: VideoPlayer(_videoPlayerController!),
-                            ),
-                            if (_showPlayPauseButton)
-                              IconButton(
-                                onPressed: _togglePlayPause,
-                                icon: Icon(
-                                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                                  size: 50,
-                                  color: Colors.white.withOpacity(0.7),
+                  // Replace the existing video player section with this:
+                  if (product.product_video != null && product.product_video!.isNotEmpty)
+                    VisibilityDetector(
+                      key: const Key('video-player'),
+                      onVisibilityChanged: _onVisibilityChanged,
+                      child: GestureDetector(
+                        onTap: _togglePlayPause,
+                        child: Container(
+                          height: 220,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            color: Colors.black,
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              if (_isVideoInitialized && _videoPlayerController != null)
+                                AspectRatio(
+                                  aspectRatio: _videoPlayerController!.value.aspectRatio,
+                                  child: VideoPlayer(_videoPlayerController!),
                                 ),
-                              ),
-                          ],
-                        )
-                            : const Center(
-                          child: Text(
-                            'No video available or loading...',
-                            style: TextStyle(color: Colors.grey),
+                              if (!_isVideoInitialized)
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const CircularProgressIndicator(color: Colors.white),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      'Loading video...',
+                                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                                    ),
+                                  ],
+                                ),
+                              if (_videoPlayerController?.value.hasError ?? false)
+                                Center(
+                                  child: Text(
+                                    'Error loading video\nTap to retry',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                                  ),
+                                ),
+                              if (_showPlayPauseButton || !_isPlaying)
+                                IconButton(
+                                  onPressed: _togglePlayPause,
+                                  icon: Icon(
+                                    _isPlaying ? Icons.pause : Icons.play_arrow,
+                                    size: 50,
+                                    color: Colors.white.withOpacity(0.7),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                  ),
                   const SizedBox(height: 30),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
