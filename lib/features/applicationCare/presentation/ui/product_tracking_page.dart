@@ -42,6 +42,33 @@ class _TrackingPageState extends State<TrackingPage> {
       return "Invalid Date";
     }
   }
+  // Show Full-Screen Image with Zoom & Pan
+  void showFullScreenImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).pop(), // Tap to close
+          child: Hero(
+            tag: imageUrl,
+            child: InteractiveViewer(
+              panEnabled: true, // Enable zoom and pan
+              boundaryMargin: EdgeInsets.all(20),
+              minScale: 0.5,
+              maxScale: 3.0,
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.image_not_supported, size: 100),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<void> downloadImage(BuildContext context, String imageUrl) async {
     if (imageUrl.isEmpty) {
@@ -331,12 +358,24 @@ class _TrackingPageState extends State<TrackingPage> {
                         child: SizedBox(
                           height: 150,
                           width: 140,
-                          child: Image.network(
+                          child: GestureDetector(
+                            onTap: () => showFullScreenImage(context, product.damagedImage ?? ''),
+                            child: Hero(
+                              tag: "${product.damagedImage}_image",
+                              child: Image.network(
+                                product.damagedImage ?? '',
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.image_not_supported),
+                              ),
+                            ),
+                          ),
+                          /*child: Image.network(
                             product.damagedImage ?? '',
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
                             const Icon(Icons.image_not_supported),
-                          ),
+                          ),*/
                         ),
                       ),
                     ),
@@ -415,28 +454,25 @@ class _TrackingPageState extends State<TrackingPage> {
                     // The image section
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Stack(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: SizedBox(
-                                  height: 150,
-                                  width: screenWidth * 0.8,
-                                  child: Image.network(
-                                    product.damagedImage ?? '',
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(
-                                        Icons.image_not_supported),
-                                  ),
+                        GestureDetector(
+                          onTap: () => showFullScreenImage(context, product.damagedImage ?? ''),
+                          child: Hero(
+                            tag: product.damagedImage ?? '',
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: SizedBox(
+                                height: 150,
+                                width: screenWidth * 0.8,
+                                child: Image.network(
+                                  product.damagedImage ?? '',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.image_not_supported),
                                 ),
                               ),
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
@@ -485,11 +521,26 @@ class _TrackingPageState extends State<TrackingPage> {
                           width: MediaQuery.of(context).size.width * 0.8,
                           height: MediaQuery.of(context).size.height * 0.3,
                           child: product.damagedVideo != null && product.damagedVideo!.isNotEmpty
-                              ? Container(
-                              height: MediaQuery.of(context).size.height * 0.5,
-                              child: VideoPreview(videoUrl: product.damagedVideo!))
+                              ? GestureDetector(
+                            onTap: () {
+                              // Open Full-Screen Video Preview
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VideoPreview(videoUrl: product.damagedVideo!),
+                                ),
+                              );
+                            },
+                            child: Hero(
+                              tag: "${product.damagedVideo}_video",
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.height * 0.3,
+                                child: VideoPreview(videoUrl: product.damagedVideo!),
+                              ),
+                            ),
+                          )
                               : Container(
-
                             decoration: BoxDecoration(
                               color: Colors.black12,
                               borderRadius: BorderRadius.circular(10),

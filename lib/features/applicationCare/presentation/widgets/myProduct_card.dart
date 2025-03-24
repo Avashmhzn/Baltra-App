@@ -40,18 +40,54 @@ class MyProdductCard extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () {
-                  // Add navigation if needed
+                  // Navigate to full-screen image with Hero animation
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenImagePage(
+                        imageUrl: product.product_image,
+                        heroTag: product.id.toString(), // Unique hero tag
+                      ),
+                    ),
+                  );
                 },
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
-                  child: Image(
-                    image: NetworkImage(product.product_image),
-                    height: 150,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
+                child: Hero(
+                  tag: product.id.toString(),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                    ),
+                    child: InteractiveViewer(
+                      panEnabled: true, // Enable panning
+                      boundaryMargin: const EdgeInsets.all(20),
+                      minScale: 0.1, // Minimum zoom scale
+                      maxScale: 4.0, // Maximum zoom scale
+                      child: Image.network(
+                        product.product_image,
+                        height: 150,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) {
+                            return child;
+                          } else {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: progress.expectedTotalBytes != null
+                                    ? progress.cumulativeBytesLoaded /
+                                    (progress.expectedTotalBytes ?? 1)
+                                    : null,
+                              ),
+                            );
+                          }
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(
+                              child: Icon(Icons.error)); // Fallback icon
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -243,6 +279,59 @@ class MyProdductCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+class FullScreenImagePage extends StatelessWidget {
+  final String imageUrl;
+  final String heroTag;
+
+  FullScreenImagePage({
+    required this.imageUrl,
+    required this.heroTag, // Make heroTag required
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () {
+          Navigator.pop(context); // Close the image viewer on tap
+        },
+        child: Center(
+          child: Hero(
+            tag: heroTag,
+            child: InteractiveViewer(
+              panEnabled: true,
+              boundaryMargin: const EdgeInsets.all(20),
+              minScale: 0.1,
+              maxScale: 4.0,
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) {
+                    return child;
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: progress.expectedTotalBytes != null
+                            ? progress.cumulativeBytesLoaded /
+                            (progress.expectedTotalBytes ?? 1)
+                            : null,
+                      ),
+                    );
+                  }
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Center(child: Icon(Icons.error));
+                },
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

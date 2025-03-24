@@ -99,12 +99,12 @@ class CustomBottomAppBar extends StatelessWidget {
               ? GestureDetector(
                   onTap: () => onItemTapped(0),
                   child: SizedBox(
-                    width: 100,
+                    width: 110,
                     child: Image.asset(
                       'assets/images/home_active.png',
                       fit: BoxFit.fitWidth,
-                      height: 120,
-                      width: 120,
+                      height: 130,
+                      width: 130,
                     ),
                   ))
               : GestureDetector(
@@ -122,12 +122,12 @@ class CustomBottomAppBar extends StatelessWidget {
               ? GestureDetector(
                   onTap: () => onItemTapped(1),
                   child: SizedBox(
-                    width: 100,
+                    width: 110,
                     child: Image.asset(
                       'assets/images/products_active.png',
                       fit: BoxFit.fitWidth,
-                      height: 120,
-                      width: 100,
+                      height: 130,
+                      width: 130,
                     ),
                   ))
               : GestureDetector(
@@ -145,12 +145,12 @@ class CustomBottomAppBar extends StatelessWidget {
               ? GestureDetector(
                   onTap: () => onItemTapped(2),
                   child: SizedBox(
-                    width: 100,
+                    width: 110,
                     child: Image.asset(
                       'assets/images/care_active.png',
                       fit: BoxFit.fitWidth,
-                      height: 120,
-                      width: 120,
+                      height: 130,
+                      width: 130,
                     ),
                   ))
               : GestureDetector(
@@ -168,12 +168,12 @@ class CustomBottomAppBar extends StatelessWidget {
               ? GestureDetector(
                   onTap: () => onItemTapped(3),
                   child: SizedBox(
-                    width: 100,
+                    width: 110,
                     child: Image.asset(
                       'assets/images/profile_active.png',
                       fit: BoxFit.fitWidth,
-                      height: 120,
-                      width: 120,
+                      height: 130,
+                      width: 130,
                     ),
                   ))
               : GestureDetector(

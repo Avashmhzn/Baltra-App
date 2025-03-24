@@ -49,13 +49,21 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           ),
           Center(
             child: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
-              width: MediaQuery.of(context).size.width * 0.7,
+              height: MediaQuery
+                  .of(context)
+                  .size
+                  .height * 0.5,
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width * 0.7,
               child: QRView(
                 key: qrKey,
                 onQRViewCreated: _onQRViewCreated,
                 overlay: QrScannerOverlayShape(
-                  borderColor: Theme.of(context).primaryColor,
+                  borderColor: Theme
+                      .of(context)
+                      .primaryColor,
                   borderRadius: 10,
                   borderLength: 30,
                   borderWidth: 10,
@@ -68,44 +76,77 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       ),
     );
   }
+
   // TODO: changing qr data format
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
+
     controller.scannedDataStream.listen((scanData) {
       setState(() {
         result = scanData;
         log('DATAAAAAA:::::${result!.code.toString()}');
-        Navigator.pop(context);
       });
+
       String scannedUrl = scanData.code ?? '';
+
       if (scannedUrl.isNotEmpty) {
-        Uri uri = Uri.parse(scannedUrl);
-        var queryParams = uri.queryParameters;
+        try {
+          Uri uri = Uri.parse(scannedUrl);
+          Map<String, String> queryParams = uri.queryParameters;
 
-        // Example: Extract specific query parameters
-        String? param1 = queryParams['model_name']; // Example parameter
-        String? param2 = queryParams['model_number']; // Another parameter
-        String? param3 = queryParams['serial_number']; // Another parameter
-        // Log or use the query parameters
-        log('param1: $param1');
-        log('param2: $param2');
-        log('param3: $param3');
+          // Check if all required keys are present
+          if (queryParams.containsKey('model_name') &&
+              queryParams.containsKey('model_number') &&
+              queryParams.containsKey('serial_number')) {
+            String? param1 = queryParams['model_name'];
+            String? param2 = queryParams['model_number'];
+            String? param3 = queryParams['serial_number'];
 
-        _navigateToResultScreen(param1,param2,param3);
-      }});
+            log('param1: $param1');
+            log('param2: $param2');
+            log('param3: $param3');
+
+            Navigator.pop(context);
+
+            _navigateToResultScreen(param1, param2, param3);
+          } else {
+            throw FormatException("Missing one or more required keys.");
+          }
+        } catch (e) {
+          log('QR Error: $e');
+          _showError("Invalid QR Code. Required data is missing.");
+        }
+      } else {
+        _showError("QR Code is empty. Please try again.");
+      }
+    });
   }
 
-  void _navigateToResultScreen(String? param1,String? param2,String? param3) {
+  void _navigateToResultScreen(String? param1, String? param2, String? param3) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ResultScreen( model_name:  param1, model_num:  param2, serial_number: param3),
+        builder: (context) =>
+            ResultScreen(
+              model_name: param1,
+              model_num: param2,
+              serial_number: param3,
+            ),
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
 }
-
 class ResultScreen extends StatefulWidget {
   final String? model_name;
   final String? model_num;

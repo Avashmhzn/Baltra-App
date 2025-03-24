@@ -2,6 +2,7 @@ import 'package:baltra/features/applicationCare/controller/crmController.dart';
 import 'package:baltra/features/applicationCare/data/crm.dart';
 import 'package:baltra/features/applicationCare/models/crmModel.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/product_tracking_page.dart';
+import 'package:baltra/features/products/presentation/widgets/baltra_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -80,7 +81,7 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
         builder: (context, snapshot) {
           return Obx(() {
             if (crmController.isLoading.value) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: PulsatingBaltraLogo());
             } else if (crmController.errorMessage.value.isNotEmpty) {
               return Center(
                   child: Text("Error: ${crmController.errorMessage.value}"));
