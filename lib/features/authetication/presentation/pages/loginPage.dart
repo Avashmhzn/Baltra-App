@@ -182,6 +182,7 @@ class _LoginpageState extends State<Loginpage> {
                         ),
                         GestureDetector(
                           onTap: () async {
+                            FocusScope.of(context).unfocus();
                             if (_formKey.currentState!.validate()) {
                               int status = await loginController.loginUser(
                                 int.parse(phoneController.text.trim()),

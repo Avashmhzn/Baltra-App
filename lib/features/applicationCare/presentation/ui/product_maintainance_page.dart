@@ -5,6 +5,7 @@ import 'package:baltra/features/applicationCare/presentation/ui/product_tracking
 import 'package:baltra/features/products/presentation/widgets/baltra_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart'; 
 
 // Helper function to return color based on status.
 Color getStatusColor(String? status) {
@@ -52,6 +53,64 @@ Widget detailRow({required String title, required String? value}) {
   );
 }
 
+// Skeleton loader widget with shimmer animation
+Widget complaintSkeleton() {
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+    padding: const EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      boxShadow: const [
+        BoxShadow(
+          color: Colors.black12,
+          blurRadius: 6.0,
+          offset: Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Shimmer.fromColors(
+      baseColor: Colors.grey[300]!, // Base color of the skeleton
+      highlightColor: Colors.grey[100]!, // Highlight color for the shimmer effect
+      period: const Duration(milliseconds: 1000), // Speed of the shimmer animation
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Skeleton for the 7 text rows
+          for (int i = 0; i < 7; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Placeholder for the label (e.g., "Product Name:")
+                  Container(
+                    width: 120, // Approximate width for the label
+                    height: 14,
+                    color: Colors.white, // Shimmer will animate over this
+                  ),
+                  // Placeholder for the value (e.g., "FRY PAN ROUND")
+                  Container(
+                    width: 100, // Approximate width for the value
+                    height: 14,
+                    color: Colors.white, // Shimmer will animate over this
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 8),
+          // Skeleton for the image
+          Container(
+            height: 150,
+            width: double.infinity,
+            color: Colors.white, // Shimmer will animate over this
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 class ProductMaintainancePage extends StatefulWidget {
   const ProductMaintainancePage({Key? key}) : super(key: key);
 
@@ -81,7 +140,29 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
         builder: (context, snapshot) {
           return Obx(() {
             if (crmController.isLoading.value) {
-              return const Center(child: PulsatingBaltraLogo());
+              // Show animated skeleton loader instead of CircularProgressIndicator
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      "Complaints",
+                      style: TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: 3, // Show 3 skeleton cards while loading
+                      itemBuilder: (context, index) {
+                        return complaintSkeleton();
+                      },
+                    ),
+                  ),
+                ],
+              );
             } else if (crmController.errorMessage.value.isNotEmpty) {
               return Center(
                   child: Text("Error: ${crmController.errorMessage.value}"));
@@ -163,9 +244,9 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
                               if ((complaint.damagedImage ?? "").isNotEmpty)
                                 Image.network(
                                   complaint.damagedImage,
-                                  height: 100,
+                                  height: 150,
                                   width: double.infinity,
-                                  fit: BoxFit.cover,
+                                  fit: BoxFit.contain,
                                 ),
                             ],
                           ),

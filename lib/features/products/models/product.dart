@@ -29,6 +29,9 @@ class Product {
   List<ImageModel>? sizing_images;
   String? galleryimagetwo;
   String? galleryimageone;
+  Map<String, dynamic>? category;
+  Map<String, dynamic>? sub_category;
+
 
   Product({
     this.id,
@@ -56,6 +59,9 @@ class Product {
     this.usage_images,
     this.galleryimagetwo,
     this.galleryimageone,
+    this.category,
+    this.sub_category,
+
   });
 
   factory Product.fromJson(Map<String, dynamic> json) =>

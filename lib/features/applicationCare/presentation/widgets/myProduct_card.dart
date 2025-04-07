@@ -65,9 +65,9 @@ class MyProdductCard extends StatelessWidget {
                       maxScale: 4.0, // Maximum zoom scale
                       child: Image.network(
                         product.product_image,
-                        height: 150,
+                        height: 170,
                         width: double.infinity,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                         loadingBuilder: (context, child, progress) {
                           if (progress == null) {
                             return child;

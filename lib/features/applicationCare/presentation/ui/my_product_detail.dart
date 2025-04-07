@@ -8,7 +8,7 @@ import 'package:baltra/features/applicationCare/models/myProduct.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:baltra/features/applicationCare/controller/crmController.dart';
 import 'video_preview.dart';
@@ -238,16 +238,22 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: product.product_image != null
-                                  ? Image.network(
-                                      product.product_image!,
-                                      height: 120,
-                                      width: 120,
-                                      fit: BoxFit.cover,
-                                    )
+                                  ? GestureDetector(
+                                onTap: () => showFullScreenImage(context, product.product_image ?? ''),
+                                child: Hero(
+                                  tag: "${product.product_image}_image",
+                                  child: Image.network(
+                                    product.product_image!,
+                                    height: 120,
+                                    width: 120,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              )
                                   : Icon(
-                                      Icons.image_not_supported,
-                                      size: 120,
-                                    ),
+                                Icons.image_not_supported,
+                                size: 120,
+                              ),
                             ),
                             SizedBox(width: 16),
                             Expanded(
@@ -317,28 +323,25 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                           // The image section
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Stack(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: SizedBox(
-                                        height: 150,
-                                        width: screenWidth * 0.8,
-                                        child: Image.network(
-                                          product.product_image ?? '',
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(
-                                              Icons.image_not_supported),
-                                        ),
+                              GestureDetector(
+                                onTap: () => showFullScreenImage(context, product.product_image ?? ''),
+                                child: Hero(
+                                  tag: product.product_image ?? '',
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: SizedBox(
+                                      height: 150,
+                                      width: screenWidth * 0.8,
+                                      child: Image.network(
+                                        product.product_image ?? '',
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                        const Icon(Icons.image_not_supported),
                                       ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
                             ],
                           ),
@@ -386,28 +389,25 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                           // The image section
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Stack(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: SizedBox(
-                                        height: 150,
-                                        width: screenWidth * 0.8,
-                                        child: Image.network(
-                                          product.bill_image_one ?? '',
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(
-                                              Icons.image_not_supported),
-                                        ),
+                              GestureDetector(
+                                onTap: () => showFullScreenImage(context, product.bill_image_one ?? ''),
+                                child: Hero(
+                                  tag: product.bill_image_one ?? '',
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: SizedBox(
+                                      height: 150,
+                                      width: screenWidth * 0.8,
+                                      child: Image.network(
+                                        product.bill_image_one ?? '',
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                        const Icon(Icons.image_not_supported),
                                       ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
                             ],
                           ),
@@ -454,28 +454,25 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                           // The image section
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Stack(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: SizedBox(
-                                        height: 150,
-                                        width: screenWidth * 0.8,
-                                        child: Image.network(
-                                          product.warranty_image ?? '',
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(
-                                              Icons.image_not_supported),
-                                        ),
+                              GestureDetector(
+                                onTap: () => showFullScreenImage(context, product.warranty_image ?? ''),
+                                child: Hero(
+                                  tag: product.warranty_image ?? '',
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: SizedBox(
+                                      height: 150,
+                                      width: screenWidth * 0.8,
+                                      child: Image.network(
+                                        product.warranty_image ?? '',
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                        const Icon(Icons.image_not_supported),
                                       ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
                             ],
                           ),
@@ -510,6 +507,33 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
             child: Text(value ?? 'N/A',overflow: TextOverflow.ellipsis,),
           ),
         ],
+      ),
+    );
+  }
+
+  void showFullScreenImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).pop(), // Tap to close
+          child: Hero(
+            tag: imageUrl,
+            child: InteractiveViewer(
+              panEnabled: true, // Enable zoom and pan
+              boundaryMargin: EdgeInsets.all(20),
+              minScale: 0.5,
+              maxScale: 3.0,
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.image_not_supported, size: 100),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

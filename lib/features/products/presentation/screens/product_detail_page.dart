@@ -35,7 +35,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   Timer? _hidePlayPauseTimer;
   final ScrollController _scrollController = ScrollController();
 
-
   // Current active tab index.
   int _currentTabIndex = 0;
 
@@ -65,6 +64,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   }
 
   void navigateToProductDetails(int productId) async {
+    controller.productDetails.value = null; // Clear previous product details
     controller.isLoading(true);
     await controller.fetchSelectedProduct(productId);
     reviewController.fetchReviewsAndRatings(productId);
@@ -72,11 +72,11 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     controller.isLoading(false);
     if (controller.productDetails.value != null) {
       _scrollController.jumpTo(0);
-      Get.to(() => ProductDetailPage(
+      Get.off(() => ProductDetailPage(
         key: UniqueKey(),
         product: controller.productDetails.value!,
         relatedProducts: controller.relatedProductsList,
-      ));
+      )); // Use Get.off to replace the current page
     } else {
       Get.snackbar("Error", "Failed to load product details",
           snackPosition: SnackPosition.BOTTOM);
@@ -89,7 +89,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
 
     if (productVideoUrl != null && productVideoUrl.isNotEmpty) {
       try {
-        // Ensure URL is properly formatted
         final Uri? uri = Uri.tryParse(productVideoUrl);
         if (uri == null) {
           print("Invalid video URL format");
@@ -114,13 +113,11 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           final player = _videoPlayerController!;
           if (player.value.hasError) {
             print("Video player error: ${player.value.errorDescription}");
-            // Show error to user
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Error playing video: ${player.value.errorDescription}")),
             );
           }
 
-          // Update playing state
           if (_isPlaying != player.value.isPlaying) {
             setState(() => _isPlaying = player.value.isPlaying);
           }
@@ -133,7 +130,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             setState(() {
               _isVideoInitialized = true;
               _videoPlayerController!.setLooping(true);
-              // Don't auto-play, let user control playback
               _isPlaying = false;
               _showPlayPauseButton = true;
             });
@@ -216,7 +212,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
 
   List<Map<String, String>> parseDimensionsText(String text) {
     final List<Map<String, String>> items = [];
-    final cleanedText = text.replaceAll('&nbsp;', ' ');
+    final cleanedText = text.replaceAll(' ', ' ');
     final regex = RegExp(r'(\w+): ([^ ]+ [^ ]+ \(.*?\))\s+([^\.]+)\.');
     for (final match in regex.allMatches(cleanedText)) {
       items.add({
@@ -328,7 +324,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             child: Image.network(
               sizingImages[i]['image_url'] ?? '',
               width: MediaQuery.of(context).size.width * 0.95,
-              // Do not force a height so it shrink wraps to content.
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) => Image.asset(
                 'assets/images/pp.png',
@@ -351,7 +346,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         ),
         if (usage.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
+            padding: const EdgeInsets.only(top: 8.0),
             child: Text(
               removeListContent(usage),
               style: const TextStyle(fontSize: 14),
@@ -467,7 +462,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             },
           ),
         ),
-        // Show only the active tab's content
         if (_currentTabIndex == 0)
           _buildDescriptionTab(specifications, specImages)
         else if (_currentTabIndex == 1)
@@ -480,7 +474,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
 
   @override
   Widget build(BuildContext context) {
-    // Outer SingleChildScrollView for entire page.
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -490,14 +483,13 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
             child: Obx(() {
               final product = controller.productDetails.value ?? widget.product;
-              if (product == null) {
+              if (controller.isLoading.value || product == null) {
                 return const Center(child: CircularProgressIndicator());
               }
               final displayRelatedProducts = controller.relatedProductsList;
               List<Map<String, String>> items = parseDimensionsText(product.sizing ?? '');
               List<String> specifications = extractSpecifications(product.specification ?? '');
               List<String> usageItems = extractUsageItems(product.usage ?? '');
-              // Build image lists with null-safety fixes.
               List<Map<String, String>> specImages = [];
               if (product.specification_images != null) {
                 for (var img in product.specification_images!.take(3)) {
@@ -520,27 +512,105 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Back button
-                  IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: Theme.of(context).primaryColor,
-                      size: 20,
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: Theme.of(context).primaryColor,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Breadcrumbs
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20.0, top: 8.0, bottom: 8.0),
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          product.category?['category_name'] ?? 'Category',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 0.0), // Reduced to 0
+                          child: Icon(
+                            Icons.chevron_right,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          product.sub_category?['sub_category_name'] ?? 'Subcategory',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 0.0), // Reduced to 0
+                          child: Icon(
+                            Icons.chevron_right,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          product.name ?? 'Product',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  // Main Image
-                  Image.network(
-                    product.main_image ?? '',
+                  // Main Image with Warranty Overlay
+                  SizedBox(
                     height: 300,
                     width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Image.asset(
-                      'assets/images/pp.png',
-                      height: 300,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+                    child: Stack(
+                      children: [
+                        // Main Image
+                        Image.network(
+                          product.main_image ?? '',
+                          height: 300,
+                          width: double.infinity,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => Image.asset(
+                            'assets/images/pp.png',
+                            height: 300,
+                            width: double.infinity,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        // Warranty Image Overlay
+                        if (product.warranty_icon != null && product.warranty_icon!.isNotEmpty)
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: Image.network(
+                              product.warranty_icon ?? '',
+                              height: 50,
+                              width: 50,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => Image.asset(
+                                'assets/images/pp.png',
+                                height: 50,
+                                width: 50,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   // Image Gallery
@@ -702,8 +772,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration:
-                    BoxDecoration(border: Border.all(color: Colors.grey)),
+                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: Image(
                       image: NetworkImage(product.galleryimageone ?? ''),
                       height: 430,
@@ -719,8 +788,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration:
-                    BoxDecoration(border: Border.all(color: Colors.grey)),
+                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: Image(
                       image: NetworkImage(product.galleryimagetwo ?? ''),
                       height: 430,
@@ -736,7 +804,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   // Video Player
-                  // Replace the existing video player section with this:
                   if (product.product_video != null && product.product_video!.isNotEmpty)
                     VisibilityDetector(
                       key: const Key('video-player'),
@@ -805,7 +872,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Reviews Section: Sorting the reviews to show latest first.
+                  // Reviews Section
                   Obx(() {
                     if (reviewController.isLoading.value) {
                       return const Center(child: CircularProgressIndicator());

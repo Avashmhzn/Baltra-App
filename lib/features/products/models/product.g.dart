@@ -43,6 +43,8 @@ Product _$ProductFromJson(Map<String, dynamic> json) => Product(
           .toList(),
       galleryimagetwo: json['galleryimagetwo'] as String?,
       galleryimageone: json['galleryimageone'] as String?,
+      category: json['category'] as Map<String, dynamic>?, // Map
+      sub_category: json['sub_category'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
@@ -71,6 +73,8 @@ Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
       'sizing_images': instance.sizing_images,
       'galleryimagetwo': instance.galleryimagetwo,
       'galleryimageone': instance.galleryimageone,
+      'category': instance.category,
+      'sub_category': instance.sub_category,
     };
 
 ImageModel _$ImageModelFromJson(Map<String, dynamic> json) => ImageModel(

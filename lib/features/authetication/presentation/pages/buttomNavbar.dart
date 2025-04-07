@@ -137,8 +137,8 @@ class CustomBottomAppBar extends StatelessWidget {
                     child: Image.asset(
                       'assets/images/products_inactive.png',
                       fit: BoxFit.contain,
-                      height: 40,
-                      width: 50,
+                      height: 35,
+                      width: 40,
                     ),
                   )),
           selectedIndex == 2

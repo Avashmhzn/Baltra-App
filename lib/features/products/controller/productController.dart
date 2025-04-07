@@ -11,8 +11,6 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-// Import your global error handler
-
 class ProductController extends GetxController {
   var isLoading = true.obs;
   var isLoadingProducts = true.obs;
@@ -102,16 +100,11 @@ class ProductController extends GetxController {
     print('Fetching related products for ID: $id');
     try {
       isRelatedProductsLoading(true);
-
-      relatedProductsList.clear();
-
+      relatedProductsList.clear(); // Clear previous related products
       final result = await productRepository.fetcRelatedProducts(id);
-      log("API Response: $result");
-
       result.fold(
             (failure) {
           print("Failed to fetch related products: $failure");
-          isRelatedProductsLoading(false);
         },
             (relatedProducts) {
           if (relatedProducts.isNotEmpty) {
@@ -119,37 +112,36 @@ class ProductController extends GetxController {
           } else {
             print("Warning: No related products returned from API.");
           }
-          isRelatedProductsLoading(false);
         },
       );
     } catch (e) {
       print("Error fetching related products: $e");
+    } finally {
       isRelatedProductsLoading(false);
     }
   }
 
 
-  /// Function to fetch the selected product when user clicks on a related product.
+  /// Function to fetch the selected product when user clicks on a product.
   Future<void> fetchSelectedProduct(int id) async {
     print('Fetching product details for ID: $id');
     try {
       isLoading(true);
+      productDetails.value = null; // Clear previous data
       final result = await productRepository.fetchProduct(id);
-      log("result: $result");
       result.fold(
             (failure) {
-          isLoading(false);
           Get.snackbar("Error", failure.toString());
         },
             (product) {
           productDetails.value = product;
           productDetails.refresh(); // Force UI update
-          isLoading(false);
         },
       );
     } catch (e) {
-      isLoading(false);
       Get.snackbar("Error", "An error occurred: $e");
+    } finally {
+      isLoading(false);
     }
   }
 
@@ -191,17 +183,17 @@ class ProductController extends GetxController {
   Future<void> fetchProducts(int page) async {
     isLoading(true);
     final Either<Exception, List<Product>> result =
-        await productRepository.fetchAllProduct();
-    log('Fetching products for page $page');
+    await productRepository.fetchAllProduct();
     result.fold(
-      (failure) {
+          (failure) {
         showErrorDialog(Get.context!, failure);
       },
-      (allProducts) {
+          (allProducts) {
         final startIndex = (page - 1) * pageSize;
         final endIndex = startIndex + pageSize;
         if (allProducts.length > startIndex) {
-          final paginatedProducts = allProducts.sublist(startIndex,
+          final paginatedProducts = allProducts.sublist(
+              startIndex,
               endIndex > allProducts.length ? allProducts.length : endIndex);
           allProductsList.addAll(paginatedProducts);
         }

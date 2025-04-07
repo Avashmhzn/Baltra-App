@@ -16,19 +16,15 @@ class CategoryPage extends StatefulWidget {
 class _CategoryPageState extends State<CategoryPage> {
   final ProductController productController =
   Get.put(ProductController(productRepository: ProductRepository()));
-
   final TextEditingController searchController = TextEditingController();
   final RxList<Category> filteredCategories = <Category>[].obs;
 
   @override
   void initState() {
     super.initState();
-    // Listen for data changes and update filteredCategories
     ever(productController.categoryList, (_) {
       filteredCategories.assignAll(productController.categoryList);
     });
-
-    // If data is already loaded, assign it immediately
     if (productController.categoryList.isNotEmpty) {
       filteredCategories.assignAll(productController.categoryList);
     }
@@ -47,11 +43,19 @@ class _CategoryPageState extends State<CategoryPage> {
     }
   }
 
+  Future<void> _refreshCategories() async {
+    await productController.fetchCategories(); // Assuming this method exists
+    filteredCategories.assignAll(productController.categoryList);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _refreshCategories,
           child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
                 const AppBarWithSVG(
@@ -59,9 +63,7 @@ class _CategoryPageState extends State<CategoryPage> {
                   title: 'Our Product',
                   subtitle: 'Explore variety of Baltra products',
                 ),
-                const SizedBox(
-                  height: 21,
-                ),
+                const SizedBox(height: 21),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Material(
@@ -78,9 +80,7 @@ class _CategoryPageState extends State<CategoryPage> {
                       ),
                       child: TextFormField(
                         controller: searchController,
-                        style: const TextStyle(
-                          fontSize: 14.0,
-                        ),
+                        style: const TextStyle(fontSize: 14.0),
                         decoration: const InputDecoration(
                           hintText: 'Search product using name or category',
                           hintStyle: TextStyle(
@@ -96,18 +96,14 @@ class _CategoryPageState extends State<CategoryPage> {
                     ),
                   ),
                 ),
-                const SizedBox(
-                  height: 21,
-                ),
+                const SizedBox(height: 21),
                 Obx(() {
                   if (productController.isLoading.value) {
                     return const Center(child: CircularProgressIndicator());
                   }
-
                   if (filteredCategories.isEmpty) {
                     return const Center(child: Text('No categories found.'));
                   }
-
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 30.0),
                     child: GridView.builder(
@@ -134,7 +130,9 @@ class _CategoryPageState extends State<CategoryPage> {
                 }),
               ],
             ),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }
