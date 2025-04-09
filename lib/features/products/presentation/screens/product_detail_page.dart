@@ -34,6 +34,10 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   bool _showPlayPauseButton = false;
   Timer? _hidePlayPauseTimer;
   final ScrollController _scrollController = ScrollController();
+  String? currentMainImage; // Tracks the current main image URL
+  int _selectedThumbnailIndex = 0; // Tracks the selected thumbnail index
+  List<String> thumbnailUrls = []; // To store the list of thumbnail URLs
+  int? _lastProductId; // To track the last product ID for thumbnail updates
 
   // Current active tab index.
   int _currentTabIndex = 0;
@@ -41,6 +45,32 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   @override
   void initState() {
     super.initState();
+    // Initialize currentMainImage with the product's main image
+    currentMainImage = widget.product?.main_image?.isNotEmpty == true
+        ? widget.product!.main_image
+        : '';
+    // Populate thumbnailUrls in initState
+    final product = widget.product ?? controller.productDetails.value;
+    if (product != null) {
+      _lastProductId = product.id;
+      thumbnailUrls.clear();
+      // Add the main image as the first thumbnail if it's not already in the list
+      if (product.main_image != null && product.main_image!.isNotEmpty) {
+        thumbnailUrls.add(product.main_image!);
+      }
+      // Add additional images from product.images
+      if (product.images != null) {
+        for (var img in product.images!) {
+          if (img.image_url != null &&
+              img.image_url!.isNotEmpty &&
+              img.image_url != product.main_image) {
+            thumbnailUrls.add(img.image_url!);
+          }
+        }
+      }
+      print("Initial Thumbnail URLs in initState: $thumbnailUrls");
+    }
+
     initializeVideo();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
@@ -51,12 +81,14 @@ class _ProductDetailPageState extends State<ProductDetailPage>
       }
     });
 
-    print("NEW ProductDetailPage initState: product id = ${widget.product?.id}");
+    print(
+        "NEW ProductDetailPage initState: product id = ${widget.product?.id}, initial main image = $currentMainImage");
 
     final initialProductId =
         widget.product?.id ?? controller.productDetails.value?.id;
     if (initialProductId != null) {
       reviewController.fetchReviewsAndRatings(initialProductId);
+      controller.relatedProductsList.clear(); // Clear previous related products
       if (widget.relatedProducts == null || widget.relatedProducts!.isEmpty) {
         controller.fetchRelatedProducts(initialProductId);
       }
@@ -73,10 +105,10 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     if (controller.productDetails.value != null) {
       _scrollController.jumpTo(0);
       Get.off(() => ProductDetailPage(
-        key: UniqueKey(),
-        product: controller.productDetails.value!,
-        relatedProducts: controller.relatedProductsList,
-      )); // Use Get.off to replace the current page
+            key: UniqueKey(),
+            product: controller.productDetails.value!,
+            relatedProducts: controller.relatedProductsList,
+          )); // Use Get.off to replace the current page
     } else {
       Get.snackbar("Error", "Failed to load product details",
           snackPosition: SnackPosition.BOTTOM);
@@ -114,7 +146,9 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           if (player.value.hasError) {
             print("Video player error: ${player.value.errorDescription}");
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Error playing video: ${player.value.errorDescription}")),
+              SnackBar(
+                  content: Text(
+                      "Error playing video: ${player.value.errorDescription}")),
             );
           }
 
@@ -234,7 +268,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   }
 
   ///--- Begin Tab Content Functions ---///
-  Widget _buildDescriptionTab(List<String> specifications, List<Map<String, String>> specImages) {
+  Widget _buildDescriptionTab(
+      List<String> specifications, List<Map<String, String>> specImages) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -282,7 +317,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     );
   }
 
-  Widget _buildSizingTab(String sizing, List<Map<String, String>> sizingImages) {
+  Widget _buildSizingTab(
+      String sizing, List<Map<String, String>> sizingImages) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -336,38 +372,48 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     );
   }
 
-  Widget _buildUsageTab(String usage, List<String> usageItems, List<Map<String, String>> extraItems, List<Map<String, String>> usageImages) {
+  Widget _buildUsageTab(
+      String usage,
+      List<String> usageItems,
+      List<Map<String, String>> extraItems,
+      List<Map<String, String>> usageImages) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           "Usage",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            height: 1.0, // Remove extra line spacing above the title
+          ),
         ),
         if (usage.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(top: 0.0),
             child: Text(
               removeListContent(usage),
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14, height: 1.0), // Remove extra line spacing
               textAlign: TextAlign.justify,
             ),
           ),
         if (usageItems.isNotEmpty)
-          for (var item in usageItems)
+          for (var i = 0; i < usageItems.length; i++)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              padding: EdgeInsets.symmetric(
+                vertical: 2.0,
+              ).copyWith(top: i == 0 ? 0.0 : 2.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     '• ',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, height: 1.0), // Remove extra line spacing
                   ),
                   Expanded(
                     child: Text(
-                      item,
-                      style: const TextStyle(fontSize: 14),
+                      usageItems[i],
+                      style: const TextStyle(fontSize: 14, height: 1.0), // Remove extra line spacing
                       textAlign: TextAlign.start,
                     ),
                   ),
@@ -383,12 +429,12 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                 children: [
                   const Text(
                     '• ',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, height: 1.0), // Remove extra line spacing
                   ),
                   Expanded(
                     child: Text(
                       map.values.first,
-                      style: const TextStyle(fontSize: 14),
+                      style: const TextStyle(fontSize: 14, height: 1.0), // Remove extra line spacing
                       textAlign: TextAlign.start,
                     ),
                   ),
@@ -426,48 +472,64 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         required List<Map<String, String>> extraItems,
         required List<Map<String, String>> usageImages,
       }) {
+    // List of tab titles matching the image
+    final List<String> tabTitles = ['DESCRIPTION', 'SIZING', 'USAGE'];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PreferredSize(
-          preferredSize: const Size.fromHeight(50),
-          child: TabBar(
-            dividerColor: Colors.white,
-            controller: tabController,
-            isScrollable: false,
-            indicatorColor: Colors.black,
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicatorWeight: 2.5,
-            labelColor: const Color(0xff201E1E),
-            unselectedLabelColor: const Color(0xff797474),
-            labelStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Color(0xff201E1E),
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Color(0xff797474),
-            ),
-            tabs: const [
-              Tab(text: 'DESCRIPTION'),
-              Tab(text: 'SIZING'),
-              Tab(text: 'USAGE'),
-            ],
-            onTap: (index) {
-              setState(() {
-                _currentTabIndex = index;
-              });
-            },
+        // Custom tab bar using Row and GestureDetector
+        Container(
+          height: 40, // Matches the height of the TabBar in the image
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start, // Left-align the tabs
+            children: List.generate(tabTitles.length, (index) {
+              final isSelected = _currentTabIndex == index;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _currentTabIndex = index;
+                    // Sync the TabController index to maintain consistency
+                    tabController.index = index;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.only(right: 24.0), // Space between tabs
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        tabTitles[index],
+                        style: TextStyle(
+                          fontSize: 16, // Matches the font size in the image
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? Colors.black : const Color(0xFF757575),
+                        ),
+                      ),
+                      if (isSelected)
+                        Container(
+                          margin: const EdgeInsets.only(top: 4.0), // Gap between text and underline
+                          height: 2.0, // Thickness of the underline
+                          width: tabTitles[index].length * 8.0, // Approximate width based on text length
+                          color: Colors.black, // Black underline
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            }),
           ),
         ),
-        if (_currentTabIndex == 0)
-          _buildDescriptionTab(specifications, specImages)
-        else if (_currentTabIndex == 1)
-          _buildSizingTab(sizing, sizingImages)
-        else if (_currentTabIndex == 2)
-            _buildUsageTab(usage, usageItems, extraItems, usageImages),
+        Padding(
+          padding: const EdgeInsets.only(
+              top: 8.0), // Small vertical gap between tabs and content
+          child: _currentTabIndex == 0
+              ? _buildDescriptionTab(specifications, specImages)
+              : _currentTabIndex == 1
+              ? _buildSizingTab(sizing, sizingImages)
+              : _buildUsageTab(usage, usageItems, extraItems, usageImages),
+        ),
       ],
     );
   }
@@ -486,9 +548,42 @@ class _ProductDetailPageState extends State<ProductDetailPage>
               if (controller.isLoading.value || product == null) {
                 return const Center(child: CircularProgressIndicator());
               }
+              // Update currentMainImage and thumbnailUrls when product changes
+              if (product.id != _lastProductId) {
+                _lastProductId = product.id;
+                currentMainImage = product.main_image?.isNotEmpty == true
+                    ? product.main_image
+                    : '';
+                _selectedThumbnailIndex =
+                    0; // Reset selected index when product changes
+                print(
+                    "Product changed (ID: ${product.id}), updated currentMainImage to: $currentMainImage");
+                // Update thumbnailUrls when product changes
+                thumbnailUrls.clear();
+                // Add the main image as the first thumbnail if it's not already in the list
+                if (product.main_image != null &&
+                    product.main_image!.isNotEmpty) {
+                  thumbnailUrls.add(product.main_image!);
+                }
+                // Add additional images from product.images
+                if (product.images != null) {
+                  for (var img in product.images!) {
+                    if (img.image_url != null &&
+                        img.image_url!.isNotEmpty &&
+                        img.image_url != product.main_image) {
+                      thumbnailUrls.add(img.image_url!);
+                    }
+                  }
+                }
+                print(
+                    "Thumbnail URLs updated due to product change: $thumbnailUrls");
+              }
+
               final displayRelatedProducts = controller.relatedProductsList;
-              List<Map<String, String>> items = parseDimensionsText(product.sizing ?? '');
-              List<String> specifications = extractSpecifications(product.specification ?? '');
+              List<Map<String, String>> items =
+                  parseDimensionsText(product.sizing ?? '');
+              List<String> specifications =
+                  extractSpecifications(product.specification ?? '');
               List<String> usageItems = extractUsageItems(product.usage ?? '');
               List<Map<String, String>> specImages = [];
               if (product.specification_images != null) {
@@ -528,7 +623,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   // Breadcrumbs
                   Padding(
-                    padding: const EdgeInsets.only(left: 20.0, top: 8.0, bottom: 8.0),
+                    padding: const EdgeInsets.only(
+                        left: 20.0, top: 8.0, bottom: 8.0),
                     child: Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
@@ -540,7 +636,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                           ),
                         ),
                         const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 0.0), // Reduced to 0
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 0.0), // Reduced to 0
                           child: Icon(
                             Icons.chevron_right,
                             size: 16,
@@ -548,14 +645,16 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                           ),
                         ),
                         Text(
-                          product.sub_category?['sub_category_name'] ?? 'Subcategory',
+                          product.sub_category?['sub_category_name'] ??
+                              'Subcategory',
                           style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 14,
                           ),
                         ),
                         const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 0.0), // Reduced to 0
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 0.0), // Reduced to 0
                           child: Icon(
                             Icons.chevron_right,
                             size: 16,
@@ -580,20 +679,32 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     child: Stack(
                       children: [
                         // Main Image
-                        Image.network(
-                          product.main_image ?? '',
-                          height: 300,
-                          width: double.infinity,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => Image.asset(
-                            'assets/images/pp.png',
-                            height: 300,
-                            width: double.infinity,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
+                        currentMainImage == null || currentMainImage!.isEmpty
+                            ? Image.asset(
+                                'assets/images/pp.png',
+                                height: 300,
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                              )
+                            : Image.network(
+                                currentMainImage!,
+                                height: 300,
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  print(
+                                      "Error loading main image: $error, URL: $currentMainImage");
+                                  return Image.asset(
+                                    'assets/images/pp.png',
+                                    height: 300,
+                                    width: double.infinity,
+                                    fit: BoxFit.contain,
+                                  );
+                                },
+                              ),
                         // Warranty Image Overlay
-                        if (product.warranty_icon != null && product.warranty_icon!.isNotEmpty)
+                        if (product.warranty_icon != null &&
+                            product.warranty_icon!.isNotEmpty)
                           Positioned(
                             top: 10,
                             right: 10,
@@ -602,7 +713,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                               height: 50,
                               width: 50,
                               fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => Image.asset(
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Image.asset(
                                 'assets/images/pp.png',
                                 height: 50,
                                 width: 50,
@@ -616,32 +728,87 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   // Image Gallery
                   Container(
                     height: 80,
-                    margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: product.images?.length ?? 0,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          margin: const EdgeInsets.only(right: 8),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                          ),
-                          child: Image.network(
-                            product.images?[index].image_url ?? '',
-                            fit: BoxFit.contain,
-                            height: 75,
-                            width: 75,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Image.asset(
-                                  'assets/images/pp.png',
-                                  height: 75,
-                                  width: 75,
-                                  fit: BoxFit.cover,
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 10),
+                    child: thumbnailUrls.isEmpty
+                        ? const Center(child: Text("No images available"))
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: thumbnailUrls.length > 0
+                                ? thumbnailUrls.length - 1
+                                : 0, // Reduce itemCount by 1 to skip the first item
+                            itemBuilder: (context, index) {
+                              // Start from the second item (index + 1)
+                              final actualIndex = index + 1;
+                              final imageUrl = thumbnailUrls[actualIndex];
+                              final isSelected =
+                                  _selectedThumbnailIndex == actualIndex;
+                              print("Thumbnail $actualIndex URL: $imageUrl");
+                              return GestureDetector(
+                                onTap: () {
+                                  print(
+                                      "Thumbnail clicked at index $actualIndex, imageUrl: $imageUrl");
+                                  if (imageUrl.isNotEmpty &&
+                                      currentMainImage != null &&
+                                      currentMainImage!.isNotEmpty) {
+                                    setState(() {
+                                      // Store the current main image before updating
+                                      final previousMainImage =
+                                          currentMainImage!;
+                                      // Update the main image to the clicked thumbnail's image
+                                      currentMainImage = imageUrl;
+                                      // Replace the clicked thumbnail with the previous main image
+                                      thumbnailUrls[actualIndex] =
+                                          previousMainImage;
+                                      // Update the selected thumbnail index
+                                      _selectedThumbnailIndex = actualIndex;
+                                      print(
+                                          "After click - Updated main image: currentMainImage = $currentMainImage");
+                                      print(
+                                          "After click - Updated thumbnailUrls[$actualIndex] = ${thumbnailUrls[actualIndex]}");
+                                      print(
+                                          "Full thumbnailUrls after click: $thumbnailUrls");
+                                    });
+                                  } else {
+                                    print(
+                                        "Image URL at index $actualIndex or currentMainImage is empty or null");
+                                  }
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? Colors.blue
+                                          : Colors.grey,
+                                      width: isSelected ? 2 : 1,
+                                    ),
+                                    color: isSelected
+                                        ? Colors.blue.withOpacity(0.1)
+                                        : null,
+                                  ),
+                                  child: Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.contain,
+                                    height: 75,
+                                    width: 75,
+                                    key: ValueKey(
+                                        imageUrl), // Force reload if URL changes
+                                    errorBuilder: (context, error, stackTrace) {
+                                      print(
+                                          "Error loading thumbnail $actualIndex: $error, URL: $imageUrl");
+                                      return Image.asset(
+                                        'assets/images/pp.png',
+                                        height: 75,
+                                        width: 75,
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
                                 ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
                   ),
                   const SizedBox(height: 18),
                   // Product Name and Model
@@ -739,20 +906,25 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ),
                   ),
                   // Tab Section
-                  buildTabSection(
-                    context,
-                    tabController: _tabController,
-                    specifications: specifications,
-                    specImages: specImages,
-                    sizing: product.sizing ?? '',
-                    sizingImages: sizingImages,
-                    usage: product.usage ?? '',
-                    usageItems: usageItems,
-                    extraItems: items,
-                    usageImages: usageImageList,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0,
+                        vertical:
+                            8.0), // Match parent horizontal padding, keep vertical
+                    child: buildTabSection(
+                      context,
+                      tabController: _tabController,
+                      specifications: specifications,
+                      specImages: specImages,
+                      sizing: product.sizing ?? '',
+                      sizingImages: sizingImages,
+                      usage: product.usage ?? '',
+                      usageItems: usageItems,
+                      extraItems: items,
+                      usageImages: usageImageList,
+                    ),
                   ),
                   const SizedBox(height: 10),
-                  // Additional images / icons
                   Container(
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
@@ -772,7 +944,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                    decoration:
+                        BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: Image(
                       image: NetworkImage(product.galleryimageone ?? ''),
                       height: 430,
@@ -788,7 +961,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                    decoration:
+                        BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: Image(
                       image: NetworkImage(product.galleryimagetwo ?? ''),
                       height: 430,
@@ -804,7 +978,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   // Video Player
-                  if (product.product_video != null && product.product_video!.isNotEmpty)
+                  if (product.product_video != null &&
+                      product.product_video!.isNotEmpty)
                     VisibilityDetector(
                       key: const Key('video-player'),
                       onVisibilityChanged: _onVisibilityChanged,
@@ -820,29 +995,35 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              if (_isVideoInitialized && _videoPlayerController != null)
+                              if (_isVideoInitialized &&
+                                  _videoPlayerController != null)
                                 AspectRatio(
-                                  aspectRatio: _videoPlayerController!.value.aspectRatio,
+                                  aspectRatio:
+                                      _videoPlayerController!.value.aspectRatio,
                                   child: VideoPlayer(_videoPlayerController!),
                                 ),
                               if (!_isVideoInitialized)
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const CircularProgressIndicator(color: Colors.white),
+                                    const CircularProgressIndicator(
+                                        color: Colors.white),
                                     const SizedBox(height: 10),
                                     Text(
                                       'Loading video...',
-                                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                                      style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7)),
                                     ),
                                   ],
                                 ),
-                              if (_videoPlayerController?.value.hasError ?? false)
+                              if (_videoPlayerController?.value.hasError ??
+                                  false)
                                 Center(
                                   child: Text(
                                     'Error loading video\nTap to retry',
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                                    style: TextStyle(
+                                        color: Colors.white.withOpacity(0.7)),
                                   ),
                                 ),
                               if (_showPlayPauseButton || !_isPlaying)
@@ -878,7 +1059,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       return const Center(child: CircularProgressIndicator());
                     }
                     reviewController.reviews.sort(
-                          (a, b) => b.reviewDate.compareTo(a.reviewDate),
+                      (a, b) => b.reviewDate.compareTo(a.reviewDate),
                     );
 
                     return ReviewsSection(
@@ -903,27 +1084,31 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                         const SizedBox(height: 15),
                         Obx(() {
                           if (controller.isLoading.value) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(
+                                child: CircularProgressIndicator());
                           }
                           if (displayRelatedProducts.isEmpty) {
-                            return const Center(child: Text("No related products available"));
+                            return const Center(
+                                child: Text("No related products available"));
                           }
                           return Container(
                             height: 400,
                             child: GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 10,
-                                  mainAxisSpacing: 10,
-                                  childAspectRatio: 0.3),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: 10,
+                                      mainAxisSpacing: 10,
+                                      childAspectRatio: 0.3),
                               itemCount: displayRelatedProducts.length,
                               itemBuilder: (context, index) {
-                                final relatedProduct = displayRelatedProducts[index];
+                                final relatedProduct =
+                                    displayRelatedProducts[index];
                                 return GestureDetector(
-                                  onTap: () =>
-                                      navigateToProductDetails(relatedProduct.id ?? 0),
+                                  onTap: () => navigateToProductDetails(
+                                      relatedProduct.id ?? 0),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
@@ -937,36 +1122,41 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                                       ],
                                     ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         ClipRRect(
-                                          borderRadius: const BorderRadius.vertical(
-                                              top: Radius.circular(10)),
+                                          borderRadius:
+                                              const BorderRadius.vertical(
+                                                  top: Radius.circular(10)),
                                           child: Image.network(
                                             relatedProduct.main_image_url ?? '',
                                             height: 180,
                                             width: double.infinity,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) =>
-                                                Image.asset(
-                                                  'assets/images/pp.png',
-                                                  height: 120,
-                                                  width: double.infinity,
-                                                  fit: BoxFit.cover,
-                                                ),
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    Image.asset(
+                                              'assets/images/pp.png',
+                                              height: 120,
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                            ),
                                           ),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 'Model Name: ${relatedProduct.name ?? 'No Name'}',
                                                 style: const TextStyle(
                                                     fontSize: 14,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                               ),

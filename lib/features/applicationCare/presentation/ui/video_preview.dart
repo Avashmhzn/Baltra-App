@@ -54,9 +54,9 @@ class _VideoPreviewState extends State<VideoPreview> {
         ),
         child: _isInitialized
             ? ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: VideoPlayer(_controller),
-        )
+                borderRadius: BorderRadius.circular(10),
+                child: VideoPlayer(_controller),
+              )
             : const Center(child: CircularProgressIndicator()),
       ),
     );

@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../widgets/home_card_skeleton.dart' show HomepageCardSkeleton;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -29,6 +31,7 @@ class _HomePageState extends State<HomePage> with SessionManager {
   String name = 'Guest';
   int loyaltyPoint = 1;
   int _itemsToShow = 4;
+  bool _isNavigating = false; // Debouncing flag
 
   @override
   void initState() {
@@ -65,21 +68,54 @@ class _HomePageState extends State<HomePage> with SessionManager {
   // Method to get sorted products (latest first)
   List<Product> _getSortedProducts() {
     final products = productController.allProductsList.toList();
-    products.sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0)); // Sort by id descending
+    products.sort(
+            (a, b) => (b.id ?? 0).compareTo(a.id ?? 0)); // Sort by id descending
     return products;
   }
 
-  // New method to handle product navigation
+  // Optimized method to handle product navigation with debouncing
   Future<void> _navigateToProductDetails(int productId) async {
-    productController.productDetails.value = null; // Clear previous product details
-    await productController.fetchSelectedProduct(productId); // Fetch new product
-    if (productController.productDetails.value != null) {
-      Get.to(() => ProductDetailPage(
-        product: productController.productDetails.value,
-        relatedProducts: productController.relatedProductsList,
-      ));
-    } else {
-      Get.snackbar("Error", "Failed to load product details");
+    if (_isNavigating) return; // Prevent multiple simultaneous navigations
+    _isNavigating = true;
+
+    try {
+      // Check if the product details are already loaded for this productId
+      if (productController.productDetails.value?.id == productId) {
+        log("Product details already loaded for productId: $productId");
+        Get.to(() => ProductDetailPage(
+          product: productController.productDetails.value,
+          relatedProducts: productController.relatedProductsList,
+        ));
+        return;
+      }
+
+      // Check if the product is already in allProductsList
+      final existingProduct = productController.allProductsList
+          .firstWhereOrNull((product) => product.id == productId);
+
+      if (existingProduct != null) {
+        log("Product found in allProductsList for productId: $productId");
+        productController.productDetails.value = existingProduct;
+        Get.to(() => ProductDetailPage(
+          product: productController.productDetails.value,
+          relatedProducts: productController.relatedProductsList,
+        ));
+        return;
+      }
+
+      // If not found in memory, fetch from API
+      log("Fetching product details for productId: $productId");
+      await productController.fetchSelectedProduct(productId);
+      if (productController.productDetails.value != null) {
+        Get.to(() => ProductDetailPage(
+          product: productController.productDetails.value,
+          relatedProducts: productController.relatedProductsList,
+        ));
+      } else {
+        Get.snackbar("Error", "Failed to load product details");
+      }
+    } finally {
+      _isNavigating = false;
     }
   }
 
@@ -91,6 +127,9 @@ class _HomePageState extends State<HomePage> with SessionManager {
           onRefresh: _refreshProducts,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.only(
+              bottom: 70.0 + MediaQuery.of(context).padding.bottom,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -156,7 +195,8 @@ class _HomePageState extends State<HomePage> with SessionManager {
                       shadowColor: Colors.transparent,
                       elevation: 20,
                       child: Container(
-                        margin: const EdgeInsets.only(top: 88, right: 15, left: 15),
+                        margin:
+                        const EdgeInsets.only(top: 88, right: 15, left: 15),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 13, vertical: 10),
                         height: MediaQuery.of(context).size.height * 0.15,
@@ -204,7 +244,8 @@ class _HomePageState extends State<HomePage> with SessionManager {
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 16.0, bottom: 8, top: 10),
+                  padding:
+                  const EdgeInsets.only(left: 16.0, bottom: 8, top: 10),
                   child: Text(
                     "Our Products",
                     softWrap: true,
@@ -220,12 +261,23 @@ class _HomePageState extends State<HomePage> with SessionManager {
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Obx(() {
                     log("Product list length: ${productController.allProductsList.length}");
-                    if (productController.isLoading.isTrue) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (productController.allProductsList.isEmpty) {
-                      log("No products found!");
-                      return const Center(child: Text("No products found!"));
+                    if (productController.isLoading.isTrue ||
+                        productController.allProductsList.isEmpty) {
+                      // Show skeleton loader while loading or if the list is empty
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 14.0,
+                            mainAxisSpacing: 8.0,
+                            childAspectRatio: 0.5),
+                        itemCount: 4, // Show 4 skeleton cards while loading
+                        itemBuilder: (context, index) {
+                          return const HomepageCardSkeleton();
+                        },
+                      );
                     }
 
                     // Get sorted products (latest first)
@@ -235,7 +287,8 @@ class _HomePageState extends State<HomePage> with SessionManager {
                       child: Column(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding:
+                            const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Column(
                               children: [
                                 GridView.builder(
@@ -247,7 +300,8 @@ class _HomePageState extends State<HomePage> with SessionManager {
                                       crossAxisSpacing: 14.0,
                                       mainAxisSpacing: 8.0,
                                       childAspectRatio: 0.5),
-                                  itemCount: _itemsToShow < sortedProducts.length
+                                  itemCount:
+                                  _itemsToShow < sortedProducts.length
                                       ? _itemsToShow
                                       : sortedProducts.length,
                                   itemBuilder: (context, index) {
@@ -255,7 +309,8 @@ class _HomePageState extends State<HomePage> with SessionManager {
                                     return GestureDetector(
                                       onTap: () {
                                         log("Navigating to Product Detail: ${product.id} - ${product.name}");
-                                        _navigateToProductDetails(product.id ?? 0); // Updated navigation
+                                        _navigateToProductDetails(
+                                            product.id ?? 0); // Updated navigation
                                       },
                                       child: Homepagecard(product: product),
                                     );
@@ -265,8 +320,8 @@ class _HomePageState extends State<HomePage> with SessionManager {
                                 if (productController.isLoading.isFalse &&
                                     sortedProducts.length > _itemsToShow)
                                   Padding(
-                                    padding:
-                                    const EdgeInsets.symmetric(vertical: 20.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 20.0),
                                     child: ElevatedButton(
                                       onPressed: _loadMoreItems,
                                       style: ElevatedButton.styleFrom(
@@ -274,10 +329,12 @@ class _HomePageState extends State<HomePage> with SessionManager {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 30.0, vertical: 12.0),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(30.0),
+                                          borderRadius:
+                                          BorderRadius.circular(30.0),
                                         ),
                                         elevation: 5,
-                                        shadowColor: Colors.black.withOpacity(0.3),
+                                        shadowColor:
+                                        Colors.black.withOpacity(0.3),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -298,8 +355,8 @@ class _HomePageState extends State<HomePage> with SessionManager {
                                   ),
                                 if (productController.isLoading.isTrue)
                                   Padding(
-                                    padding:
-                                    const EdgeInsets.symmetric(vertical: 20.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 20.0),
                                     child: CircularProgressIndicator(
                                       valueColor: AlwaysStoppedAnimation<Color>(
                                           Colors.redAccent),

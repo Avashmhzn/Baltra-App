@@ -6,6 +6,9 @@ import 'package:baltra/features/products/presentation/widgets/categoryCard.dart'
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+// Import the ProductItemSkeleton widget
+import 'package:baltra/features/products/presentation/widgets/product_skeleton_item.dart';
+
 class CategoryPage extends StatefulWidget {
   CategoryPage({super.key});
 
@@ -88,7 +91,8 @@ class _CategoryPageState extends State<CategoryPage> {
                             fontSize: 14.0,
                             color: Color(0xff545454),
                           ),
-                          prefixIcon: Icon(Icons.search, color: Color(0xff545454)),
+                          prefixIcon:
+                          Icon(Icons.search, color: Color(0xff545454)),
                           border: InputBorder.none,
                         ),
                         onChanged: searchCategory,
@@ -98,18 +102,34 @@ class _CategoryPageState extends State<CategoryPage> {
                 ),
                 const SizedBox(height: 21),
                 Obx(() {
-                  if (productController.isLoading.value) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (filteredCategories.isEmpty) {
-                    return const Center(child: Text('No categories found.'));
+                  if (productController.isLoading.value ||
+                      filteredCategories.isEmpty) {
+                    // Show skeleton loader while loading or if the filtered list is empty
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                      child: GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                        ),
+                        itemCount: 4, // Show 4 skeleton items while loading
+                        itemBuilder: (context, index) {
+                          return const ProductItemSkeleton();
+                        },
+                      ),
+                    );
                   }
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 30.0),
                     child: GridView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,

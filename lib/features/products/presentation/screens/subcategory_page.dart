@@ -17,7 +17,7 @@ class SubcategoryPage extends StatefulWidget {
 
 class _SubcategoryPageState extends State<SubcategoryPage> {
   final ProductController productController =
-  Get.put(ProductController(productRepository: ProductRepository()));
+      Get.put(ProductController(productRepository: ProductRepository()));
 
   final TextEditingController searchController = TextEditingController();
   final RxList<Subcategory> filteredCategories = <Subcategory>[].obs;
@@ -47,7 +47,7 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
       filteredCategories.assignAll(
         productController.subCategoryList
             .where((subcategory) =>
-            subcategory.name.toLowerCase().contains(query.toLowerCase()))
+                subcategory.name.toLowerCase().contains(query.toLowerCase()))
             .toList(),
       );
     }
@@ -90,7 +90,8 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
                           fontSize: 14.0,
                           color: Color(0xff545454),
                         ),
-                        prefixIcon: Icon(Icons.search, color: Color(0xff545454)),
+                        prefixIcon:
+                            Icon(Icons.search, color: Color(0xff545454)),
                         border: InputBorder.none,
                       ),
                       onChanged: searchCategory,
@@ -122,7 +123,8 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
                   child: GridView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,

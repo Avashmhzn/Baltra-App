@@ -85,7 +85,7 @@ class CustomBottomAppBar extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(curveHeight)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withOpacity(0.1),
             spreadRadius: 8,
             blurRadius: 1,
             offset: const Offset(0, 3), // changes position of shadow

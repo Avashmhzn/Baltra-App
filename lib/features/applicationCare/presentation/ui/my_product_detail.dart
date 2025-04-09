@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:baltra/features/applicationCare/presentation/widgets/baltra_skeleton.dart';
+import 'package:baltra/features/applicationCare/presentation/widgets/myproduct_details_skeletion.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,7 +15,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:baltra/features/applicationCare/controller/crmController.dart';
 import 'video_preview.dart';
 import 'package:http/http.dart' as http;
-
 
 class MyProductDetailPage extends StatefulWidget {
   final int productId;
@@ -69,7 +70,8 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
             }
 
             // Create a unique filename
-            final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            final fileName =
+                'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
             final file = File('${directory.path}/$fileName');
 
             // Write the file
@@ -124,7 +126,8 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
             }
 
             // Create a unique filename
-            final fileName = 'video_${DateTime.now().millisecondsSinceEpoch}.mp4';
+            final fileName =
+                'video_${DateTime.now().millisecondsSinceEpoch}.mp4';
             final file = File('${directory.path}/$fileName');
 
             // Write the file
@@ -156,15 +159,13 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: ProductDetailSkeleton());
         }
         if (controller.errorMessage.value.isNotEmpty) {
           return Center(child: Text("Error: ${controller.errorMessage.value}"));
@@ -213,6 +214,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                           SizedBox(height: 2),
                           Text(
                             "Job ID: ${product.job_No ?? 'N/A'}",
+
                             style:
                                 TextStyle(fontSize: 16, color: Colors.black87),
                           )
@@ -239,46 +241,53 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                               borderRadius: BorderRadius.circular(8),
                               child: product.product_image != null
                                   ? GestureDetector(
-                                onTap: () => showFullScreenImage(context, product.product_image ?? ''),
-                                child: Hero(
-                                  tag: "${product.product_image}_image",
-                                  child: Image.network(
-                                    product.product_image!,
-                                    height: 120,
-                                    width: 120,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              )
+                                      onTap: () => showFullScreenImage(
+                                          context, product.product_image ?? ''),
+                                      child: Hero(
+                                        tag: "${product.product_image}_image",
+                                        child: Image.network(
+                                          product.product_image!,
+                                          height: 120,
+                                          width: 120,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    )
                                   : Icon(
-                                Icons.image_not_supported,
-                                size: 120,
-                              ),
+                                      Icons.image_not_supported,
+                                      size: 120,
+                                    ),
                             ),
                             SizedBox(width: 16),
                             Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      product.model_name ?? 'Unknown Product',
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      'Job ID: ${product.job_No ?? '-'}',
-                                      style: TextStyle(fontSize: 14,color: Colors.grey),
-                                    ),
-                                    SizedBox(height: 10),
-                                    _buildInfoRow("Model Number", product.model_num),
-                                    _buildInfoRow("Serial Number", product.serial_number),
-                                    _buildInfoRow("Store Name", product.store_name),
-                                    _buildInfoRow("Store Location", product.store_location),
-                                    _buildInfoRow("Purchase Date", product.purchase_date),
-                                    _buildInfoRow("Status", product.status),
-
-
-                                  ],
-                                ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    product.model_name ?? 'Unknown Product',
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    'Job ID: ${product.job_No ?? '-'}',
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.grey),
+                                  ),
+                                  SizedBox(height: 10),
+                                  _buildInfoRow(
+                                      "Model Number", product.model_num),
+                                  _buildInfoRow(
+                                      "Serial Number", product.serial_number),
+                                  _buildInfoRow(
+                                      "Store Name", product.store_name),
+                                  _buildInfoRow(
+                                      "Store Location", product.store_location),
+                                  _buildInfoRow(
+                                      "Purchase Date", product.purchase_date),
+                                  _buildInfoRow("Status", product.status),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -287,10 +296,10 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
 
                     SizedBox(height: 16),
                     Container(
-                      padding:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-                      margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 8),
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(15),
@@ -312,10 +321,13 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                 onPressed: () => downloadImage(
                                     context, product.product_image ?? ''),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                  const Color(0xFF000000), // Or any color you prefer
+                                  backgroundColor: const Color(
+                                      0xFF000000), // Or any color you prefer
                                 ),
-                                child: const Text("Download",style: TextStyle(color: Colors.white),),
+                                child: const Text(
+                                  "Download",
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
                             ],
                           ),
@@ -325,7 +337,8 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               GestureDetector(
-                                onTap: () => showFullScreenImage(context, product.product_image ?? ''),
+                                onTap: () => showFullScreenImage(
+                                    context, product.product_image ?? ''),
                                 child: Hero(
                                   tag: product.product_image ?? '',
                                   child: ClipRRect(
@@ -336,8 +349,10 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                       child: Image.network(
                                         product.product_image ?? '',
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                        const Icon(Icons.image_not_supported),
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(
+                                                    Icons.image_not_supported),
                                       ),
                                     ),
                                   ),
@@ -345,7 +360,6 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                               ),
                             ],
                           ),
-
                         ],
                       ),
                     ),
@@ -353,10 +367,10 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                     const SizedBox(height: 8),
                     // The image section
                     Container(
-                      padding:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-                      margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 8),
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(15),
@@ -378,10 +392,13 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                 onPressed: () => downloadImage(
                                     context, product.bill_image_one ?? ''),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                  const Color(0xFF000000), // Or any color you prefer
+                                  backgroundColor: const Color(
+                                      0xFF000000), // Or any color you prefer
                                 ),
-                                child: const Text("Download",style: TextStyle(color: Colors.white),),
+                                child: const Text(
+                                  "Download",
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
                             ],
                           ),
@@ -391,7 +408,8 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               GestureDetector(
-                                onTap: () => showFullScreenImage(context, product.bill_image_one ?? ''),
+                                onTap: () => showFullScreenImage(
+                                    context, product.bill_image_one ?? ''),
                                 child: Hero(
                                   tag: product.bill_image_one ?? '',
                                   child: ClipRRect(
@@ -402,8 +420,10 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                       child: Image.network(
                                         product.bill_image_one ?? '',
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                        const Icon(Icons.image_not_supported),
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(
+                                                    Icons.image_not_supported),
                                       ),
                                     ),
                                   ),
@@ -418,10 +438,10 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                     const SizedBox(height: 8),
                     // The image section
                     Container(
-                      padding:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-                      margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 8),
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(15),
@@ -443,10 +463,13 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                 onPressed: () => downloadImage(
                                     context, product.warranty_image ?? ''),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                  const Color(0xFF000000), // Or any color you prefer
+                                  backgroundColor: const Color(
+                                      0xFF000000), // Or any color you prefer
                                 ),
-                                child: const Text("Download",style: TextStyle(color: Colors.white),),
+                                child: const Text(
+                                  "Download",
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
                             ],
                           ),
@@ -456,7 +479,8 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               GestureDetector(
-                                onTap: () => showFullScreenImage(context, product.warranty_image ?? ''),
+                                onTap: () => showFullScreenImage(
+                                    context, product.warranty_image ?? ''),
                                 child: Hero(
                                   tag: product.warranty_image ?? '',
                                   child: ClipRRect(
@@ -467,8 +491,10 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                       child: Image.network(
                                         product.warranty_image ?? '',
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                        const Icon(Icons.image_not_supported),
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(
+                                                    Icons.image_not_supported),
                                       ),
                                     ),
                                   ),
@@ -479,7 +505,6 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                         ],
                       ),
                     ),
-
                   ],
                 ),
               )
@@ -504,7 +529,10 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
             ),
           ),
           Expanded(
-            child: Text(value ?? 'N/A',overflow: TextOverflow.ellipsis,),
+            child: Text(
+              value ?? 'N/A',
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -529,7 +557,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                 imageUrl,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.image_not_supported, size: 100),
+                    const Icon(Icons.image_not_supported, size: 100),
               ),
             ),
           ),
@@ -537,5 +565,4 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
       ),
     );
   }
-
 }

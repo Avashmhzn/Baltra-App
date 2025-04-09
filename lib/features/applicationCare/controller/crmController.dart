@@ -24,13 +24,13 @@ class CrmController extends GetxController {
       log("Fetching customer product for Stock ID: $stockId");
 
       final Either<String, CustomerProduct?> result =
-      await crmService.fetchCustomerProduct(stockId);
+          await crmService.fetchCustomerProduct(stockId);
       result.fold(
-            (error) {
+        (error) {
           log("Error fetching product: $error");
           errorMessage.value = error;
         },
-            (product) {
+        (product) {
           if (product == null) {
             errorMessage.value = "Product not found";
             log("Product not found for Stock ID: $stockId");
@@ -56,11 +56,11 @@ class CrmController extends GetxController {
     final result = await crmService.fetchAllComplaints();
 
     result.fold(
-          (error) {
+      (error) {
         log("Error fetching complaints: $error");
         errorMessage(error.toString());
       },
-          (data) {
+      (data) {
         complaints.assignAll(data);
         log("Successfully fetched ${data.length} complaints");
       },

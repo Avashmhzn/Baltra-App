@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -10,7 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:baltra/core/utils/constants.dart';
 
 class CrmServices extends GetxService {
-  Future<Either<String, CustomerProduct?>> fetchCustomerProduct(int stockId) async {
+  Future<Either<String, CustomerProduct?>> fetchCustomerProduct(
+      int stockId) async {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('auth_token');
 
@@ -38,7 +38,8 @@ class CrmServices extends GetxService {
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success']) {
-          final CustomerProduct customerProduct = CustomerProduct.fromJson(jsonResponse['data']);
+          final CustomerProduct customerProduct =
+              CustomerProduct.fromJson(jsonResponse['data']);
           log('this is cutomer product${customerProduct}');
           return Right(customerProduct);
         } else {
@@ -79,7 +80,7 @@ class CrmServices extends GetxService {
         if (jsonResponse['success']) {
           final List<dynamic> data = jsonResponse['data'];
           final List<CustomerProduct> complaints =
-          data.map((json) => CustomerProduct.fromJson(json)).toList();
+              data.map((json) => CustomerProduct.fromJson(json)).toList();
           return Right(complaints);
         } else {
           return const Left(HttpException("Failed to fetch complaints"));

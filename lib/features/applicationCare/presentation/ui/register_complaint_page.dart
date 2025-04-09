@@ -1,4 +1,4 @@
-           import 'dart:convert';
+import 'dart:convert';
 import 'dart:io';
 import 'package:baltra/core/utils/constants.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/application_care_page.dart';
@@ -171,11 +171,11 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
       var responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 201) {
-        Navigator.pushReplacement(
+        // Use pushAndRemoveUntil to clear the stack and prevent back navigation
+        Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(
-            builder: (context) => ButtomNavBar(pageno: 2),
-          ),
+          MaterialPageRoute(builder: (context) => ButtomNavBar(pageno: 2)),
+              (Route<dynamic> route) => false, // Removes all previous routes
         );
       } else {
         throw Exception('Failed to submit data : ${response.statusCode}');
@@ -188,8 +188,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
 
   void showSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content:
-        Text('Complain can be placed only for verified products')));
+        content: Text('Complain can be placed only for verified products')));
   }
 
   @override
@@ -272,8 +271,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                           child: Text(
                             'Select Zone',
                             style: TextStyle(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 14),
+                                fontWeight: FontWeight.normal, fontSize: 14),
                           ),
                         ),
                         ...zones.map((zone) => DropdownMenuItem<String>(
@@ -306,11 +304,11 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                           child: Text(
                             'Select Area',
                             style: TextStyle(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 14),
+                                fontWeight: FontWeight.normal, fontSize: 14),
                           ),
                         ),
-                        ...availableAreas.map((area) => DropdownMenuItem<String>(
+                        ...availableAreas
+                            .map((area) => DropdownMenuItem<String>(
                           value: area['areaName'],
                           child: Text(
                             area['areaName'],

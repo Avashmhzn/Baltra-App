@@ -5,6 +5,7 @@ import 'package:baltra/features/applicationCare/models/myProduct.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/my_product_detail.dart';
 import 'package:baltra/features/applicationCare/presentation/widgets/add_product_dialog.dart';
 import 'package:baltra/features/applicationCare/presentation/widgets/myProduct_card.dart';
+import 'package:baltra/features/applicationCare/presentation/widgets/myproduct_skeletion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -18,7 +19,7 @@ class MyProductPage extends StatefulWidget {
 }
 
 final Myproductcontroller myproductcontroller =
-Get.put(Myproductcontroller(productRepository: MyProductRepository()));
+    Get.put(Myproductcontroller(productRepository: MyProductRepository()));
 
 class _MyProductPageState extends State<MyProductPage> {
   final PageController _pageController = PageController(viewportFraction: 0.85);
@@ -27,7 +28,7 @@ class _MyProductPageState extends State<MyProductPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_){
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       myproductcontroller.fetchMyProduct();
     }); // Fetch data automatically on page load
 
@@ -52,7 +53,8 @@ class _MyProductPageState extends State<MyProductPage> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          await myproductcontroller.fetchMyProduct(); // Refresh data on pull-down
+          await myproductcontroller
+              .fetchMyProduct(); // Refresh data on pull-down
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -71,7 +73,8 @@ class _MyProductPageState extends State<MyProductPage> {
                             return QRScannerScreen();
                           },
                         );
-                        myproductcontroller.fetchMyProduct(); // Refresh after adding product
+                        myproductcontroller
+                            .fetchMyProduct(); // Refresh after adding product
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -89,17 +92,19 @@ class _MyProductPageState extends State<MyProductPage> {
                 ),
                 Obx(() {
                   if (myproductcontroller.isLoading.value) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: MyProductSkeletonLoader());
                   }
 
                   if (myproductcontroller.myProducts.isEmpty) {
                     return Column(
                       children: [
-                        SizedBox(height: MediaQuery.of(context).size.height / 6),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height / 6),
                         const Center(
                             child: Text(
                                 'You have not added any product.\nPlease scan the QR code of the package to add.')),
-                        SizedBox(height: MediaQuery.of(context).size.height / 6),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height / 6),
                       ],
                     );
                   }
@@ -112,14 +117,17 @@ class _MyProductPageState extends State<MyProductPage> {
                           controller: _pageController,
                           itemCount: myproductcontroller.myProducts.length,
                           itemBuilder: (context, index) {
-                            log(myproductcontroller.myProducts[index].toString());
-                            final Myproduct myproduct = myproductcontroller.myProducts[index];
+                            log(myproductcontroller.myProducts[index]
+                                .toString());
+                            final Myproduct myproduct =
+                                myproductcontroller.myProducts[index];
 
                             return GestureDetector(
                               onTap: () {
                                 // Navigate if there's a valid product ID
                                 if (myproduct.id != null) {
-                                  Get.to(() => MyProductDetailPage(productId: myproduct.id));
+                                  Get.to(() => MyProductDetailPage(
+                                      productId: myproduct.id));
                                 }
                               },
                               child: MyProdductCard(product: myproduct),
@@ -142,8 +150,10 @@ class _MyProductPageState extends State<MyProductPage> {
                 }),
                 Container(
                   height: 135,
-                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                   decoration: BoxDecoration(
                       border: Border.all(color: const Color(0xffD7D7D7)),
                       borderRadius: BorderRadius.circular(10)),

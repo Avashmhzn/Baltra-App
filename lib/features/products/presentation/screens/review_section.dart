@@ -33,7 +33,9 @@ class _ReviewsSectionState extends State<ReviewsSection> {
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isLoadingMore) {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !_isLoadingMore) {
       _loadMoreReviews();
     }
   }
@@ -84,7 +86,8 @@ class _ReviewsSectionState extends State<ReviewsSection> {
 
   @override
   Widget build(BuildContext context) {
-    bool hasRatings = widget.reviewController.ratingData.value.total_reviews > 0;
+    bool hasRatings =
+        widget.reviewController.ratingData.value.total_reviews > 0;
     bool hasReviews = widget.reviewController.reviews.isNotEmpty;
     int reviewCount = widget.reviewController.reviews.length;
 
@@ -96,19 +99,33 @@ class _ReviewsSectionState extends State<ReviewsSection> {
             padding: const EdgeInsets.all(20.0),
             child: RatingSummary(
               counter: widget.reviewController.ratingData.value.total_reviews,
-              average: hasRatings ? widget.reviewController.ratingData.value.average_rating : 0.0,
-              counterFiveStars: widget.reviewController.ratingData.value.rating_distribution['5'] ?? 0,
-              counterFourStars: widget.reviewController.ratingData.value.rating_distribution['4'] ?? 0,
-              counterThreeStars: widget.reviewController.ratingData.value.rating_distribution['3'] ?? 0,
-              counterTwoStars: widget.reviewController.ratingData.value.rating_distribution['2'] ?? 0,
-              counterOneStars: widget.reviewController.ratingData.value.rating_distribution['1'] ?? 0,
+              average: hasRatings
+                  ? widget.reviewController.ratingData.value.average_rating
+                  : 0.0,
+              counterFiveStars: widget.reviewController.ratingData.value
+                      .rating_distribution['5'] ??
+                  0,
+              counterFourStars: widget.reviewController.ratingData.value
+                      .rating_distribution['4'] ??
+                  0,
+              counterThreeStars: widget.reviewController.ratingData.value
+                      .rating_distribution['3'] ??
+                  0,
+              counterTwoStars: widget.reviewController.ratingData.value
+                      .rating_distribution['2'] ??
+                  0,
+              counterOneStars: widget.reviewController.ratingData.value
+                      .rating_distribution['1'] ??
+                  0,
             ),
           ),
           ListView.builder(
             controller: _scrollController,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: showAllReviews ? reviewCount : (reviewCount > 3 ? 3 : reviewCount),
+            itemCount: showAllReviews
+                ? reviewCount
+                : (reviewCount > 3 ? 3 : reviewCount),
             itemBuilder: (context, index) {
               Review review = widget.reviewController.reviews[index];
               return Padding(
@@ -126,11 +143,16 @@ class _ReviewsSectionState extends State<ReviewsSection> {
               },
               child: const Text(
                 "See All Reviews",
-                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500),
               ),
             ),
         ] else
-          const Center(child: Text('No reviews yet', style: TextStyle(color: Colors.grey))),
+          const Center(
+              child:
+                  Text('No reviews yet', style: TextStyle(color: Colors.grey))),
         const SizedBox(height: 20),
         const Text(
           'Rate this product',
@@ -192,9 +214,9 @@ class _ReviewsSectionState extends State<ReviewsSection> {
             child: _isSubmitting
                 ? const CircularProgressIndicator(color: Colors.white)
                 : const Text(
-              'Submit',
-              style: TextStyle(color: Colors.white),
-            ),
+                    'Submit',
+                    style: TextStyle(color: Colors.white),
+                  ),
           ),
         ),
         const SizedBox(height: 20),

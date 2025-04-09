@@ -5,7 +5,7 @@ import 'package:baltra/features/applicationCare/presentation/ui/product_tracking
 import 'package:baltra/features/products/presentation/widgets/baltra_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shimmer/shimmer.dart'; 
+import 'package:shimmer/shimmer.dart';
 
 // Helper function to return color based on status.
 Color getStatusColor(String? status) {
@@ -71,8 +71,10 @@ Widget complaintSkeleton() {
     ),
     child: Shimmer.fromColors(
       baseColor: Colors.grey[300]!, // Base color of the skeleton
-      highlightColor: Colors.grey[100]!, // Highlight color for the shimmer effect
-      period: const Duration(milliseconds: 1000), // Speed of the shimmer animation
+      highlightColor:
+          Colors.grey[100]!, // Highlight color for the shimmer effect
+      period:
+          const Duration(milliseconds: 1000), // Speed of the shimmer animation
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -83,13 +85,11 @@ Widget complaintSkeleton() {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Placeholder for the label (e.g., "Product Name:")
                   Container(
                     width: 120, // Approximate width for the label
                     height: 14,
                     color: Colors.white, // Shimmer will animate over this
                   ),
-                  // Placeholder for the value (e.g., "FRY PAN ROUND")
                   Container(
                     width: 100, // Approximate width for the value
                     height: 14,
@@ -115,12 +115,13 @@ class ProductMaintainancePage extends StatefulWidget {
   const ProductMaintainancePage({Key? key}) : super(key: key);
 
   @override
-  State<ProductMaintainancePage> createState() => _ProductMaintainancePageState();
+  State<ProductMaintainancePage> createState() =>
+      _ProductMaintainancePageState();
 }
 
 class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
   final CrmController crmController =
-  Get.put(CrmController(crmService: CrmServices()));
+      Get.put(CrmController(crmService: CrmServices()));
 
   @override
   void initState() {
@@ -149,8 +150,8 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
                     padding: EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
                       "Complaints",
-                      style: TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Expanded(
@@ -186,8 +187,7 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
                   padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
                     "Complaints",
-                    style: TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Expanded(
@@ -195,7 +195,7 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
                     itemCount: crmController.complaints.length,
                     itemBuilder: (context, index) {
                       CustomerProduct complaint =
-                      crmController.complaints[index];
+                          crmController.complaints[index];
 
                       return GestureDetector(
                         onTap: () {
@@ -236,8 +236,7 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
                                   title: 'Complaint:',
                                   value: complaint.problemDescription),
                               detailRow(
-                                  title: 'Status:',
-                                  value: complaint.status),
+                                  title: 'Status:', value: complaint.status),
                               detailRow(
                                   title: 'Complaint Date:',
                                   value: complaint.dateJoined),

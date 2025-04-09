@@ -1,4 +1,3 @@
-
 import 'package:baltra/core/utils/sessionExpirationMixin.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/myProduct_page.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/product_maintainance_page.dart';
@@ -30,62 +29,57 @@ class _ApplicationCarePageState extends State<ApplicationCarePage>
       child: SafeArea(
         child: Scaffold(
             body: Stack(
-              children: [
-                Positioned(top: 0, left: 0, right: 0, child: _buildAppBar()),
-                Positioned(
-                  top: _selectedIndex == 2 ? 214 : 144,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: DefaultTabController(
-                    length: 2,
-                    child: Scaffold(
-                      appBar: AppBar(
-                        flexibleSpace: TabBar(
-                          // padding: EdgeInsets.all(10),
-                          tabs: const [
-                            Tab(
-                              text: 'My Products',
-                            ),
-                            Tab(
-                              text: 'Tracking',
-                            ),
-                            // Tab(
-                            //   text: 'Reward Points',
-                            // ),
-                          ],
-                          indicator: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          onTap: (index) {
-                            setState(() {
-                              _selectedIndex = index;
-                            });
-                          },
-                          // indicatorColor: Theme.of(context).primaryColor,
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          labelColor: Colors.white,
-                          unselectedLabelColor: Colors.black,
-                          labelStyle: const TextStyle(
-                            overflow: TextOverflow.clip,
-                            fontSize: 14,
-                          ),
+          children: [
+            Positioned(top: 0, left: 0, right: 0, child: _buildAppBar()),
+            Positioned(
+              top: _selectedIndex == 2 ? 214 : 144,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: DefaultTabController(
+                length: 2,
+                child: Scaffold(
+                  appBar: AppBar(
+                    flexibleSpace: TabBar(
+                      // padding: EdgeInsets.all(10),
+                      tabs: const [
+                        Tab(
+                          text: 'My Products',
                         ),
+                        Tab(
+                          text: 'Tracking',
+                        ),
+                        // add tab here if needed
+                      ],
+                      indicator: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
                       ),
-                      body: const TabBarView(
-                        physics: NeverScrollableScrollPhysics(),
-                        children: [
-                          MyProductPage(),
-                          ProductMaintainancePage(),
-                          // RewardsPage(),
-                          // Text('History'),
-                        ],
+                      onTap: (index) {
+                        setState(() {
+                          _selectedIndex = index;
+                        });
+                      },
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.black,
+                      labelStyle: const TextStyle(
+                        overflow: TextOverflow.clip,
+                        fontSize: 14,
                       ),
                     ),
                   ),
-                )
-              ],
-            )),
+                  body: const TabBarView(
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
+                      MyProductPage(),
+                      ProductMaintainancePage(),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          ],
+        )),
       ),
     );
   }

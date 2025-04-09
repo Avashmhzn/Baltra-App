@@ -219,7 +219,7 @@ class MyProductRepository {
       if (jsonResponse['success']) {
         final List<dynamic> data = jsonResponse['data'];
         final List<CustomerProduct> complaints =
-        data.map((json) => CustomerProduct.fromJson(json)).toList();
+            data.map((json) => CustomerProduct.fromJson(json)).toList();
         return Right(complaints);
       } else {
         return const Left(HttpException("Failed to fetch complaints"));
@@ -230,6 +230,7 @@ class MyProductRepository {
       return Left(Exception("Unknown error occurred: $e"));
     }
   }
+
   // my_product_repository.dart
   Future<Either<Exception, Myproduct>> fetchSingleMyProduct(int id) async {
     try {
@@ -258,7 +259,4 @@ class MyProductRepository {
       return Left(Exception("Unknown error occurred: $e"));
     }
   }
-
-
-
 }

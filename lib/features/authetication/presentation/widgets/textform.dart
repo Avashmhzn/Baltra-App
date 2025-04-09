@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 // ignore: must_be_immutable
@@ -10,13 +11,16 @@ class NormalTextField extends StatelessWidget {
       this.readonly,
       this.initial,
       required this.hint,
-      required this.title});
+      required this.title,
+        this.inputFormatters,
+      });
   final String title;
   final String hint;
   final TextInputType type;
   TextEditingController? controller;
   bool? readonly;
   String? initial;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +38,7 @@ class NormalTextField extends StatelessWidget {
             readOnly: readonly ?? false,
             controller: controller,
             keyboardType: type,
+            inputFormatters: inputFormatters,
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
               hintText: hint,

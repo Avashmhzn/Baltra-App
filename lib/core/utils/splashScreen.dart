@@ -43,8 +43,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: Lottie.asset(
-            'assets/BSC.json',
+        child: Lottie.asset('assets/BSC.json',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,

@@ -10,7 +10,7 @@ import 'package:get/get.dart';
 
 class ProductPage extends StatelessWidget {
   final ProductController controller =
-  Get.put(ProductController(productRepository: ProductRepository()));
+      Get.put(ProductController(productRepository: ProductRepository()));
   final ReviewController reviewController = Get.put(ReviewController());
 
   final TextEditingController searchController = TextEditingController();
@@ -26,7 +26,8 @@ class ProductPage extends StatelessWidget {
         // If search query is empty, show all products
         filteredProducts.assignAll(controller.subCategoryProductsList);
       } else {
-        filteredProducts.assignAll(controller.subCategoryProductsList.where((product) {
+        filteredProducts
+            .assignAll(controller.subCategoryProductsList.where((product) {
           return product.name.toLowerCase().contains(query.toLowerCase()) ||
               product.model_name.toLowerCase().contains(query.toLowerCase());
         }).toList());
@@ -35,7 +36,8 @@ class ProductPage extends StatelessWidget {
 
     // Call filterProducts when the products list or search query changes
     ever(controller.subCategoryProductsList, (_) {
-      filterProducts(searchController.text); // Filter based on current search text
+      filterProducts(
+          searchController.text); // Filter based on current search text
     });
 
     // Listen to search input changes
@@ -61,7 +63,8 @@ class ProductPage extends StatelessWidget {
                 shadowColor: Colors.black45,
                 child: Container(
                   height: 45,
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 4.0, vertical: 10.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12.0),
@@ -120,9 +123,9 @@ class ProductPage extends StatelessWidget {
                         ]);
                         Get.back();
                         Get.to(() => ProductDetailPage(
-                          product: controller.productDetails.value,
-                          relatedProducts: controller.relatedProductsList,
-                        ));
+                              product: controller.productDetails.value,
+                              relatedProducts: controller.relatedProductsList,
+                            ));
                       } catch (error) {
                         Get.back();
                         Get.snackbar(

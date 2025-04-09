@@ -25,7 +25,6 @@ class Myproductcontroller extends GetxController {
   var errorMessage = ''.obs;
   var singleMyProduct = Rxn<Myproduct>();
 
-
   final MyProductRepository productRepository;
 
   Myproductcontroller({required this.productRepository});
@@ -55,16 +54,17 @@ class Myproductcontroller extends GetxController {
   Future<void> fetchMyProduct() async {
     isLoading(true);
     try {
-      final Either<Exception, List<Myproduct>> result = await productRepository.fetchMyProduct();
+      final Either<Exception, List<Myproduct>> result =
+          await productRepository.fetchMyProduct();
       log(result.toString());
 
       result.fold(
-            (failure) {
+        (failure) {
           showErrorDialog(Get.context!, failure);
           errorMessage(failure.toString());
         },
-            (myProductList) {
-          myProducts.assignAll(myProductList);  // Update the products list
+        (myProductList) {
+          myProducts.assignAll(myProductList); // Update the products list
         },
       );
     } catch (e) {
@@ -80,12 +80,11 @@ class Myproductcontroller extends GetxController {
     errorMessage('');
     final result = await productRepository.fetchAllComplaints();
     result.fold(
-          (error) => errorMessage(error.toString()),
-          (data) => complaints.assignAll(data),
+      (error) => errorMessage(error.toString()),
+      (data) => complaints.assignAll(data),
     );
     isLoading(false);
   }
-
 
   Future<int> deleteMyProduct(int id) async {
     isLoading(true);
@@ -239,24 +238,24 @@ class Myproductcontroller extends GetxController {
     try {
       // This repository method should return Either<Exception, Myproduct>.
       final Either<Exception, Myproduct> result =
-      await productRepository.fetchSingleMyProduct(id);
+          await productRepository.fetchSingleMyProduct(id);
 
       result.fold(
-            (failure) {
+        (failure) {
           showErrorDialog(Get.context!, failure);
           errorMessage.value = failure.toString();
         },
-            (product) {
+        (product) {
           // If successful, store the product in singleMyProduct
           singleMyProduct.value = product;
         },
       );
     } catch (e) {
       errorMessage.value = 'An unexpected error occurred: $e';
-      showErrorDialog(Get.context!, Exception('An unexpected error occurred: $e'));
+      showErrorDialog(
+          Get.context!, Exception('An unexpected error occurred: $e'));
     } finally {
       isLoading(false);
     }
   }
-
 }

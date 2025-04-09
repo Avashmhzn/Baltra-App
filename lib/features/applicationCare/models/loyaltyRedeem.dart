@@ -18,7 +18,5 @@ class LoyaltyRedeem {
   Map<String, dynamic> toJson() => _$LoyaltyRedeemToJson(this);
 }
 
-
-
 //  "reward_points": 400,
 //         "tier_status": "Silver Tier"

@@ -3,6 +3,7 @@ import 'package:baltra/features/applicationCare/data/productRepository.dart';
 import 'package:baltra/features/applicationCare/models/myProduct.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/extend_warranty_page.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/register_complaint_page.dart';
+import 'package:baltra/features/applicationCare/presentation/widgets/custom_delete_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -99,26 +100,12 @@ class MyProdductCard extends StatelessWidget {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Delete Product'),
-                          content: const Text(
-                              'Are you sure you want to delete this product?'),
-                          actions: <Widget>[
-                            TextButton(
-                              child: const Text('Cancel'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            TextButton(
-                              child: const Text('Delete'),
-                              onPressed: () {
-                                myproductcontroller.deleteMyProduct(product.id);
-                                myproductcontroller.fetchMyProduct();
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
+                        return CustomDeleteDialog(
+                          productName: product.model_name ?? 'Unnamed Product',
+                          onConfirm: () {
+                            myproductcontroller.deleteMyProduct(product.id);
+                            myproductcontroller.fetchMyProduct();
+                          },
                         );
                       },
                     );
@@ -145,8 +132,10 @@ class MyProdductCard extends StatelessWidget {
               children: [
                 detailRow(title: 'Model Name: ', value: product.model_name),
                 detailRow(title: 'Model Number: ', value: product.model_num),
-                detailRow(title: 'Purchase Date: ', value: product.purchase_date),
-                detailRow(title: 'Serial Number: ', value: product.serial_number),
+                detailRow(
+                    title: 'Purchase Date: ', value: product.purchase_date),
+                detailRow(
+                    title: 'Serial Number: ', value: product.serial_number),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -159,10 +148,13 @@ class MyProdductCard extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: product.status == 'Pending' ? Colors.grey : Colors.green,
+                        color: product.status == 'Pending'
+                            ? Colors.grey
+                            : Colors.green,
                       ),
                       child: Text(
                         product.status == 'Pending' ? 'Pending' : 'Approved',
@@ -283,6 +275,7 @@ class MyProdductCard extends StatelessWidget {
     );
   }
 }
+
 class FullScreenImagePage extends StatelessWidget {
   final String imageUrl;
   final String heroTag;

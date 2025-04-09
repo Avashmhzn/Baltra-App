@@ -42,24 +42,28 @@ class _EditProfileState extends State<EditProfile> {
   void initState() {
     super.initState();
     _initializeData();
-    _saveInitialProfileData(); // <-- Added: Save initial profile data to SharedPreferences.
+    _saveInitialProfileData();
     _loadProfileImage();
     _fetchProfileData();
-    // _loadProfileData(); // Not used currently.
   }
 
   void _initializeData() {
     _phone = widget.data.contact.toString();
-    _fullNameController.text =
-    "${widget.data.firstname} ${widget.data.lastname}";
+    _fullNameController.text = "${widget.data.firstname} ${widget.data.lastname}";
     _emailController.text = widget.data.email;
-    _gender = widget.data.gender;
+
+    // Normalize the gender value to match the DropdownMenuItem values (capitalize first letter)
+    if (widget.data.gender != null && widget.data.gender!.isNotEmpty) {
+      _gender = widget.data.gender!.toLowerCase() == 'male' ? 'Male' : 'Female';
+    } else {
+      _gender = null; // Set to null if gender is empty or null
+    }
+    log('Initialized gender: $_gender'); // Debug log to verify the value
 
     if (widget.data.dob != null && widget.data.dob!.isNotEmpty) {
       final parsedDate = DateTime.tryParse(widget.data.dob!);
       if (parsedDate != null) {
-        _dobController.text =
-        '${parsedDate.month}/${parsedDate.day}/${parsedDate.year}';
+        _dobController.text = '${parsedDate.month}/${parsedDate.day}/${parsedDate.year}';
         _dob = parsedDate;
       }
     }
@@ -69,7 +73,6 @@ class _EditProfileState extends State<EditProfile> {
     _cityController.text = widget.data.city ?? '';
   }
 
-  // <-- Added method to save initial profile data
   Future<void> _saveInitialProfileData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('firstName', widget.data.firstname);
@@ -93,7 +96,6 @@ class _EditProfileState extends State<EditProfile> {
         return;
       }
 
-      // Using PUT as the endpoint rejects GET (405 error)
       final response = await http.put(
         Uri.parse('$URL/customer/updateprofile'),
         headers: {
@@ -112,20 +114,22 @@ class _EditProfileState extends State<EditProfile> {
             widget.data.firstname = data['firstname'];
             widget.data.lastname = data['lastname'];
             widget.data.email = data['email'];
-            widget.data.gender = data['gender'];
+            // Normalize the fetched gender value
+            widget.data.gender = data['gender'] != null && data['gender'].isNotEmpty
+                ? (data['gender'].toLowerCase() == 'male' ? 'Male' : 'Female')
+                : null;
             widget.data.dob = data['dob'];
             widget.data.address = data['customerAddress'];
             widget.data.district = data['district'];
             widget.data.city = data['city'];
 
-            // Update controllers with fetched data
-            _fullNameController.text =
-            "${widget.data.firstname} ${widget.data.lastname}";
+            _fullNameController.text = "${widget.data.firstname} ${widget.data.lastname}";
             _emailController.text = widget.data.email;
             _dobController.text = widget.data.dob ?? '';
             _AddressController.text = widget.data.address ?? '';
             _districtController.text = widget.data.district ?? '';
             _cityController.text = widget.data.city ?? '';
+            _gender = widget.data.gender; // Update _gender with normalized value
           });
         } else {
           log('Failed to fetch profile: ${responseData['message']}');
@@ -141,8 +145,7 @@ class _EditProfileState extends State<EditProfile> {
   Future<void> _loadProfileImage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _profileImagePath =
-          prefs.getString('profile_image_path') ?? widget.data.image_url;
+      _profileImagePath = prefs.getString('profile_image_path') ?? widget.data.image_url;
     });
     log('Loaded profile image path: $_profileImagePath');
   }
@@ -155,8 +158,7 @@ class _EditProfileState extends State<EditProfile> {
       if (pickedFile != null) {
         final appDir = await getApplicationDocumentsDirectory();
         final fileName = pickedFile.name;
-        final savedImage =
-        await File(pickedFile.path).copy('${appDir.path}/$fileName');
+        final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
 
         setState(() {
           _profileImagePath = savedImage.path;
@@ -202,8 +204,7 @@ class _EditProfileState extends State<EditProfile> {
       );
 
       request.headers['Authorization'] = 'Bearer $token';
-      request.files
-          .add(await http.MultipartFile.fromPath('image', imageFile.path));
+      request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
 
       final response = await request.send();
 
@@ -214,15 +215,11 @@ class _EditProfileState extends State<EditProfile> {
         log('Response Data: $responseData');
         log('Image URL from server: ${responseJson['image_url']}');
 
-        final imageUrl = responseJson['data'] != null
-            ? responseJson['data']['image_url']
-            : null;
+        final imageUrl = responseJson['data'] != null ? responseJson['data']['image_url'] : null;
 
         log('Image URL from server: $imageUrl');
 
-        if (imageUrl != null &&
-            imageUrl is String &&
-            Uri.tryParse(imageUrl)?.isAbsolute == true) {
+        if (imageUrl != null && imageUrl is String && Uri.tryParse(imageUrl)?.isAbsolute == true) {
           await prefs.setString('image_url', imageUrl);
           setState(() {
             widget.data.image_url = imageUrl;
@@ -310,8 +307,7 @@ class _EditProfileState extends State<EditProfile> {
 
       final nameParts = _fullNameController.text.split(' ');
       final firstName = nameParts.isNotEmpty ? nameParts.first : '';
-      final lastName =
-      nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
       log('First Name: $firstName, Last Name: $lastName');
 
@@ -330,8 +326,7 @@ class _EditProfileState extends State<EditProfile> {
       log('Sending request to update profile with data: $updatedData');
 
       final encodedData = updatedData.entries
-          .map((e) =>
-      '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value ?? '')}')
+          .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value ?? '')}')
           .join('&');
 
       final response = await http.put(
@@ -362,8 +357,7 @@ class _EditProfileState extends State<EditProfile> {
             widget.data.district = updatedUserData['district'];
             widget.data.city = updatedUserData['city'];
 
-            _fullNameController.text =
-            "${widget.data.firstname} ${widget.data.lastname}";
+            _fullNameController.text = "${widget.data.firstname} ${widget.data.lastname}";
             _emailController.text = widget.data.email;
             _dobController.text = widget.data.dob ?? '';
             _AddressController.text = widget.data.address ?? '';
@@ -371,7 +365,6 @@ class _EditProfileState extends State<EditProfile> {
             _cityController.text = widget.data.city ?? '';
           });
 
-          // Save updated profile details using keys that match those used by the Complaint Registration page.
           await prefs.setString('firstName', widget.data.firstname);
           await prefs.setString('lastName', widget.data.lastname);
           await prefs.setString('email', widget.data.email);
@@ -478,8 +471,7 @@ class _EditProfileState extends State<EditProfile> {
                   foregroundImage: _profileImagePath != null
                       ? (_profileImagePath!.startsWith('http')
                       ? NetworkImage(_profileImagePath!)
-                      : FileImage(File(_profileImagePath!))
-                  as ImageProvider)
+                      : FileImage(File(_profileImagePath!)) as ImageProvider)
                       : const NetworkImage(
                     'https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg',
                   ),
@@ -520,8 +512,7 @@ class _EditProfileState extends State<EditProfile> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your email';
-                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                              .hasMatch(value)) {
+                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                             return 'Please enter a valid email';
                           }
                           return null;
@@ -579,26 +570,40 @@ class _EditProfileState extends State<EditProfile> {
                               borderRadius: BorderRadius.circular(4.0),
                             ),
                             child: Padding(
-                              padding:
-                              const EdgeInsets.only(bottom: 20, left: 10),
+                              padding: const EdgeInsets.only(bottom: 20, left: 10),
                               child: DropdownButtonFormField<String>(
-                                value: _gender!.isEmpty ? null : _gender,
+                                value: _gender, // _gender is now either null, "Male", or "Female"
                                 dropdownColor: Colors.white,
-                                items: ['Male', 'Female'].map((gender) {
-                                  return DropdownMenuItem(
-                                    value: gender,
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'Male',
                                     child: Text(
-                                      gender,
-                                      style: const TextStyle(
+                                      'Male',
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black,
                                         fontSize: 15,
                                       ),
                                     ),
-                                  );
-                                }).toList(),
-                                onChanged: (value) =>
-                                    setState(() => _gender = value!),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Female',
+                                    child: Text(
+                                      'Female',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    _gender = value;
+                                    widget.data.gender = value; // Update the User model
+                                  });
+                                },
                                 decoration: const InputDecoration(
                                   border: InputBorder.none,
                                   contentPadding: EdgeInsets.zero,
@@ -607,9 +612,7 @@ class _EditProfileState extends State<EditProfile> {
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black,
                                 ),
-                                validator: (value) => value == null
-                                    ? 'Please select an option'
-                                    : null,
+                                validator: (value) => value == null ? 'Please select an option' : null,
                               ),
                             ),
                           ),
@@ -649,10 +652,8 @@ class _EditProfileState extends State<EditProfile> {
                                 ),
                                 suffixIcon: GestureDetector(
                                   onTap: () async {
-                                    FocusScope.of(context)
-                                        .requestFocus(FocusNode());
-                                    final DateTime? pickedDate =
-                                    await showDatePicker(
+                                    FocusScope.of(context).requestFocus(FocusNode());
+                                    final DateTime? pickedDate = await showDatePicker(
                                       context: context,
                                       initialDate: _dob ?? DateTime.now(),
                                       firstDate: DateTime(1900),
@@ -663,14 +664,11 @@ class _EditProfileState extends State<EditProfile> {
                                         _dob = pickedDate;
                                         _dobController.text =
                                         '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
-                                        widget.data.dob = pickedDate
-                                            .toIso8601String()
-                                            .split('T')[0];
+                                        widget.data.dob = pickedDate.toIso8601String().split('T')[0];
                                       });
                                     }
                                   },
-                                  child: Icon(Icons.edit_calendar,
-                                      color: Colors.grey),
+                                  child: Icon(Icons.edit_calendar, color: Colors.grey),
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(4.0),
@@ -699,10 +697,8 @@ class _EditProfileState extends State<EditProfile> {
                                 return null;
                               },
                               onTap: () async {
-                                FocusScope.of(context)
-                                    .requestFocus(FocusNode());
-                                final DateTime? pickedDate =
-                                await showDatePicker(
+                                FocusScope.of(context).requestFocus(FocusNode());
+                                final DateTime? pickedDate = await showDatePicker(
                                   context: context,
                                   initialDate: _dob ?? DateTime.now(),
                                   firstDate: DateTime(1900),
@@ -712,10 +708,7 @@ class _EditProfileState extends State<EditProfile> {
                                   setState(() {
                                     _dobController.text =
                                     '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
-                                    widget.data.dob = pickedDate
-                                        .toLocal()
-                                        .toString()
-                                        .split(' ')[0];
+                                    widget.data.dob = pickedDate.toLocal().toString().split(' ')[0];
                                   });
                                 }
                               },
@@ -727,7 +720,6 @@ class _EditProfileState extends State<EditProfile> {
                           SizedBox(height: 15),
                         ],
                       ),
-                      // Reset Password
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -743,7 +735,6 @@ class _EditProfileState extends State<EditProfile> {
                           title: 'Change Password',
                         ),
                       ),
-                      // Save Button
                       Align(
                         alignment: Alignment.centerRight,
                         child: GestureDetector(

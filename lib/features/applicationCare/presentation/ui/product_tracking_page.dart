@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:baltra/features/applicationCare/controller/crmController.dart';
+import 'package:baltra/features/applicationCare/presentation/widgets/tracking_details_skeletion.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +43,7 @@ class _TrackingPageState extends State<TrackingPage> {
       return "Invalid Date";
     }
   }
+
   // Show Full-Screen Image with Zoom & Pan
   void showFullScreenImage(BuildContext context, String imageUrl) {
     showDialog(
@@ -61,7 +63,7 @@ class _TrackingPageState extends State<TrackingPage> {
                 imageUrl,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.image_not_supported, size: 100),
+                    const Icon(Icons.image_not_supported, size: 100),
               ),
             ),
           ),
@@ -93,7 +95,8 @@ class _TrackingPageState extends State<TrackingPage> {
             }
 
             // Create a unique filename
-            final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            final fileName =
+                'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
             final file = File('${directory.path}/$fileName');
 
             // Write the file
@@ -148,7 +151,8 @@ class _TrackingPageState extends State<TrackingPage> {
             }
 
             // Create a unique filename
-            final fileName = 'video_${DateTime.now().millisecondsSinceEpoch}.mp4';
+            final fileName =
+                'video_${DateTime.now().millisecondsSinceEpoch}.mp4';
             final file = File('${directory.path}/$fileName');
 
             // Write the file
@@ -186,7 +190,7 @@ class _TrackingPageState extends State<TrackingPage> {
     return Scaffold(
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: TrackingPageSkeleton());
         } else if (controller.errorMessage.value.isNotEmpty) {
           return Center(child: Text("Error: ${controller.errorMessage.value}"));
         } else if (controller.customerProduct.value == null) {
@@ -310,37 +314,35 @@ class _TrackingPageState extends State<TrackingPage> {
               ),
               // Conditionally display the stepper if a valid Job ID exists.
               (product.jobNo != null &&
-                  product.jobNo!.trim().isNotEmpty &&
-                  product.jobNo != 'N/A')
+                      product.jobNo!.trim().isNotEmpty &&
+                      product.jobNo != 'N/A')
                   ? Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 20),
-                    // Tracking Progress Steps
-                    stepperData.isNotEmpty
-                        ? SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: stepWidgets,
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 20),
+                          // Tracking Progress Steps
+                          stepperData.isNotEmpty
+                              ? SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: stepWidgets,
+                                  ),
+                                )
+                              : const Center(
+                                  child: Text("Wait for process",
+                                      style: TextStyle(color: Colors.red)),
+                                ),
+                        ],
                       ),
                     )
-                        : const Center(
-                      child: Text("Wait for process",
-                          style: TextStyle(color: Colors.red)),
-                    ),
-                  ],
-                ),
-              )
                   : Container(),
               // Product Details Section
               Container(
-                padding:
-                const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-                margin:
-                const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                 height: 180,
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -359,14 +361,15 @@ class _TrackingPageState extends State<TrackingPage> {
                           height: 150,
                           width: 140,
                           child: GestureDetector(
-                            onTap: () => showFullScreenImage(context, product.damagedImage ?? ''),
+                            onTap: () => showFullScreenImage(
+                                context, product.damagedImage ?? ''),
                             child: Hero(
                               tag: "${product.damagedImage}_image",
                               child: Image.network(
                                 product.damagedImage ?? '',
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.image_not_supported),
+                                    const Icon(Icons.image_not_supported),
                               ),
                             ),
                           ),
@@ -418,10 +421,8 @@ class _TrackingPageState extends State<TrackingPage> {
               ),
               // Damaged product picture section with heading and download button
               Container(
-                padding:
-                const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-                margin:
-                const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
@@ -443,10 +444,13 @@ class _TrackingPageState extends State<TrackingPage> {
                           onPressed: () => downloadImage(
                               context, product.damagedImage ?? ''),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                            const Color(0xFF000000), // Or any color you prefer
+                            backgroundColor: const Color(
+                                0xFF000000), // Or any color you prefer
                           ),
-                          child: const Text("Download",style: TextStyle(color: Colors.white),),
+                          child: const Text(
+                            "Download",
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ],
                     ),
@@ -456,7 +460,8 @@ class _TrackingPageState extends State<TrackingPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () => showFullScreenImage(context, product.damagedImage ?? ''),
+                          onTap: () => showFullScreenImage(
+                              context, product.damagedImage ?? ''),
                           child: Hero(
                             tag: product.damagedImage ?? '',
                             child: ClipRRect(
@@ -468,7 +473,7 @@ class _TrackingPageState extends State<TrackingPage> {
                                   product.damagedImage ?? '',
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.image_not_supported),
+                                      const Icon(Icons.image_not_supported),
                                 ),
                               ),
                             ),
@@ -491,17 +496,17 @@ class _TrackingPageState extends State<TrackingPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Heading row with text on the left and download button on the right
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
                           "Damaged Product Video",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         ElevatedButton(
-                          onPressed: () =>
-                              downloadVideo(context, product.damagedVideo ?? ''),
+                          onPressed: () => downloadVideo(
+                              context, product.damagedVideo ?? ''),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF000000),
                           ),
@@ -513,50 +518,57 @@ class _TrackingPageState extends State<TrackingPage> {
                       ],
                     ),
                     const SizedBox(height: 5),
-                    // Video preview section: play video from the database
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
                           width: MediaQuery.of(context).size.width * 0.8,
                           height: MediaQuery.of(context).size.height * 0.3,
-                          child: product.damagedVideo != null && product.damagedVideo!.isNotEmpty
+                          child: product.damagedVideo != null &&
+                                  product.damagedVideo!.isNotEmpty
                               ? GestureDetector(
-                            onTap: () {
-                              // Open Full-Screen Video Preview
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => VideoPreview(videoUrl: product.damagedVideo!),
-                                ),
-                              );
-                            },
-                            child: Hero(
-                              tag: "${product.damagedVideo}_video",
-                              child: Container(
-                                width: MediaQuery.of(context).size.width * 0.8,
-                                height: MediaQuery.of(context).size.height * 0.3,
-                                child: VideoPreview(videoUrl: product.damagedVideo!),
-                              ),
-                            ),
-                          )
+                                  onTap: () {
+                                    // Open Full-Screen Video Preview
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => VideoPreview(
+                                            videoUrl: product.damagedVideo!),
+                                      ),
+                                    );
+                                  },
+                                  child: Hero(
+                                    tag: "${product.damagedVideo}_video",
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.8,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.3,
+                                      child: VideoPreview(
+                                          videoUrl: product.damagedVideo!),
+                                    ),
+                                  ),
+                                )
                               : Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black12,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.play_circle_fill,
-                                size: 50,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black12,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.play_circle_fill,
+                                      size: 50,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 5,)
+                    SizedBox(
+                      height: 5,
+                    )
                   ],
                 ),
               ),
@@ -565,8 +577,8 @@ class _TrackingPageState extends State<TrackingPage> {
                 builder: (context) {
                   final currentStep = stepperData
                       .cast<Map<String, dynamic>>()
-                      .firstWhereOrNull(
-                          (step) => step['newServiceStatusName'] == product.status);
+                      .firstWhereOrNull((step) =>
+                          step['newServiceStatusName'] == product.status);
                   if (currentStep == null) return const SizedBox.shrink();
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -623,7 +635,7 @@ class _TrackingPageState extends State<TrackingPage> {
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         // Stage name
                                         Text(
@@ -647,7 +659,7 @@ class _TrackingPageState extends State<TrackingPage> {
                                         // Custom stage message
                                         Text(
                                           'Your repaired item is ready for collection. '
-                                              'Please visit our service center located in Teku.',
+                                          'Please visit our service center located in Teku.',
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: Colors.grey.shade700,
@@ -659,7 +671,9 @@ class _TrackingPageState extends State<TrackingPage> {
                                 ],
                               ),
                             ),
-                            SizedBox(height: 20,)
+                            SizedBox(
+                              height: 20,
+                            )
                           ],
                         ),
                       ),
@@ -677,7 +691,8 @@ class _TrackingPageState extends State<TrackingPage> {
   // Finds the active step index safely
   int getActiveStep(List<dynamic> steps, String? status) {
     if (status == null) return 0;
-    int index = steps.indexWhere((step) => step["newServiceStatusName"] == status);
+    int index =
+        steps.indexWhere((step) => step["newServiceStatusName"] == status);
     return index >= 0 ? index : 0;
   }
 
@@ -692,7 +707,6 @@ class _TrackingPageState extends State<TrackingPage> {
         return Colors.blue;
     }
   }
-
 
   // Builds a table row for product details with status text color change.
   TableRow _buildTableRow(String label, String? value) {
