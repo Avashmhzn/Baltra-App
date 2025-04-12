@@ -269,27 +269,34 @@ class _LoginpageState extends State<Loginpage> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       backgroundColor: Colors.green[300],
-                                      content: const Text(
-                                          'User logged in successfully!'),
+                                      content: const Text('User logged in successfully!'),
                                       duration: const Duration(seconds: 2),
                                     ),
                                   );
                                   Navigator.pushAndRemoveUntil(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                      const ButtomNavBar(pageno: 0),
+                                      builder: (context) => const ButtomNavBar(pageno: 0),
                                     ),
                                         (route) => false,
                                   );
-                                } else if (loginController
-                                    .errorMessage.isNotEmpty) {
+                                } else {
+                                  // Log for debugging
+                                  print('Login failed - Status: $status, Error: ${loginController.errorMessage.value}');
+
+                                  String errorMessage = '';
+                                  // Check errorMessage content or assume phone error for common database responses
+                                  if (loginController.errorMessage.value.toLowerCase().contains('user') ||
+                                      loginController.errorMessage.value.toLowerCase().contains('not found') ||
+                                      !RegExp(r'^\d{10}$').hasMatch(phoneController.text.trim())) {
+                                    errorMessage = 'Phone number is wrong';
+                                  } else {
+                                    errorMessage = 'Please Enter Correct Phone and Password !!';
+                                  }
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                      content: Text(
-                                          'Error: ${loginController.errorMessage.value}'),
+                                      backgroundColor: Theme.of(context).primaryColor,
+                                      content: Text(errorMessage),
                                       duration: const Duration(seconds: 2),
                                     ),
                                   );
@@ -304,7 +311,7 @@ class _LoginpageState extends State<Loginpage> {
                                 color: Theme.of(context).primaryColor,
                                 child: Center(
                                   child: loginController.isLoading.value
-                                      ? const CustomLoadingIndicator() // Replace CircularProgressIndicator with custom indicator
+                                      ? const CustomLoadingIndicator()
                                       : const Text(
                                     'Login',
                                     style: TextStyle(color: Colors.white),

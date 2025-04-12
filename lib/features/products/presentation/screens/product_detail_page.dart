@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:baltra/core/utils/constants.dart';
+import 'package:baltra/features/applicationCare/presentation/widgets/myproduct_details_skeletion.dart';
 import 'package:baltra/features/products/controller/productController.dart';
 import 'package:baltra/features/products/controller/reviewController.dart';
 import 'package:baltra/features/products/models/product.dart';
 import 'package:baltra/features/products/models/subcategoryProduct.dart';
 import 'package:baltra/features/products/presentation/screens/review_section.dart';
 import 'package:baltra/features/products/presentation/widgets/function.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Added import
 import 'package:easy_rich_text/easy_rich_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,31 +36,25 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   bool _showPlayPauseButton = false;
   Timer? _hidePlayPauseTimer;
   final ScrollController _scrollController = ScrollController();
-  String? currentMainImage; // Tracks the current main image URL
-  int _selectedThumbnailIndex = 0; // Tracks the selected thumbnail index
-  List<String> thumbnailUrls = []; // To store the list of thumbnail URLs
-  int? _lastProductId; // To track the last product ID for thumbnail updates
-
-  // Current active tab index.
+  String? currentMainImage;
+  int _selectedThumbnailIndex = 0;
+  List<String> thumbnailUrls = [];
+  int? _lastProductId;
   int _currentTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    // Initialize currentMainImage with the product's main image
     currentMainImage = widget.product?.main_image?.isNotEmpty == true
         ? widget.product!.main_image
         : '';
-    // Populate thumbnailUrls in initState
     final product = widget.product ?? controller.productDetails.value;
     if (product != null) {
       _lastProductId = product.id;
       thumbnailUrls.clear();
-      // Add the main image as the first thumbnail if it's not already in the list
       if (product.main_image != null && product.main_image!.isNotEmpty) {
         thumbnailUrls.add(product.main_image!);
       }
-      // Add additional images from product.images
       if (product.images != null) {
         for (var img in product.images!) {
           if (img.image_url != null &&
@@ -81,14 +77,11 @@ class _ProductDetailPageState extends State<ProductDetailPage>
       }
     });
 
-    print(
-        "NEW ProductDetailPage initState: product id = ${widget.product?.id}, initial main image = $currentMainImage");
-
     final initialProductId =
         widget.product?.id ?? controller.productDetails.value?.id;
     if (initialProductId != null) {
       reviewController.fetchReviewsAndRatings(initialProductId);
-      controller.relatedProductsList.clear(); // Clear previous related products
+      controller.relatedProductsList.clear();
       if (widget.relatedProducts == null || widget.relatedProducts!.isEmpty) {
         controller.fetchRelatedProducts(initialProductId);
       }
@@ -96,7 +89,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   }
 
   void navigateToProductDetails(int productId) async {
-    controller.productDetails.value = null; // Clear previous product details
+    controller.productDetails.value = null;
     controller.isLoading(true);
     await controller.fetchSelectedProduct(productId);
     reviewController.fetchReviewsAndRatings(productId);
@@ -105,10 +98,10 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     if (controller.productDetails.value != null) {
       _scrollController.jumpTo(0);
       Get.off(() => ProductDetailPage(
-            key: UniqueKey(),
-            product: controller.productDetails.value!,
-            relatedProducts: controller.relatedProductsList,
-          )); // Use Get.off to replace the current page
+        key: UniqueKey(),
+        product: controller.productDetails.value!,
+        relatedProducts: controller.relatedProductsList,
+      ));
     } else {
       Get.snackbar("Error", "Failed to load product details",
           snackPosition: SnackPosition.BOTTOM);
@@ -267,7 +260,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     super.dispose();
   }
 
-  ///--- Begin Tab Content Functions ---///
   Widget _buildDescriptionTab(
       List<String> specifications, List<Map<String, String>> specImages) {
     return Column(
@@ -301,11 +293,16 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         for (var i = 0; i < specImages.length; i++)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Image.network(
-              specImages[i]['image_url'] ?? '',
+            child: CachedNetworkImage(
+              imageUrl: specImages[i]['image_url'] ?? '',
               width: double.infinity,
               fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => Image.asset(
+              placeholder: (context, url) => Container(
+                width: double.infinity,
+                height: 120,
+                color: Colors.grey[300],
+              ),
+              errorWidget: (context, url, error) => Image.asset(
                 'assets/images/pp.png',
                 height: 120,
                 width: double.infinity,
@@ -357,11 +354,16 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         for (var i = 0; i < sizingImages.length; i++)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
-            child: Image.network(
-              sizingImages[i]['image_url'] ?? '',
+            child: CachedNetworkImage(
+              imageUrl: sizingImages[i]['image_url'] ?? '',
               width: MediaQuery.of(context).size.width * 0.95,
               fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => Image.asset(
+              placeholder: (context, url) => Container(
+                width: MediaQuery.of(context).size.width * 0.95,
+                height: 120,
+                color: Colors.grey[300],
+              ),
+              errorWidget: (context, url, error) => Image.asset(
                 'assets/images/pp.png',
                 width: MediaQuery.of(context).size.width * 0.95,
                 fit: BoxFit.cover,
@@ -385,7 +387,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            height: 1.0, // Remove extra line spacing above the title
+            height: 1.0,
           ),
         ),
         if (usage.isNotEmpty)
@@ -393,7 +395,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             padding: const EdgeInsets.only(top: 0.0),
             child: Text(
               removeListContent(usage),
-              style: const TextStyle(fontSize: 14, height: 1.0), // Remove extra line spacing
+              style: const TextStyle(fontSize: 14, height: 1.0),
               textAlign: TextAlign.justify,
             ),
           ),
@@ -408,12 +410,12 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                 children: [
                   const Text(
                     '• ',
-                    style: TextStyle(fontSize: 18, height: 1.0), // Remove extra line spacing
+                    style: TextStyle(fontSize: 18, height: 1.0),
                   ),
                   Expanded(
                     child: Text(
                       usageItems[i],
-                      style: const TextStyle(fontSize: 14, height: 1.0), // Remove extra line spacing
+                      style: const TextStyle(fontSize: 14, height: 1.0),
                       textAlign: TextAlign.start,
                     ),
                   ),
@@ -429,12 +431,12 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                 children: [
                   const Text(
                     '• ',
-                    style: TextStyle(fontSize: 18, height: 1.0), // Remove extra line spacing
+                    style: TextStyle(fontSize: 18, height: 1.0),
                   ),
                   Expanded(
                     child: Text(
                       map.values.first,
-                      style: const TextStyle(fontSize: 14, height: 1.0), // Remove extra line spacing
+                      style: const TextStyle(fontSize: 14, height: 1.0),
                       textAlign: TextAlign.start,
                     ),
                   ),
@@ -445,11 +447,16 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           for (var i = 0; i < usageImages.length; i++)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: Image.network(
-                usageImages[i]['image_url'] ?? '',
+              child: CachedNetworkImage(
+                imageUrl: usageImages[i]['image_url'] ?? '',
                 width: double.infinity,
                 fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => Image.asset(
+                placeholder: (context, url) => Container(
+                  width: double.infinity,
+                  height: 120,
+                  color: Colors.grey[300],
+                ),
+                errorWidget: (context, url, error) => Image.asset(
                   'assets/images/pp.png',
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -472,29 +479,26 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         required List<Map<String, String>> extraItems,
         required List<Map<String, String>> usageImages,
       }) {
-    // List of tab titles matching the image
     final List<String> tabTitles = ['DESCRIPTION', 'SIZING', 'USAGE'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Custom tab bar using Row and GestureDetector
         Container(
-          height: 40, // Matches the height of the TabBar in the image
+          height: 40,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start, // Left-align the tabs
+            mainAxisAlignment: MainAxisAlignment.start,
             children: List.generate(tabTitles.length, (index) {
               final isSelected = _currentTabIndex == index;
               return GestureDetector(
                 onTap: () {
                   setState(() {
                     _currentTabIndex = index;
-                    // Sync the TabController index to maintain consistency
                     tabController.index = index;
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.only(right: 24.0), // Space between tabs
+                  padding: const EdgeInsets.only(right: 24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -502,17 +506,17 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       Text(
                         tabTitles[index],
                         style: TextStyle(
-                          fontSize: 16, // Matches the font size in the image
+                          fontSize: 16,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           color: isSelected ? Colors.black : const Color(0xFF757575),
                         ),
                       ),
                       if (isSelected)
                         Container(
-                          margin: const EdgeInsets.only(top: 4.0), // Gap between text and underline
-                          height: 2.0, // Thickness of the underline
-                          width: tabTitles[index].length * 8.0, // Approximate width based on text length
-                          color: Colors.black, // Black underline
+                          margin: const EdgeInsets.only(top: 4.0),
+                          height: 2.0,
+                          width: tabTitles[index].length * 8.0,
+                          color: Colors.black,
                         ),
                     ],
                   ),
@@ -522,8 +526,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(
-              top: 8.0), // Small vertical gap between tabs and content
+          padding: const EdgeInsets.only(top: 8.0),
           child: _currentTabIndex == 0
               ? _buildDescriptionTab(specifications, specImages)
               : _currentTabIndex == 1
@@ -539,74 +542,64 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-            child: Obx(() {
-              final product = controller.productDetails.value ?? widget.product;
-              if (controller.isLoading.value || product == null) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              // Update currentMainImage and thumbnailUrls when product changes
-              if (product.id != _lastProductId) {
-                _lastProductId = product.id;
-                currentMainImage = product.main_image?.isNotEmpty == true
-                    ? product.main_image
-                    : '';
-                _selectedThumbnailIndex =
-                    0; // Reset selected index when product changes
-                print(
-                    "Product changed (ID: ${product.id}), updated currentMainImage to: $currentMainImage");
-                // Update thumbnailUrls when product changes
-                thumbnailUrls.clear();
-                // Add the main image as the first thumbnail if it's not already in the list
-                if (product.main_image != null &&
-                    product.main_image!.isNotEmpty) {
-                  thumbnailUrls.add(product.main_image!);
+        child: Obx(() {
+          final product = controller.productDetails.value ?? widget.product;
+          if (controller.isLoading.value || product == null) {
+            return const ProductDetailSkeleton();
+          }
+          if (product.id != _lastProductId) {
+            _lastProductId = product.id;
+            currentMainImage = product.main_image?.isNotEmpty == true
+                ? product.main_image
+                : '';
+            _selectedThumbnailIndex = 0;
+            thumbnailUrls.clear();
+            if (product.main_image != null && product.main_image!.isNotEmpty) {
+              thumbnailUrls.add(product.main_image!);
+            }
+            if (product.images != null) {
+              for (var img in product.images!) {
+                if (img.image_url != null &&
+                    img.image_url!.isNotEmpty &&
+                    img.image_url != product.main_image) {
+                  thumbnailUrls.add(img.image_url!);
                 }
-                // Add additional images from product.images
-                if (product.images != null) {
-                  for (var img in product.images!) {
-                    if (img.image_url != null &&
-                        img.image_url!.isNotEmpty &&
-                        img.image_url != product.main_image) {
-                      thumbnailUrls.add(img.image_url!);
-                    }
-                  }
-                }
-                print(
-                    "Thumbnail URLs updated due to product change: $thumbnailUrls");
               }
+            }
+            print("Thumbnail URLs updated due to product change: $thumbnailUrls");
+          }
 
-              final displayRelatedProducts = controller.relatedProductsList;
-              List<Map<String, String>> items =
-                  parseDimensionsText(product.sizing ?? '');
-              List<String> specifications =
-                  extractSpecifications(product.specification ?? '');
-              List<String> usageItems = extractUsageItems(product.usage ?? '');
-              List<Map<String, String>> specImages = [];
-              if (product.specification_images != null) {
-                for (var img in product.specification_images!.take(3)) {
-                  specImages.add({'image_url': img.image_url ?? ''});
-                }
-              }
-              List<Map<String, String>> sizingImages = [];
-              if (product.sizing_images != null) {
-                for (var img in product.sizing_images!) {
-                  sizingImages.add({'image_url': img.image_url ?? ''});
-                }
-              }
-              List<Map<String, String>> usageImageList = [];
-              if (product.usage_images != null) {
-                for (var img in product.usage_images!) {
-                  usageImageList.add({'image_url': img.image_url ?? ''});
-                }
-              }
-              return Column(
+          final displayRelatedProducts = controller.relatedProductsList;
+          List<Map<String, String>> items =
+          parseDimensionsText(product.sizing ?? '');
+          List<String> specifications =
+          extractSpecifications(product.specification ?? '');
+          List<String> usageItems = extractUsageItems(product.usage ?? '');
+          List<Map<String, String>> specImages = [];
+          if (product.specification_images != null) {
+            for (var img in product.specification_images!.take(3)) {
+              specImages.add({'image_url': img.image_url ?? ''});
+            }
+          }
+          List<Map<String, String>> sizingImages = [];
+          if (product.sizing_images != null) {
+            for (var img in product.sizing_images!) {
+              sizingImages.add({'image_url': img.image_url ?? ''});
+            }
+          }
+          List<Map<String, String>> usageImageList = [];
+          if (product.usage_images != null) {
+            for (var img in product.usage_images!) {
+              usageImageList.add({'image_url': img.image_url ?? ''});
+            }
+          }
+          return SingleChildScrollView(
+            controller: _scrollController,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Back button
                   Row(
                     children: [
                       IconButton(
@@ -621,45 +614,26 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       ),
                     ],
                   ),
-                  // Breadcrumbs
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 20.0, top: 8.0, bottom: 8.0),
+                    padding: const EdgeInsets.only(left: 20.0, top: 8.0, bottom: 8.0),
                     child: Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           product.category?['category_name'] ?? 'Category',
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
+                          style: const TextStyle(color: Colors.grey, fontSize: 14),
                         ),
                         const Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 0.0), // Reduced to 0
-                          child: Icon(
-                            Icons.chevron_right,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 0.0),
+                          child: Icon(Icons.chevron_right, size: 16, color: Colors.grey),
                         ),
                         Text(
-                          product.sub_category?['sub_category_name'] ??
-                              'Subcategory',
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
+                          product.sub_category?['sub_category_name'] ?? 'Subcategory',
+                          style: const TextStyle(color: Colors.grey, fontSize: 14),
                         ),
                         const Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 0.0), // Reduced to 0
-                          child: Icon(
-                            Icons.chevron_right,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 0.0),
+                          child: Icon(Icons.chevron_right, size: 16, color: Colors.grey),
                         ),
                         Text(
                           product.name ?? 'Product',
@@ -672,49 +646,53 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       ],
                     ),
                   ),
-                  // Main Image with Warranty Overlay
                   SizedBox(
                     height: 300,
                     width: double.infinity,
                     child: Stack(
                       children: [
-                        // Main Image
-                        currentMainImage == null || currentMainImage!.isEmpty
-                            ? Image.asset(
-                                'assets/images/pp.png',
-                                height: 300,
-                                width: double.infinity,
-                                fit: BoxFit.contain,
-                              )
-                            : Image.network(
-                                currentMainImage!,
-                                height: 300,
-                                width: double.infinity,
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) {
-                                  print(
-                                      "Error loading main image: $error, URL: $currentMainImage");
-                                  return Image.asset(
-                                    'assets/images/pp.png',
-                                    height: 300,
-                                    width: double.infinity,
-                                    fit: BoxFit.contain,
-                                  );
-                                },
-                              ),
-                        // Warranty Image Overlay
-                        if (product.warranty_icon != null &&
-                            product.warranty_icon!.isNotEmpty)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0), // Optional: Add rounded corners
+                          child: currentMainImage == null || currentMainImage!.isEmpty
+                              ? Image.asset(
+                            'assets/images/pp.png',
+                            height: 300,
+                            width: double.infinity,
+                            fit: BoxFit.cover, // Changed to cover to fill the space
+                          )
+                              : CachedNetworkImage(
+                            imageUrl: currentMainImage!,
+                            height: 300,
+                            width: double.infinity,
+                            fit: BoxFit.fitHeight, // Changed to cover to fill the space
+                            placeholder: (context, url) => Container(
+                              height: 300,
+                              width: double.infinity,
+                              color: Colors.grey[300],
+                            ),
+                            errorWidget: (context, url, error) => Image.asset(
+                              'assets/images/pp.png',
+                              height: 300,
+                              width: double.infinity,
+                              fit: BoxFit.cover, // Changed to cover to match
+                            ),
+                          ),
+                        ),
+                        if (product.warranty_icon != null && product.warranty_icon!.isNotEmpty)
                           Positioned(
                             top: 10,
                             right: 10,
-                            child: Image.network(
-                              product.warranty_icon ?? '',
+                            child: CachedNetworkImage(
+                              imageUrl: product.warranty_icon ?? '',
                               height: 50,
                               width: 50,
                               fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Image.asset(
+                              placeholder: (context, url) => Container(
+                                height: 50,
+                                width: 50,
+                                color: Colors.grey[300],
+                              ),
+                              errorWidget: (context, url, error) => Image.asset(
                                 'assets/images/pp.png',
                                 height: 50,
                                 width: 50,
@@ -725,93 +703,61 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       ],
                     ),
                   ),
-                  // Image Gallery
                   Container(
                     height: 80,
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 10),
+                    margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                     child: thumbnailUrls.isEmpty
                         ? const Center(child: Text("No images available"))
                         : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: thumbnailUrls.length > 0
-                                ? thumbnailUrls.length - 1
-                                : 0, // Reduce itemCount by 1 to skip the first item
-                            itemBuilder: (context, index) {
-                              // Start from the second item (index + 1)
-                              final actualIndex = index + 1;
-                              final imageUrl = thumbnailUrls[actualIndex];
-                              final isSelected =
-                                  _selectedThumbnailIndex == actualIndex;
-                              print("Thumbnail $actualIndex URL: $imageUrl");
-                              return GestureDetector(
-                                onTap: () {
-                                  print(
-                                      "Thumbnail clicked at index $actualIndex, imageUrl: $imageUrl");
-                                  if (imageUrl.isNotEmpty &&
-                                      currentMainImage != null &&
-                                      currentMainImage!.isNotEmpty) {
-                                    setState(() {
-                                      // Store the current main image before updating
-                                      final previousMainImage =
-                                          currentMainImage!;
-                                      // Update the main image to the clicked thumbnail's image
-                                      currentMainImage = imageUrl;
-                                      // Replace the clicked thumbnail with the previous main image
-                                      thumbnailUrls[actualIndex] =
-                                          previousMainImage;
-                                      // Update the selected thumbnail index
-                                      _selectedThumbnailIndex = actualIndex;
-                                      print(
-                                          "After click - Updated main image: currentMainImage = $currentMainImage");
-                                      print(
-                                          "After click - Updated thumbnailUrls[$actualIndex] = ${thumbnailUrls[actualIndex]}");
-                                      print(
-                                          "Full thumbnailUrls after click: $thumbnailUrls");
-                                    });
-                                  } else {
-                                    print(
-                                        "Image URL at index $actualIndex or currentMainImage is empty or null");
-                                  }
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 8),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? Colors.blue
-                                          : Colors.grey,
-                                      width: isSelected ? 2 : 1,
-                                    ),
-                                    color: isSelected
-                                        ? Colors.blue.withOpacity(0.1)
-                                        : null,
-                                  ),
-                                  child: Image.network(
-                                    imageUrl,
-                                    fit: BoxFit.contain,
-                                    height: 75,
-                                    width: 75,
-                                    key: ValueKey(
-                                        imageUrl), // Force reload if URL changes
-                                    errorBuilder: (context, error, stackTrace) {
-                                      print(
-                                          "Error loading thumbnail $actualIndex: $error, URL: $imageUrl");
-                                      return Image.asset(
-                                        'assets/images/pp.png',
-                                        height: 75,
-                                        width: 75,
-                                        fit: BoxFit.cover,
-                                      );
-                                    },
-                                  ),
-                                ),
-                              );
-                            },
+                      scrollDirection: Axis.horizontal,
+                      itemCount: thumbnailUrls.length > 0 ? thumbnailUrls.length - 1 : 0,
+                      itemBuilder: (context, index) {
+                        final actualIndex = index + 1;
+                        final imageUrl = thumbnailUrls[actualIndex];
+                        final isSelected = _selectedThumbnailIndex == actualIndex;
+                        return GestureDetector(
+                          onTap: () {
+                            if (imageUrl.isNotEmpty && currentMainImage != null && currentMainImage!.isNotEmpty) {
+                              setState(() {
+                                final previousMainImage = currentMainImage!;
+                                currentMainImage = imageUrl;
+                                thumbnailUrls[actualIndex] = previousMainImage;
+                                _selectedThumbnailIndex = actualIndex;
+                              });
+                            }
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: isSelected ? Colors.blue : Colors.grey,
+                                width: isSelected ? 2 : 1,
+                              ),
+                              color: isSelected ? Colors.blue.withOpacity(0.1) : null,
+                            ),
+                            child: CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              fit: BoxFit.contain,
+                              height: 75,
+                              width: 75,
+                              placeholder: (context, url) => Container(
+                                height: 75,
+                                width: 75,
+                                color: Colors.grey[300],
+                              ),
+                              errorWidget: (context, url, error) => Image.asset(
+                                'assets/images/pp.png',
+                                height: 75,
+                                width: 75,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
+                        );
+                      },
+                    ),
                   ),
                   const SizedBox(height: 18),
-                  // Product Name and Model
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: Text(
@@ -834,7 +780,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       ),
                     ),
                   ),
-                  // Divider
                   Container(
                     margin: EdgeInsets.only(
                       top: 12,
@@ -845,7 +790,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     width: double.infinity,
                     color: const Color(0xffbbbbbb),
                   ),
-                  // Color Options
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
                     child: Text(
@@ -872,7 +816,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ),
                   ),
                   const SizedBox(height: 15),
-                  // Pricing
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
                     child: Text(
@@ -896,21 +839,14 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ),
                   ),
                   const SizedBox(height: 15),
-                  // Horizontal divider
                   Container(
                     decoration: const BoxDecoration(
                       color: Colors.white,
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey, width: 1),
-                      ),
+                      border: Border(bottom: BorderSide(color: Colors.grey, width: 1)),
                     ),
                   ),
-                  // Tab Section
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0,
-                        vertical:
-                            8.0), // Match parent horizontal padding, keep vertical
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
                     child: buildTabSection(
                       context,
                       tabController: _tabController,
@@ -926,15 +862,18 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: Image(
-                      image: NetworkImage(product.warranty_icon ?? ''),
+                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                    child: CachedNetworkImage(
+                      imageUrl: product.warranty_icon ?? '',
                       height: 300,
                       width: double.infinity,
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                      placeholder: (context, url) => Container(
+                        height: 300,
+                        width: double.infinity,
+                        color: Colors.grey[300],
+                      ),
+                      errorWidget: (context, url, error) => Image.asset(
                         'assets/images/pp.png',
                         height: 430,
                         width: double.infinity,
@@ -944,14 +883,18 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration:
-                        BoxDecoration(border: Border.all(color: Colors.grey)),
-                    child: Image(
-                      image: NetworkImage(product.galleryimageone ?? ''),
+                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                    child: CachedNetworkImage(
+                      imageUrl: product.galleryimageone ?? '',
                       height: 430,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                      placeholder: (context, url) => Container(
+                        height: 430,
+                        width: double.infinity,
+                        color: Colors.grey[300],
+                      ),
+                      errorWidget: (context, url, error) => Image.asset(
                         'assets/images/pp.png',
                         height: 430,
                         width: double.infinity,
@@ -961,14 +904,18 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration:
-                        BoxDecoration(border: Border.all(color: Colors.grey)),
-                    child: Image(
-                      image: NetworkImage(product.galleryimagetwo ?? ''),
+                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                    child: CachedNetworkImage(
+                      imageUrl: product.galleryimagetwo ?? '',
                       height: 430,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                      placeholder: (context, url) => Container(
+                        height: 430,
+                        width: double.infinity,
+                        color: Colors.grey[300],
+                      ),
+                      errorWidget: (context, url, error) => Image.asset(
                         'assets/images/pp.png',
                         height: 430,
                         width: double.infinity,
@@ -977,9 +924,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // Video Player
-                  if (product.product_video != null &&
-                      product.product_video!.isNotEmpty)
+                  if (product.product_video != null && product.product_video!.isNotEmpty)
                     VisibilityDetector(
                       key: const Key('video-player'),
                       onVisibilityChanged: _onVisibilityChanged,
@@ -995,35 +940,29 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              if (_isVideoInitialized &&
-                                  _videoPlayerController != null)
+                              if (_isVideoInitialized && _videoPlayerController != null)
                                 AspectRatio(
-                                  aspectRatio:
-                                      _videoPlayerController!.value.aspectRatio,
+                                  aspectRatio: _videoPlayerController!.value.aspectRatio,
                                   child: VideoPlayer(_videoPlayerController!),
                                 ),
                               if (!_isVideoInitialized)
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const CircularProgressIndicator(
-                                        color: Colors.white),
+                                    const CircularProgressIndicator(color: Colors.white),
                                     const SizedBox(height: 10),
                                     Text(
                                       'Loading video...',
-                                      style: TextStyle(
-                                          color: Colors.white.withOpacity(0.7)),
+                                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
                                     ),
                                   ],
                                 ),
-                              if (_videoPlayerController?.value.hasError ??
-                                  false)
+                              if (_videoPlayerController?.value.hasError ?? false)
                                 Center(
                                   child: Text(
                                     'Error loading video\nTap to retry',
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        color: Colors.white.withOpacity(0.7)),
+                                    style: TextStyle(color: Colors.white.withOpacity(0.7)),
                                   ),
                                 ),
                               if (_showPlayPauseButton || !_isPlaying)
@@ -1053,21 +992,16 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Reviews Section
                   Obx(() {
                     if (reviewController.isLoading.value) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    reviewController.reviews.sort(
-                      (a, b) => b.reviewDate.compareTo(a.reviewDate),
-                    );
-
+                    reviewController.reviews.sort((a, b) => b.reviewDate.compareTo(a.reviewDate));
                     return ReviewsSection(
                       reviewController: reviewController,
                       productId: product.id ?? 0,
                     );
                   }),
-                  // Related Products Section
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
@@ -1084,31 +1018,27 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                         const SizedBox(height: 15),
                         Obx(() {
                           if (controller.isLoading.value) {
-                            return const Center(
-                                child: CircularProgressIndicator());
+                            return const Center(child: CircularProgressIndicator());
                           }
                           if (displayRelatedProducts.isEmpty) {
-                            return const Center(
-                                child: Text("No related products available"));
+                            return const Center(child: Text("No related products available"));
                           }
                           return Container(
                             height: 400,
                             child: GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 10,
-                                      mainAxisSpacing: 10,
-                                      childAspectRatio: 0.3),
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                childAspectRatio: 0.3,
+                              ),
                               itemCount: displayRelatedProducts.length,
                               itemBuilder: (context, index) {
-                                final relatedProduct =
-                                    displayRelatedProducts[index];
+                                final relatedProduct = displayRelatedProducts[index];
                                 return GestureDetector(
-                                  onTap: () => navigateToProductDetails(
-                                      relatedProduct.id ?? 0),
+                                  onTap: () => navigateToProductDetails(relatedProduct.id ?? 0),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
@@ -1118,25 +1048,25 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                                           color: Colors.grey.withOpacity(0.2),
                                           blurRadius: 5,
                                           spreadRadius: 2,
-                                        )
+                                        ),
                                       ],
                                     ),
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         ClipRRect(
-                                          borderRadius:
-                                              const BorderRadius.vertical(
-                                                  top: Radius.circular(10)),
-                                          child: Image.network(
-                                            relatedProduct.main_image_url ?? '',
+                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                                          child: CachedNetworkImage(
+                                            imageUrl: relatedProduct.main_image_url ?? '',
                                             height: 180,
                                             width: double.infinity,
                                             fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) =>
-                                                    Image.asset(
+                                            placeholder: (context, url) => Container(
+                                              height: 180,
+                                              width: double.infinity,
+                                              color: Colors.grey[300],
+                                            ),
+                                            errorWidget: (context, url, error) => Image.asset(
                                               'assets/images/pp.png',
                                               height: 120,
                                               width: double.infinity,
@@ -1148,53 +1078,33 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                                           padding: const EdgeInsets.all(8.0),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 'Model Name: ${relatedProduct.name ?? 'No Name'}',
-                                                style: const TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                               const SizedBox(height: 6),
                                               Text(
                                                 'Sub Category: ${relatedProduct.sub_category ?? 'N/A'}',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
-                                                ),
+                                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
                                               ),
                                               const SizedBox(height: 6),
                                               Text(
                                                 'Warranty: ${relatedProduct.warranty ?? 'N/A'}',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
-                                                ),
+                                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
                                               ),
                                               const SizedBox(height: 6),
                                               Text(
                                                 'Price: Rs. ${relatedProduct.price ?? 'N/A'}',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
-                                                ),
+                                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
                                               ),
                                               const SizedBox(height: 6),
                                               Text(
                                                 'Power: ${relatedProduct.power ?? 'N/A'}',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
-                                                ),
+                                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
                                               ),
                                               const SizedBox(height: 6),
                                             ],
@@ -1210,12 +1120,12 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                         }),
                       ],
                     ),
-                  )
+                  ),
                 ],
-              );
-            }),
-          ),
-        ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

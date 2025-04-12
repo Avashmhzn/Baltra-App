@@ -5,8 +5,10 @@ import 'package:baltra/features/products/data/productRepository.dart';
 import 'package:baltra/features/products/models/subcategory.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:baltra/features/products/presentation/widgets/categoryCard.dart';
+import 'package:baltra/features/products/presentation/widgets/sub_catagory_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart'; // Kept shimmer import as it's used in SubcategoryItemSkeleton
 
 class SubcategoryPage extends StatefulWidget {
   SubcategoryPage({super.key});
@@ -17,7 +19,7 @@ class SubcategoryPage extends StatefulWidget {
 
 class _SubcategoryPageState extends State<SubcategoryPage> {
   final ProductController productController =
-      Get.put(ProductController(productRepository: ProductRepository()));
+  Get.put(ProductController(productRepository: ProductRepository()));
 
   final TextEditingController searchController = TextEditingController();
   final RxList<Subcategory> filteredCategories = <Subcategory>[].obs;
@@ -47,7 +49,7 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
       filteredCategories.assignAll(
         productController.subCategoryList
             .where((subcategory) =>
-                subcategory.name.toLowerCase().contains(query.toLowerCase()))
+            subcategory.name.toLowerCase().contains(query.toLowerCase()))
             .toList(),
       );
     }
@@ -91,7 +93,7 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
                           color: Color(0xff545454),
                         ),
                         prefixIcon:
-                            Icon(Icons.search, color: Color(0xff545454)),
+                        Icon(Icons.search, color: Color(0xff545454)),
                         border: InputBorder.none,
                       ),
                       onChanged: searchCategory,
@@ -102,7 +104,23 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
               const SizedBox(height: 21),
               Obx(() {
                 if (productController.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                    child: GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                      ),
+                      itemCount: 8, // Show 4 skeleton items
+                      itemBuilder: (context, index) {
+                        return const SubcategoryItemSkeleton(); // Use provided skeleton widget
+                      },
+                    ),
+                  );
                 }
 
                 if (filteredCategories.isEmpty) {
@@ -124,7 +142,7 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                    const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,

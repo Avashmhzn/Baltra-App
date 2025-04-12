@@ -4,8 +4,8 @@ import 'package:baltra/core/utils/sessionExpirationMixin.dart';
 import 'package:baltra/features/products/controller/productController.dart';
 import 'package:baltra/features/products/data/productRepository.dart';
 import 'package:baltra/features/products/models/product.dart';
-import 'package:baltra/features/products/presentation/screens/product_detail_page.dart';
 import 'package:baltra/features/products/presentation/widgets/homepageCard.dart';
+import 'package:baltra/features/products/presentation/widgets/product_detail_loading%20_page_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> with SessionManager {
   Get.put(ProductController(productRepository: ProductRepository()));
 
   String name = 'Guest';
-  int loyaltyPoint = 1;
+  int loyaltyPoint = 0;
   int _itemsToShow = 4;
   bool _isNavigating = false; // Debouncing flag
 
@@ -73,47 +73,15 @@ class _HomePageState extends State<HomePage> with SessionManager {
     return products;
   }
 
-  // Optimized method to handle product navigation with debouncing
+  // Updated method to navigate to ProductDetailLoadingPage
   Future<void> _navigateToProductDetails(int productId) async {
     if (_isNavigating) return; // Prevent multiple simultaneous navigations
     _isNavigating = true;
 
     try {
-      // Check if the product details are already loaded for this productId
-      if (productController.productDetails.value?.id == productId) {
-        log("Product details already loaded for productId: $productId");
-        Get.to(() => ProductDetailPage(
-          product: productController.productDetails.value,
-          relatedProducts: productController.relatedProductsList,
-        ));
-        return;
-      }
-
-      // Check if the product is already in allProductsList
-      final existingProduct = productController.allProductsList
-          .firstWhereOrNull((product) => product.id == productId);
-
-      if (existingProduct != null) {
-        log("Product found in allProductsList for productId: $productId");
-        productController.productDetails.value = existingProduct;
-        Get.to(() => ProductDetailPage(
-          product: productController.productDetails.value,
-          relatedProducts: productController.relatedProductsList,
-        ));
-        return;
-      }
-
-      // If not found in memory, fetch from API
-      log("Fetching product details for productId: $productId");
-      await productController.fetchSelectedProduct(productId);
-      if (productController.productDetails.value != null) {
-        Get.to(() => ProductDetailPage(
-          product: productController.productDetails.value,
-          relatedProducts: productController.relatedProductsList,
-        ));
-      } else {
-        Get.snackbar("Error", "Failed to load product details");
-      }
+      log("Navigating to ProductDetailLoadingPage for productId: $productId");
+      // Navigate to ProductDetailLoadingPage, which will show the skeleton and fetch the data
+      await Get.to(() => ProductDetailLoadingPage(productId: productId));
     } finally {
       _isNavigating = false;
     }
@@ -300,8 +268,7 @@ class _HomePageState extends State<HomePage> with SessionManager {
                                       crossAxisSpacing: 14.0,
                                       mainAxisSpacing: 8.0,
                                       childAspectRatio: 0.5),
-                                  itemCount:
-                                  _itemsToShow < sortedProducts.length
+                                  itemCount: _itemsToShow < sortedProducts.length
                                       ? _itemsToShow
                                       : sortedProducts.length,
                                   itemBuilder: (context, index) {

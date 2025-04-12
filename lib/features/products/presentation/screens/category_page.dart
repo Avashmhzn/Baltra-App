@@ -6,11 +6,11 @@ import 'package:baltra/features/products/presentation/widgets/categoryCard.dart'
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-// Import the ProductItemSkeleton widget
-import 'package:baltra/features/products/presentation/widgets/product_skeleton_item.dart';
+// Import the CategorySkeleton widget
+import 'package:baltra/features/products/presentation/widgets/category_skeleton.dart'; // Adjust the import path as needed
 
 class CategoryPage extends StatefulWidget {
-  CategoryPage({super.key});
+  const CategoryPage({super.key});
 
   @override
   _CategoryPageState createState() => _CategoryPageState();
@@ -25,14 +25,19 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   void initState() {
     super.initState();
+    // Update filteredCategories whenever categoryList changes
     ever(productController.categoryList, (_) {
       filteredCategories.assignAll(productController.categoryList);
     });
+    // Initialize filteredCategories if categoryList already has data
     if (productController.categoryList.isNotEmpty) {
       filteredCategories.assignAll(productController.categoryList);
     }
+    // Fetch categories on page load
+    productController.fetchCategories();
   }
 
+  // Function to filter categories based on search query
   void searchCategory(String query) {
     if (query.isEmpty) {
       filteredCategories.assignAll(productController.categoryList);
@@ -46,8 +51,9 @@ class _CategoryPageState extends State<CategoryPage> {
     }
   }
 
+  // Function to refresh categories
   Future<void> _refreshCategories() async {
-    await productController.fetchCategories(); // Assuming this method exists
+    await productController.fetchCategories(); // Fetch categories on refresh
     filteredCategories.assignAll(productController.categoryList);
   }
 
@@ -102,27 +108,27 @@ class _CategoryPageState extends State<CategoryPage> {
                 ),
                 const SizedBox(height: 21),
                 Obx(() {
-                  if (productController.isLoading.value ||
-                      filteredCategories.isEmpty) {
-                    // Show skeleton loader while loading or if the filtered list is empty
+                  // Show skeleton while loading or if no categories are available
+                  if (productController.isLoading.value) {
+                    const int skeletonCount = 8; // Fixed number of skeletons while loading
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 30.0),
                       child: GridView.builder(
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisSpacing: 16,
                           crossAxisSpacing: 16,
                         ),
-                        itemCount: 4, // Show 4 skeleton items while loading
+                        itemCount: skeletonCount,
                         itemBuilder: (context, index) {
-                          return const ProductItemSkeleton();
+                          return const CategorySkeleton();
                         },
                       ),
                     );
                   }
+                  // Show actual category cards when data is loaded
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 30.0),
                     child: GridView.builder(

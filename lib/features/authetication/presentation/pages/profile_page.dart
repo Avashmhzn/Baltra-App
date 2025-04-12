@@ -1,12 +1,14 @@
 import 'package:baltra/core/utils/sessionController.dart';
 import 'package:baltra/core/utils/sessionExpirationMixin.dart';
 import 'package:baltra/features/authetication/controller/profileController.dart';
+import 'package:baltra/features/authetication/presentation/pages/changepassword.dart';
 import 'package:baltra/features/authetication/presentation/pages/editProfile.dart';
 import 'package:baltra/features/authetication/presentation/pages/loginPage.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Add this import
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -54,7 +56,7 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                   children: [
                     CircleAvatar(
                       radius: 60,
-                      foregroundImage: NetworkImage(
+                      foregroundImage: CachedNetworkImageProvider(
                         user.image_url ??
                             'https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg',
                       ),
@@ -131,6 +133,23 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                     ProfileDetailCard(
                       detail: user.contact.toString(), // Phone
                       title: 'Phone',
+                    ),
+                    // Add the Change Password GestureDetector here
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChangePasswordPage(
+                              phone: 9861490173,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const ProfileDetailCard(
+                        detail: "Password",
+                        title: 'Change Password',
+                      ),
                     ),
                     const SizedBox(height: 25),
                     const Text(

@@ -1,4 +1,5 @@
 import 'package:baltra/features/products/models/subcategoryProduct.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class ProductItem extends StatelessWidget {
@@ -26,7 +27,7 @@ class ProductItem extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage(product.main_image_url),
+                image: CachedNetworkImageProvider(product.main_image_url),
                 fit: BoxFit.cover,
               ),
             ),

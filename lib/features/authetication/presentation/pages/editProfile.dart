@@ -390,13 +390,15 @@ class _EditProfileState extends State<EditProfile> {
             ),
           );
 
-          Navigator.pushReplacement(
+          // Replace Navigator.pushReplacement with Navigator.pushAndRemoveUntil
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) => ButtomNavBar(
                 pageno: 3,
               ),
             ),
+                (Route<dynamic> route) => false, // This removes all previous routes
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -719,21 +721,6 @@ class _EditProfileState extends State<EditProfile> {
                           ),
                           SizedBox(height: 15),
                         ],
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChangePasswordPage(
-                                  phone: 9861490173,
-                                ),
-                              ));
-                        },
-                        child: const ProfileDetailCard(
-                          detail: "Password",
-                          title: 'Change Password',
-                        ),
                       ),
                       Align(
                         alignment: Alignment.centerRight,

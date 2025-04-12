@@ -1,4 +1,5 @@
 import 'package:baltra/features/products/models/product.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class Homepagecard extends StatelessWidget {
@@ -23,16 +24,21 @@ class Homepagecard extends StatelessWidget {
         children: [
           Expanded(
             child: Container(
-              // height: 175,
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                image: DecorationImage(
-                  image: NetworkImage(
-                    product.main_image!,
+              color: Colors.white,
+              child: CachedNetworkImage(
+                imageUrl: product.main_image!,
+                fit: BoxFit.contain,
+                placeholder: (context, url) => const SizedBox.shrink(), // No visible loader
+                errorWidget: (context, url, error) => const Center(
+                  child: Icon(
+                    Icons.error,
+                    color: Colors.red,
+                    size: 40,
                   ),
-                  fit: BoxFit.contain,
                 ),
+                fadeInDuration: const Duration(milliseconds: 300),
+                fadeOutDuration: const Duration(milliseconds: 300),
               ),
             ),
           ),
@@ -43,7 +49,7 @@ class Homepagecard extends StatelessWidget {
           ),
           Padding(
             padding:
-                const EdgeInsets.only(left: 8.0, right: 8, bottom: 10, top: 8),
+            const EdgeInsets.only(left: 8.0, right: 8, bottom: 10, top: 8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +57,7 @@ class Homepagecard extends StatelessWidget {
                 Text(
                   product.model_name!,
                   softWrap: true,
-                  maxLines: 2, // Adjust maxLines as needed
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       fontSize: 16,
@@ -84,7 +90,7 @@ class Homepagecard extends StatelessWidget {
           child: Text(
             value,
             softWrap: true,
-            maxLines: 2, // Adjust maxLines as needed
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 14,
