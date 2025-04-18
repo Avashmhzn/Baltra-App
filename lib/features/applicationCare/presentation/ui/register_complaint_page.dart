@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:baltra/core/utils/constants.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/application_care_page.dart';
+import 'package:baltra/features/authetication/controller/profileController.dart';
+import 'package:baltra/features/authetication/models/user.dart';
 import 'package:baltra/features/authetication/presentation/pages/buttomNavbar.dart';
 import 'package:baltra/features/authetication/presentation/widgets/textform.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
@@ -10,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
 class ComplaintRegistrationPage extends StatefulWidget {
@@ -49,6 +52,8 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
   String? customerContact;
   String? email;
 
+  bool _isLoading = false; // Add loading state
+
   // Method to load zones from the assets
   Future<void> loadZones() async {
     final String response = await rootBundle.loadString('assets/zones.json');
@@ -69,35 +74,57 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
         .cast<Map<String, dynamic>>();
   }
 
-  // Load customer details from SharedPreferences
+  // Load customer details from ProfileController
   Future<void> _loadCustomerDetails() async {
-    final prefs = await SharedPreferences.getInstance();
-    // <-- Fix: If the keys are missing, set default values.
-    if (!prefs.containsKey('firstName')) {
-      await prefs.setString('firstName', 'John');
+    try {
+      // Initialize or find ProfileController
+      final ProfileController profileController = Get.put(ProfileController());
+
+      // Fetch user data if not already loaded
+      if (profileController.userData.value == null) {
+        await profileController.fetchUserData();
+      }
+
+      // Access user data
+      final User? user = profileController.userData.value;
+      if (user != null) {
+        setState(() {
+          customerName = '${user.firstname} ${user.lastname}';
+          customerContact = user.contact.toString();
+          email = user.email;
+        });
+      } else {
+        // Fallback to SharedPreferences if user data is unavailable
+        final prefs = await SharedPreferences.getInstance();
+        setState(() {
+          customerName = prefs.getString('name') ?? 'Unknown';
+          final contact = prefs.get('contact');
+          customerContact = contact != null
+              ? (contact is int ? contact.toString() : contact.toString())
+              : 'Not Available';
+          email = prefs.getString('email') ?? 'Not Available';
+        });
+      }
+
+      print('Customer Name: $customerName');
+      print('Customer Contact: $customerContact');
+      print('Email: $email');
+    } catch (e) {
+      print('Error loading customer details: $e');
+      // Fallback to SharedPreferences in case of error
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        customerName = prefs.getString('name') ?? 'Unknown';
+        final contact = prefs.get('contact');
+        customerContact = contact != null
+            ? (contact is int ? contact.toString() : contact.toString())
+            : 'Not Available';
+        email = prefs.getString('email') ?? 'Not Available';
+      });
+      print('Customer Name (Fallback): $customerName');
+      print('Customer Contact (Fallback): $customerContact');
+      print('Email (Fallback): $email');
     }
-    if (!prefs.containsKey('lastName')) {
-      await prefs.setString('lastName', 'Doe');
-    }
-    if (!prefs.containsKey('contact')) {
-      await prefs.setString('contact', '0000000000');
-    }
-    if (!prefs.containsKey('email')) {
-      await prefs.setString('email', 'johndoe@example.com');
-    }
-    setState(() {
-      // Use 'firstName' and 'lastName' to match what is saved in EditProfile
-      String firstName = prefs.getString('firstName') ?? '';
-      String lastName = prefs.getString('lastName') ?? '';
-      customerName = "$firstName $lastName".trim().isEmpty
-          ? 'Unknown'
-          : "$firstName $lastName";
-      customerContact = prefs.getString('contact') ?? 'Not Available';
-      email = prefs.getString('email') ?? 'Not Available';
-    });
-    print('Customer Name: $customerName');
-    print('Customer Contact: $customerContact');
-    print('Email: $email');
   }
 
   Future<void> _pickImage(ImageSource source, bool isProductImage) async {
@@ -123,10 +150,30 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
   }
 
   Future<void> submitForm() async {
+    setState(() {
+      _isLoading = true; // Start loading
+    });
+
     try {
-      await _loadCustomerDetails();
+      await _loadCustomerDetails(); // Ensure latest customer details
       final prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('auth_token');
+
+      if (customerName == 'Unknown' ||
+          customerContact == 'Not Available' ||
+          email == 'Not Available') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Customer details are incomplete.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
+        return;
+      }
 
       var request = http.MultipartRequest(
         'POST',
@@ -153,10 +200,10 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
       request.fields['problem_description'] =
           _problemDescriptionController.text;
 
-      // Customer details
-      request.fields['customerName'] = customerName ?? 'Unknown';
-      request.fields['customerContact'] = customerContact ?? 'Not Available';
-      request.fields['email'] = email ?? 'Not Available';
+      // Customer details - Use correct field names
+      request.fields['customerName'] = customerName!;
+      request.fields['customerContact'] = customerContact!; // Changed from 'contact' to 'customerContact'
+      request.fields['email'] = email!;
 
       if (selectedZone != null) {
         request.fields['zone'] = selectedZone!;
@@ -167,22 +214,55 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
 
       request.headers['Authorization'] = 'Bearer $token';
 
+      // Debug: Print request fields
+      print('Request Fields: ${request.fields}');
+
       var response = await request.send();
       var responseBody = await response.stream.bytesToString();
+      print('Response Body: $responseBody');
 
       if (response.statusCode == 201) {
-        // Use pushAndRemoveUntil to clear the stack and prevent back navigation
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => ButtomNavBar(pageno: 2)),
-              (Route<dynamic> route) => false, // Removes all previous routes
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
+        // Show custom success dialog
+        showDialog(
+          context: context,
+          builder: (context) => CustomSuccessDialog(
+            productName: widget.modelName,
+            onConfirm: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => ButtomNavBar(pageno: 2)),
+                    (Route<dynamic> route) => false, // Removes all previous routes
+              );
+            },
+          ),
         );
       } else {
-        throw Exception('Failed to submit data : ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit complaint: ${response.statusCode}'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
       }
     } catch (error) {
-      // Handle general errors
       print('Error: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error submitting complaint: $error'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      setState(() {
+        _isLoading = false; // Stop loading
+      });
     }
   }
 
@@ -279,8 +359,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                           child: Text(
                             zone['zoneName'],
                             style: const TextStyle(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 14),
+                                fontWeight: FontWeight.normal, fontSize: 14),
                           ),
                         )),
                       ],
@@ -307,14 +386,12 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                                 fontWeight: FontWeight.normal, fontSize: 14),
                           ),
                         ),
-                        ...availableAreas
-                            .map((area) => DropdownMenuItem<String>(
+                        ...availableAreas.map((area) => DropdownMenuItem<String>(
                           value: area['areaName'],
                           child: Text(
                             area['areaName'],
                             style: const TextStyle(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 14),
+                                fontWeight: FontWeight.normal, fontSize: 14),
                           ),
                         )),
                       ],
@@ -411,8 +488,8 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: widget.status == 'Pending'
-                          ? showSnackBar
+                      onTap: (widget.status == 'Pending' || _isLoading)
+                          ? null // Disable button when loading or status is Pending
                           : submitForm,
                       child: Container(
                         margin: const EdgeInsets.symmetric(vertical: 10),
@@ -420,8 +497,19 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                           horizontal: 50,
                           vertical: 15,
                         ),
-                        color: Theme.of(context).primaryColor,
-                        child: const Text(
+                        color: _isLoading
+                            ? Colors.grey // Grey out when loading
+                            : Theme.of(context).primaryColor,
+                        child: _isLoading
+                            ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                            : const Text(
                           'Submit',
                           style: TextStyle(color: Colors.white),
                         ),
@@ -432,6 +520,93 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
               )
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// Custom Success Dialog
+class CustomSuccessDialog extends StatelessWidget {
+  final String productName;
+  final VoidCallback onConfirm;
+
+  const CustomSuccessDialog({
+    super.key,
+    required this.productName,
+    required this.onConfirm,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        width: 350,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.check_circle,
+              color: Colors.green,
+              size: 50,
+            ),
+            const SizedBox(height: 15),
+            const Text(
+              'Complaint Registered',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Your complaint for "$productName" has been successfully registered.',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black54,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                onConfirm(); // Navigate to home or other action
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

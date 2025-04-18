@@ -63,7 +63,7 @@ class _TrackingPageState extends State<TrackingPage> {
                 imageUrl,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.image_not_supported, size: 100),
+                const Icon(Icons.image_not_supported, size: 100),
               ),
             ),
           ),
@@ -229,7 +229,7 @@ class _TrackingPageState extends State<TrackingPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height:8),
                   // Step Title
                   Text(
                     step["newServiceStatusName"] ?? "Unknown Step",
@@ -281,6 +281,7 @@ class _TrackingPageState extends State<TrackingPage> {
               Padding(
                 padding: const EdgeInsets.all(15),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
                       decoration: BoxDecoration(
@@ -293,73 +294,76 @@ class _TrackingPageState extends State<TrackingPage> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.modelName ?? "Unknown Model",
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          "Job ID: ${product.jobNo ?? 'N/A'}",
-                          style: const TextStyle(
-                              fontSize: 16, color: Colors.black87),
-                        ),
-                      ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.modelName ?? "Unknown Model",
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                            softWrap: true,
+                            overflow: TextOverflow.visible,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "Job ID: ${product.jobNo ?? 'N/A'}",
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.black87),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
               // Conditionally display the stepper if a valid Job ID exists.
               (product.jobNo != null &&
-                      product.jobNo!.trim().isNotEmpty &&
-                      product.jobNo != 'N/A')
+                  product.jobNo!.trim().isNotEmpty &&
+                  product.jobNo != 'N/A')
                   ? Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 20),
-                          // Tracking Progress Steps
-                          stepperData.isNotEmpty
-                              ? SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: stepWidgets,
-                                  ),
-                                )
-                              : const Center(
-                                  child: Text("Wait for process",
-                                      style: TextStyle(color: Colors.red)),
-                                ),
-                        ],
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 20),
+                    // Tracking Progress Steps
+                    stepperData.isNotEmpty
+                        ? SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: stepWidgets,
                       ),
                     )
+                        : const Center(
+                      child: Text("Wait for process",
+                          style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              )
                   : Container(),
               // Product Details Section
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                height: 180,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(color: Colors.grey),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Product Image
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.only(right: 10.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: SizedBox(
-                          height: 150,
-                          width: 140,
+                          height: 100,
+                          width: 100,
                           child: GestureDetector(
                             onTap: () => showFullScreenImage(
                                 context, product.damagedImage ?? ''),
@@ -369,48 +373,80 @@ class _TrackingPageState extends State<TrackingPage> {
                                 product.damagedImage ?? '',
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(Icons.image_not_supported),
+                                const Icon(Icons.image_not_supported),
                               ),
                             ),
                           ),
-                          /*child: Image.network(
-                            product.damagedImage ?? '',
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.image_not_supported),
-                          ),*/
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
+                    // Product Details
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Product Name
                           Text(
                             product.modelName ?? 'Unknown Model',
                             style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            softWrap: true,
+                            overflow: TextOverflow.visible,
                           ),
-                          Text("Model Num: ${product.modelNum ?? 'N/A'}",
-                              style: const TextStyle(
-                                  fontSize: 14, color: Colors.grey)),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.5,
-                            child: Table(
-                              border: TableBorder.symmetric(
-                                  outside: BorderSide.none),
-                              children: [
-                                _buildTableRow("Job ID", product.jobNo),
-                                _buildTableRow(
-                                    "Tracking ID", product.serialNumber),
-                                _buildTableRow("Sent for", product.problemType),
-                                _buildTableRow(
-                                    "Complaint", product.problemDescription),
-                                _buildTableRow("Stage", product.status),
-                                _buildTableRow("Sent Date", product.dateJoined),
-                              ],
+                          const SizedBox(height: 5),
+                          // Job ID (instead of Model Number)
+                          Text(
+                            "Job ID: ${product.jobNo ?? 'N/A'}",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          // Serial Number (Tracking ID)
+                          Text(
+                            "Serial Number: ${product.serialNumber ?? 'N/A'}",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          // Store Name
+                          Text(
+                            "Store Name: ${product.storeName ?? 'N/A'}",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          // Store Location
+                          Text(
+                            "Store Location: ${product.storeLocation ?? 'N/A'}",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          // Purchase Date (Sent Date)
+                          Text(
+                            "Purchase Date: ${product.dateJoined ?? 'N/A'}",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          // Status
+                          Text(
+                            "Status: ${product.status ?? 'N/A'}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: getStatusColor(product.status),
                             ),
                           ),
                         ],
@@ -473,7 +509,7 @@ class _TrackingPageState extends State<TrackingPage> {
                                   product.damagedImage ?? '',
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.image_not_supported),
+                                  const Icon(Icons.image_not_supported),
                                 ),
                               ),
                             ),
@@ -525,44 +561,44 @@ class _TrackingPageState extends State<TrackingPage> {
                           width: MediaQuery.of(context).size.width * 0.8,
                           height: MediaQuery.of(context).size.height * 0.3,
                           child: product.damagedVideo != null &&
-                                  product.damagedVideo!.isNotEmpty
+                              product.damagedVideo!.isNotEmpty
                               ? GestureDetector(
-                                  onTap: () {
-                                    // Open Full-Screen Video Preview
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => VideoPreview(
-                                            videoUrl: product.damagedVideo!),
-                                      ),
-                                    );
-                                  },
-                                  child: Hero(
-                                    tag: "${product.damagedVideo}_video",
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.8,
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.3,
-                                      child: VideoPreview(
-                                          videoUrl: product.damagedVideo!),
-                                    ),
-                                  ),
-                                )
-                              : Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black12,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.play_circle_fill,
-                                      size: 50,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                            onTap: () {
+                              // Open Full-Screen Video Preview
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VideoPreview(
+                                      videoUrl: product.damagedVideo!),
                                 ),
+                              );
+                            },
+                            child: Hero(
+                              tag: "${product.damagedVideo}_video",
+                              child: Container(
+                                width: MediaQuery.of(context).size.width *
+                                    0.8,
+                                height:
+                                MediaQuery.of(context).size.height *
+                                    0.3,
+                                child: VideoPreview(
+                                    videoUrl: product.damagedVideo!),
+                              ),
+                            ),
+                          )
+                              : Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black12,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.play_circle_fill,
+                                size: 50,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -578,7 +614,7 @@ class _TrackingPageState extends State<TrackingPage> {
                   final currentStep = stepperData
                       .cast<Map<String, dynamic>>()
                       .firstWhereOrNull((step) =>
-                          step['newServiceStatusName'] == product.status);
+                  step['newServiceStatusName'] == product.status);
                   if (currentStep == null) return const SizedBox.shrink();
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -635,7 +671,7 @@ class _TrackingPageState extends State<TrackingPage> {
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         // Stage name
                                         Text(
@@ -659,7 +695,7 @@ class _TrackingPageState extends State<TrackingPage> {
                                         // Custom stage message
                                         Text(
                                           'Your repaired item is ready for collection. '
-                                          'Please visit our service center located in Teku.',
+                                              'Please visit our service center located in Teku.',
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: Colors.grey.shade700,
@@ -692,7 +728,7 @@ class _TrackingPageState extends State<TrackingPage> {
   int getActiveStep(List<dynamic> steps, String? status) {
     if (status == null) return 0;
     int index =
-        steps.indexWhere((step) => step["newServiceStatusName"] == status);
+    steps.indexWhere((step) => step["newServiceStatusName"] == status);
     return index >= 0 ? index : 0;
   }
 

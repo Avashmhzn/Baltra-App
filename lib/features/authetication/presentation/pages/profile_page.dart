@@ -135,7 +135,7 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                       title: 'Phone',
                     ),
                     // Add the Change Password GestureDetector here
-                    GestureDetector(
+                    /*GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
@@ -150,8 +150,41 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                         detail: "Password",
                         title: 'Change Password',
                       ),
+                    ),*/
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChangePasswordPage(
+                              phone: 9861490173,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.key,
+                              color: Colors.red,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Change Password',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 25),
+                    SizedBox(height: 25),
                     const Text(
                       'Logout from this account',
                       style: TextStyle(

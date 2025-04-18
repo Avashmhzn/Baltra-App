@@ -4,16 +4,20 @@ import 'package:intl/intl.dart';
 
 // ignore: must_be_immutable
 class NormalTextField extends StatelessWidget {
-  NormalTextField(
-      {super.key,
-      this.controller,
-      required this.type,
-      this.readonly,
-      this.initial,
-      required this.hint,
-      required this.title,
-        this.inputFormatters,
-      });
+  NormalTextField({
+    super.key,
+    this.controller,
+    required this.type,
+    this.readonly,
+    this.initial,
+    required this.hint,
+    required this.title,
+    this.inputFormatters,
+    this.validator, // Added validator parameter
+    this.onTap, // Added onTap parameter
+    this.onChanged, // Added onChanged parameter
+  });
+
   final String title;
   final String hint;
   final TextInputType type;
@@ -21,6 +25,9 @@ class NormalTextField extends StatelessWidget {
   bool? readonly;
   String? initial;
   final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator; // Validator function
+  final VoidCallback? onTap; // onTap callback
+  final ValueChanged<String>? onChanged; // onChanged callback
 
   @override
   Widget build(BuildContext context) {
@@ -43,17 +50,19 @@ class NormalTextField extends StatelessWidget {
               border: const OutlineInputBorder(),
               hintText: hint,
               hintStyle:
-                  const TextStyle(fontSize: 12, color: Color(0xff828282)),
+              const TextStyle(fontSize: 12, color: Color(0xff828282)),
               focusedBorder: OutlineInputBorder(
                   borderSide:
-                      BorderSide(color: Theme.of(context).primaryColor)),
+                  BorderSide(color: Theme.of(context).primaryColor)),
             ),
-            validator: (value) {
+            validator: validator ?? (value) {
               if (value == null || value.isEmpty) {
                 return '$title is required';
               }
               return null;
-            },
+            }, // Use provided validator or default
+            onTap: onTap, // Pass onTap to TextFormField
+            onChanged: onChanged, // Pass onChanged to TextFormField
           ),
         ],
       ),
@@ -91,10 +100,10 @@ class DatePickerField extends StatelessWidget {
               border: const OutlineInputBorder(),
               hintText: hint,
               hintStyle:
-                  const TextStyle(fontSize: 12, color: Color(0xff828282)),
+              const TextStyle(fontSize: 12, color: Color(0xff828282)),
               focusedBorder: OutlineInputBorder(
                   borderSide:
-                      BorderSide(color: Theme.of(context).primaryColor)),
+                  BorderSide(color: Theme.of(context).primaryColor)),
             ),
             onTap: () async {
               DateTime? pickedDate = await showDatePicker(
@@ -106,7 +115,7 @@ class DatePickerField extends StatelessWidget {
 
               if (pickedDate != null) {
                 String formattedDate =
-                    DateFormat('yyyy-MM-dd').format(pickedDate);
+                DateFormat('yyyy-MM-dd').format(pickedDate);
                 controller.text = formattedDate;
               }
             },

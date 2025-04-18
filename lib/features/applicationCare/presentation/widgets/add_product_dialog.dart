@@ -378,6 +378,7 @@ class _ResultScreenState extends State<ResultScreen> {
   final _picker = ImagePicker();
 
   final List<File?> _images = List.filled(3, null);
+  bool _isLoading = false; // Add loading state
 
   Future<void> _openImagePicker(int index) async {
     final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
@@ -400,6 +401,10 @@ class _ResultScreenState extends State<ResultScreen> {
   Get.put(Myproductcontroller(productRepository: MyProductRepository()));
 
   Future<void> submitForm() async {
+    setState(() {
+      _isLoading = true; // Start loading
+    });
+
     log("adding product.....");
     log(_purchaseDateController.text);
     log(modelNameController.text);
@@ -439,6 +444,10 @@ class _ResultScreenState extends State<ResultScreen> {
     var responseBody = await response.stream.bytesToString();
     log('RESPONSE: ***********88$responseBody');
     log(response.statusCode.toString());
+
+    setState(() {
+      _isLoading = false; // Stop loading
+    });
 
     final data = jsonDecode(responseBody);
     if (response.statusCode == 200) {
@@ -663,16 +672,27 @@ class _ResultScreenState extends State<ResultScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () async {
+                        onTap: _isLoading ? null : () async {
                           await submitForm();
-                        },
+                        }, // Disable button when loading
                         child: Container(
                           margin: const EdgeInsets.symmetric(vertical: 15),
                           width: double.infinity,
                           height: 50,
-                          color: Theme.of(context).primaryColor,
-                          child: const Center(
-                            child: Text(
+                          color: _isLoading
+                              ? Colors.grey // Grey out when loading
+                              : Theme.of(context).primaryColor,
+                          child: Center(
+                            child: _isLoading
+                                ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                                : const Text(
                               'Add product',
                               style: TextStyle(color: Colors.white),
                             ),

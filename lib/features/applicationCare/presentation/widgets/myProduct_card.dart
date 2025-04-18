@@ -6,6 +6,8 @@ import 'package:baltra/features/applicationCare/presentation/ui/register_complai
 import 'package:baltra/features/applicationCare/presentation/widgets/custom_delete_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class MyProdductCard extends StatelessWidget {
   MyProdductCard({
@@ -64,29 +66,21 @@ class MyProdductCard extends StatelessWidget {
                       boundaryMargin: const EdgeInsets.all(20),
                       minScale: 0.1, // Minimum zoom scale
                       maxScale: 4.0, // Maximum zoom scale
-                      child: Image.network(
-                        product.product_image,
-                        height: 170,
+                      child: CachedNetworkImage(
+                        imageUrl: product.product_image,
+                        height: 150,
                         width: double.infinity,
                         fit: BoxFit.contain,
-                        loadingBuilder: (context, child, progress) {
-                          if (progress == null) {
-                            return child;
-                          } else {
-                            return Center(
-                              child: CircularProgressIndicator(
-                                value: progress.expectedTotalBytes != null
-                                    ? progress.cumulativeBytesLoaded /
-                                    (progress.expectedTotalBytes ?? 1)
-                                    : null,
-                              ),
-                            );
-                          }
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Center(
-                              child: Icon(Icons.error)); // Fallback icon
-                        },
+                        placeholder: (context, url) => Skeletonizer(
+                          enabled: true,
+                          child: Container(
+                            height: 150,
+                            width: double.infinity,
+                            color: Colors.grey[300], // Skeleton background
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => const Center(
+                            child: Icon(Icons.error)), // Fallback icon
                       ),
                     ),
                   ),
@@ -123,10 +117,11 @@ class MyProdductCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 20),
 
           // Product Details
           Padding(
-            padding: const EdgeInsets.all(14.0),
+            padding: const EdgeInsets.all(10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -170,7 +165,7 @@ class MyProdductCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 15), // Increased from 10
 
           // Function call to show buttons based on product status
           _buildActionButtons(context),
@@ -204,9 +199,9 @@ class MyProdductCard extends StatelessWidget {
                 color: Color(0xff000C22),
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
-              margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
               width: double.infinity,
-              height: 50,
+              height: 52, // Increased from 50
               child: const Center(
                 child: Text(
                   'Register a Complaint',
@@ -245,9 +240,9 @@ class MyProdductCard extends StatelessWidget {
   }
 
   // Function to display product details
-  Widget detailRow({required String title, required String value}) {
+  Widget detailRow({required String title, required String? value}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -261,7 +256,7 @@ class MyProdductCard extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              value,
+              value ?? 'N/A',
               textAlign: TextAlign.end,
               style: const TextStyle(
                 fontSize: 14,
@@ -280,7 +275,8 @@ class FullScreenImagePage extends StatelessWidget {
   final String imageUrl;
   final String heroTag;
 
-  FullScreenImagePage({
+  const FullScreenImagePage({
+    super.key,
     required this.imageUrl,
     required this.heroTag, // Make heroTag required
   });
@@ -301,26 +297,19 @@ class FullScreenImagePage extends StatelessWidget {
               boundaryMargin: const EdgeInsets.all(20),
               minScale: 0.1,
               maxScale: 4.0,
-              child: Image.network(
-                imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
                 fit: BoxFit.contain,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) {
-                    return child;
-                  } else {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: progress.expectedTotalBytes != null
-                            ? progress.cumulativeBytesLoaded /
-                            (progress.expectedTotalBytes ?? 1)
-                            : null,
-                      ),
-                    );
-                  }
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Center(child: Icon(Icons.error));
-                },
+                placeholder: (context, url) => Skeletonizer(
+                  enabled: true,
+                  child: Container(
+                    height: double.infinity,
+                    width: double.infinity,
+                    color: Colors.grey[300], // Skeleton background
+                  ),
+                ),
+                errorWidget: (context, url, error) =>
+                const Center(child: Icon(Icons.error)),
               ),
             ),
           ),

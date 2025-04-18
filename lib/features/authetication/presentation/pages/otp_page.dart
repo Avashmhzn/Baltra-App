@@ -1,5 +1,6 @@
 
 import 'package:baltra/features/authetication/data/authRepository.dart';
+import 'package:baltra/features/authetication/presentation/pages/congratulations_page.dart';
 import 'package:baltra/features/authetication/presentation/pages/resetPassowrd.dart';
 import 'package:baltra/features/authetication/presentation/pages/signup_page.dart';
 import 'package:baltra/features/authetication/presentation/widgets/appbar.dart';
@@ -58,7 +59,7 @@ class _OtpPageState extends State<OtpPage> {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-                builder: (context) => SignupPage(phone: widget.phone)),
+                builder: (context) => CongratulationsPage(phone: widget.phone)),
             (route) => false,
           );
         }

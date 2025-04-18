@@ -3,24 +3,27 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 // ignore: must_be_immutable
 class ObsecureTextField extends StatefulWidget {
-  ObsecureTextField(
-      {super.key,
-      this.controller,
-      required this.type,
-      this.validator,
-      required this.title});
+  ObsecureTextField({
+    super.key,
+    this.controller,
+    required this.type,
+    this.validator,
+    required this.title,
+    this.hintText, // Add hintText parameter
+  });
   final String title;
   final TextInputType type;
   TextEditingController? controller;
   final String? Function(String?)? validator;
+  final String? hintText; // Declare hintText
 
   @override
   State<ObsecureTextField> createState() => _ObsecureTextFieldState();
 }
 
 class _ObsecureTextFieldState extends State<ObsecureTextField> {
-
   bool _isObscured = true;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -39,16 +42,22 @@ class _ObsecureTextFieldState extends State<ObsecureTextField> {
             obscureText: _isObscured,
             decoration: InputDecoration(
               suffixIcon: IconButton(
-                  icon: SvgPicture.asset(_isObscured ?'assets/icons/eye_show.svg': 'assets/icons/eye_hidden.svg' ), 
-                  onPressed: () {
-                    setState(() {
-                    _isObscured =! _isObscured;
-                    });
-                  }),
+                icon: SvgPicture.asset(_isObscured
+                    ? 'assets/icons/eye_show.svg'
+                    : 'assets/icons/eye_hidden.svg'),
+                onPressed: () {
+                  setState(() {
+                    _isObscured = !_isObscured;
+                  });
+                },
+              ),
               border: const OutlineInputBorder(),
               focusedBorder: OutlineInputBorder(
-                  borderSide:
-                      BorderSide(color: Theme.of(context).primaryColor)),
+                borderSide: BorderSide(color: Theme.of(context).primaryColor),
+              ),
+              hintText: widget.hintText,
+              hintStyle: const TextStyle(
+                  fontSize: 12, color: Color(0xff828282)), // Apply hintText
             ),
           ),
         ],

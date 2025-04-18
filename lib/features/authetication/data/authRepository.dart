@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Authrepository extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
+
   Future<void> requestOTP(int number) async {
     try {
       isLoading.value = true; // Start loading indicator
@@ -89,7 +90,8 @@ class Authrepository extends GetxController {
       if (response.statusCode == 200) {
         return response.statusCode;
       } else {
-        errorMessage.value = 'Failed to login: ${data['message'] ?? "Unknown error"}';
+        errorMessage.value =
+        'Failed to login: ${data['message'] ?? "Unknown error"}';
         return response.statusCode;
       }
     } on SocketException {
@@ -105,42 +107,53 @@ class Authrepository extends GetxController {
     }
   }
 
-
   Future<int> registerCustomer(
       String firstname,
       String lastName,
       String email,
       String password,
-      int phone,
-      ) async {
+      int phone, {
+        String? gender,
+        String? customerAddress,
+        String? city,
+        String? district,
+        String? dob,
+      }) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-// TODo: ADD DOB ON SIGNUP
     try {
+      final Map<String, dynamic> requestBody = {
+        "firstname": firstname,
+        "lastname": lastName,
+        "email": email,
+        "password": password,
+        "contact": phone,
+      };
+
+      // Add optional fields only if provided and non-empty
+      if (gender != null && gender.isNotEmpty) requestBody["gender"] = gender;
+      if (customerAddress != null && customerAddress.isNotEmpty) requestBody["customerAddress"] = customerAddress;
+      if (city != null && city.isNotEmpty) requestBody["city"] = city;
+      if (district != null && district.isNotEmpty) requestBody["district"] = district;
+      if (dob != null && dob.isNotEmpty) requestBody["dob"] = dob;
+
       final response = await http.post(
         Uri.parse('$URL/customer/register'),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(<String, dynamic>{
-          "firstname": firstname,
-          "lastname": lastName,
-          "email": email,
-          "password": password,
-          "contact": phone,
-          "dob": '2001-06-20',
-        }),
+        body: jsonEncode(requestBody),
       );
+      log("Register Request Body: ${jsonEncode(requestBody)}");
       log(response.body);
       log(response.statusCode.toString());
+
       final dynamic data = json.decode(response.body);
       if (response.statusCode == 200) {
         final dynamic userResponseData = data['data'];
 
         User user = User.fromJson(userResponseData);
-        // If login is successful
         log("***************");
-
-        log("reward Poinits: ${user.reward_points}");
+        log("reward Points: ${user.reward_points}");
         log("***************");
 
         final sessionController = Get.find<SessionController>();
@@ -150,12 +163,13 @@ class Authrepository extends GetxController {
         await prefs.setBool('logedin', true);
         await prefs.setInt(
           'reward_points',
-          user.reward_points!,
+          user.reward_points ?? 0,
         );
         final int status = response.statusCode;
         return status;
       } else {
-        errorMessage.value = 'Failed to create User: ${data['message']}';
+        errorMessage.value =
+        'Failed to create User: ${data['message'] ?? 'Unknown error'}';
         return response.statusCode;
       }
     } on SocketException catch (_) {
@@ -169,8 +183,6 @@ class Authrepository extends GetxController {
     }
   }
 
-// 766127
-  // requestpasswordreset
   Future<int> passwordResetOTP(int number) async {
     try {
       final response = await http.post(
@@ -199,8 +211,6 @@ class Authrepository extends GetxController {
       isLoading.value = false;
     }
   }
-
-// resetverifyotp
 
   Future<int> resetverifyOTP(int number, int otp) async {
     try {
@@ -232,7 +242,6 @@ class Authrepository extends GetxController {
       isLoading.value = false;
     }
   }
-  // resetpassword
 
   Future<int> resetpassword(
       int number, String newPassword, String confirmPassword) async {
@@ -270,21 +279,26 @@ class Authrepository extends GetxController {
     }
   }
 
-  //changepassword
-  Future<int> changePassword(
+  Future<Map<String, dynamic>> changePassword(
       int number,
       String oldPassword,
       String newPassword,
       String confirmNewPassword,
       ) async {
-    if (number <= 0 || oldPassword.isEmpty || newPassword.isEmpty || confirmNewPassword.isEmpty) {
+    if (number <= 0 ||
+        oldPassword.isEmpty ||
+        newPassword.isEmpty ||
+        confirmNewPassword.isEmpty) {
       ScaffoldMessenger.of(Get.context!).showSnackBar(
         const SnackBar(
           content: Text('All fields are required.'),
           duration: Duration(seconds: 2),
         ),
       );
-      return -1;
+      return {
+        'status': -1,
+        'message': 'All fields are required.',
+      };
     }
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -313,26 +327,40 @@ class Authrepository extends GetxController {
       final dynamic data = json.decode(response.body);
 
       if (response.statusCode == 200) {
-        return response.statusCode;
+        return {
+          'status': response.statusCode,
+          'message': data['message'] ?? 'Password changed successfully.',
+        };
       } else if (response.statusCode == 401) {
         errorMessage.value = 'Session expired. Please log in again.';
         Get.offAll(Loginpage()); // Navigate to login page
-        return response.statusCode;
+        return {
+          'status': response.statusCode,
+          'message': 'Session expired. Please log in again.',
+        };
       } else {
         errorMessage.value = data['message'] ?? 'Failed to change password';
-        return response.statusCode;
+        return {
+          'status': response.statusCode,
+          'message': data['message'] ?? 'Failed to change password',
+        };
       }
     } on SocketException catch (_) {
       errorMessage.value = 'No internet connection';
-      return -1;
+      return {
+        'status': -1,
+        'message': 'No internet connection',
+      };
     } catch (e) {
       errorMessage.value = 'Unexpected error: $e';
-      return -1;
+      return {
+        'status': -1,
+        'message': 'Unexpected error: $e',
+      };
     } finally {
       isLoading.value = false;
     }
   }
-
 
   Future<int> loginUser(
       int phone,
@@ -367,18 +395,16 @@ class Authrepository extends GetxController {
         final sessionController = Get.find<SessionController>();
         await sessionController.setLoggedIn();
         log("***************");
-
-        log("reward Poinits: ${user.reward_points}");
+        log("reward Points: ${user.reward_points}");
         log("***************");
         await prefs.setString('auth_token', data['token']);
         await prefs.setString('name', user.firstname);
         await prefs.setBool('logedin', true);
         await prefs.setInt(
           'reward_points',
-          user.reward_points!,
+          user.reward_points ?? 0,
         );
         final int status = response.statusCode;
-
         return status;
       } else {
         errorMessage.value = 'Failed to login: ${data['message']}';
