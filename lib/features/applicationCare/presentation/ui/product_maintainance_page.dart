@@ -5,6 +5,7 @@ import 'package:baltra/features/applicationCare/presentation/ui/product_tracking
 import 'package:baltra/features/products/presentation/widgets/baltra_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
 // Helper function to return color based on status.
@@ -23,7 +24,7 @@ Color getStatusColor(String? status) {
 // Widget for displaying complaint details with conditional color for "Status:".
 Widget detailRow({required String title, required String? value}) {
   // Check if this row is the status row.
-  bool isStatusRow = title.toLowerCase().contains('status');
+  bool isStatusRow = title.toLowerCase().contains('stage');
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
     child: Row(
@@ -51,6 +52,15 @@ Widget detailRow({required String title, required String? value}) {
       ],
     ),
   );
+}
+String formatDateOnly(String? dateStr) {
+  if (dateStr == null || dateStr.isEmpty) return "No Date";
+  try {
+    DateTime parsedDate = DateTime.parse(dateStr);
+    return DateFormat('yyyy-MM-dd').format(parsedDate);
+  } catch (e) {
+    return "Invalid Date";
+  }
 }
 
 // Skeleton loader widget with shimmer animation
@@ -156,7 +166,7 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
                   ),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: 3, // Show 3 skeleton cards while loading
+                      itemCount: 3,
                       itemBuilder: (context, index) {
                         return complaintSkeleton();
                       },
@@ -236,10 +246,10 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
                                   title: 'Complaint:',
                                   value: complaint.problemDescription),
                               detailRow(
-                                  title: 'Status:', value: complaint.status),
+                                  title: 'Stage:', value: complaint.status),
                               detailRow(
                                   title: 'Complaint Date:',
-                                  value: complaint.dateJoined),
+                                  value: formatDateOnly(complaint.dateJoined)),
                               if ((complaint.damagedImage ?? "").isNotEmpty)
                                 Image.network(
                                   complaint.damagedImage,

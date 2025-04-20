@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:baltra/features/applicationCare/controller/crmController.dart';
 import 'package:baltra/features/applicationCare/presentation/widgets/tracking_details_skeletion.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
-import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -39,6 +38,17 @@ class _TrackingPageState extends State<TrackingPage> {
     try {
       DateTime parsedDate = DateTime.parse(dateStr);
       return DateFormat('EEE, MMM dd, yyyy').format(parsedDate);
+    } catch (e) {
+      return "Invalid Date";
+    }
+  }
+
+  // New method for date-only formatting
+  String formatDateOnly(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return "No Date";
+    try {
+      DateTime parsedDate = DateTime.parse(dateStr);
+      return DateFormat('yyyy-MM-dd').format(parsedDate);
     } catch (e) {
       return "Invalid Date";
     }
@@ -229,7 +239,7 @@ class _TrackingPageState extends State<TrackingPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height:8),
+                  const SizedBox(height: 8),
                   // Step Title
                   Text(
                     step["newServiceStatusName"] ?? "Unknown Step",
@@ -346,7 +356,8 @@ class _TrackingPageState extends State<TrackingPage> {
                   : Container(),
               // Product Details Section
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                padding:
+                const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -358,7 +369,7 @@ class _TrackingPageState extends State<TrackingPage> {
                   children: [
                     // Product Image
                     Padding(
-                      padding: const EdgeInsets.only(right: 10.0),
+                      padding: const EdgeInsets.only(right: 10.0, top: 40),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: SizedBox(
@@ -387,67 +398,37 @@ class _TrackingPageState extends State<TrackingPage> {
                         children: [
                           // Product Name
                           Text(
-                            product.modelName ?? 'Unknown Model',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            softWrap: true,
-                            overflow: TextOverflow.visible,
-                          ),
-                          const SizedBox(height: 5),
-                          // Job ID (instead of Model Number)
-                          Text(
-                            "Job ID: ${product.jobNo ?? 'N/A'}",
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          // Serial Number (Tracking ID)
-                          Text(
-                            "Serial Number: ${product.serialNumber ?? 'N/A'}",
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          // Store Name
-                          Text(
-                            "Store Name: ${product.storeName ?? 'N/A'}",
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          // Store Location
-                          Text(
-                            "Store Location: ${product.storeLocation ?? 'N/A'}",
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          // Purchase Date (Sent Date)
-                          Text(
-                            "Purchase Date: ${product.dateJoined ?? 'N/A'}",
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          // Status
-                          Text(
-                            "Status: ${product.status ?? 'N/A'}",
+                            product.modelName,
                             style: TextStyle(
-                              fontSize: 14,
-                              color: getStatusColor(product.status),
-                            ),
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'Model Number: ${product.modelNum}',
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                          SizedBox(height: 10),
+                          // Table for product details
+                          Table(
+                            columnWidths: const {
+                              0: FlexColumnWidth(2),
+                              1: FlexColumnWidth(3),
+                            },
+                            children: [
+                              detailRow(
+                                  title: "Job ID: ", value: product.jobNo),
+                              detailRow(
+                                  title: "Sent for: ",
+                                  value: product.problemType),
+                              detailRow(
+                                  title: "Complaint: ",
+                                  value: product.problemDescription),
+                              detailRow(
+                                  title: "Stage: ",
+                                  value: product.status),
+                              detailRow(
+                                  title: "Purchase Date: ",
+                                  value: formatDateOnly(product.dateJoined)),
+                            ],
                           ),
                         ],
                       ),
@@ -608,7 +589,6 @@ class _TrackingPageState extends State<TrackingPage> {
                   ],
                 ),
               ),
-
               Builder(
                 builder: (context) {
                   final currentStep = stepperData
@@ -629,9 +609,8 @@ class _TrackingPageState extends State<TrackingPage> {
                             const Text(
                               'Current Stage',
                               style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -745,22 +724,34 @@ class _TrackingPageState extends State<TrackingPage> {
   }
 
   // Builds a table row for product details with status text color change.
-  TableRow _buildTableRow(String label, String? value) {
-    bool isStatusRow = label.toLowerCase() == "stage";
+  TableRow detailRow({required String title, required String? value}) {
+    bool isStatusRow = title.toLowerCase().contains('stage');
     return TableRow(
       children: [
         TableCell(
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
           ),
         ),
         TableCell(
-          child: Text(
-            value?.isNotEmpty == true ? value! : 'N/A',
-            style: TextStyle(
-              fontSize: 11,
-              color: isStatusRow ? getStatusColor(value) : Colors.black,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Text(
+              value?.isNotEmpty == true ? value! : 'Not Available',
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isStatusRow ? getStatusColor(value) : Colors.black54,
+              ),
             ),
           ),
         ),

@@ -1,17 +1,13 @@
 import 'dart:io';
 
-import 'package:baltra/features/applicationCare/presentation/widgets/baltra_skeleton.dart';
 import 'package:baltra/features/applicationCare/presentation/widgets/myproduct_details_skeletion.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:baltra/features/applicationCare/controller/myProductController.dart';
 import 'package:baltra/features/applicationCare/models/myProduct.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:baltra/features/applicationCare/controller/crmController.dart';
-import 'video_preview.dart';
 import 'package:http/http.dart' as http;
 
 class MyProductDetailPage extends StatefulWidget {
@@ -207,7 +203,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            product.model_name ?? "Unknown Model",
+                            product.model_name,
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                             softWrap: true,
@@ -215,9 +211,9 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            "Job ID: ${product.job_No ?? 'N/A'}",
+                            "Job ID: ${product.job_No}",
                             style:
-                            TextStyle(fontSize: 16, color: Colors.black87),
+                                TextStyle(fontSize: 16, color: Colors.black87),
                           ),
                         ],
                       ),
@@ -244,22 +240,22 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                               borderRadius: BorderRadius.circular(8),
                               child: product.product_image != null
                                   ? GestureDetector(
-                                onTap: () => showFullScreenImage(
-                                    context, product.product_image ?? ''),
-                                child: Hero(
-                                  tag: "${product.product_image}_image",
-                                  child: Image.network(
-                                    product.product_image!,
-                                    height: 120,
-                                    width: 120,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              )
+                                      onTap: () => showFullScreenImage(
+                                          context, product.product_image),
+                                      child: Hero(
+                                        tag: "${product.product_image}_image",
+                                        child: Image.network(
+                                          product.product_image,
+                                          height: 120,
+                                          width: 120,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    )
                                   : Icon(
-                                Icons.image_not_supported,
-                                size: 120,
-                              ),
+                                      Icons.image_not_supported,
+                                      size: 120,
+                                    ),
                             ),
                             SizedBox(width: 16),
                             Expanded(
@@ -267,13 +263,13 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    product.model_name ?? 'Unknown Product',
+                                    product.model_name,
                                     style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold),
                                   ),
                                   Text(
-                                    'Job ID: ${product.job_No ?? '-'}',
+                                    'Job ID: ${product.job_No}',
                                     style: TextStyle(
                                         fontSize: 14, color: Colors.grey),
                                   ),
@@ -288,7 +284,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                       "Store Location", product.store_location),
                                   _buildInfoRow(
                                       "Purchase Date", product.purchase_date),
-                                  _buildInfoRow("Status", product.status),
+                                  _buildInfoRow("Stage", product.status),
                                 ],
                               ),
                             ),
@@ -320,7 +316,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                               ),
                               ElevatedButton(
                                 onPressed: () => downloadImage(
-                                    context, product.product_image ?? ''),
+                                    context, product.product_image),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF000000),
                                 ),
@@ -350,8 +346,8 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) =>
-                                        const Icon(
-                                            Icons.image_not_supported),
+                                                const Icon(
+                                                    Icons.image_not_supported),
                                       ),
                                     ),
                                   ),
@@ -416,8 +412,8 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) =>
-                                        const Icon(
-                                            Icons.image_not_supported),
+                                                const Icon(
+                                                    Icons.image_not_supported),
                                       ),
                                     ),
                                   ),
@@ -482,8 +478,8 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) =>
-                                        const Icon(
-                                            Icons.image_not_supported),
+                                                const Icon(
+                                                    Icons.image_not_supported),
                                       ),
                                     ),
                                   ),
@@ -505,6 +501,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
   }
 
   Widget _buildInfoRow(String label, String? value) {
+    bool isStatusRow = label.toLowerCase() == "stage";
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
@@ -519,13 +516,28 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
           ),
           Expanded(
             child: Text(
-              value ?? 'N/A',
-              overflow: TextOverflow.ellipsis,
+              value?.isNotEmpty == true ? value! : 'N/A',
+              style: TextStyle(
+                fontSize: 12,
+                color: isStatusRow ? getStatusColor(value) : Colors.black,
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Color getStatusColor(String? status) {
+    if (status == null) return Colors.black;
+    switch (status.toLowerCase()) {
+      case 'assigned':
+        return Colors.green;
+      case 'un-assigned':
+        return Colors.red;
+      default:
+        return Colors.blue;
+    }
   }
 
   void showFullScreenImage(BuildContext context, String imageUrl) {
@@ -546,7 +558,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                 imageUrl,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.image_not_supported, size: 100),
+                    const Icon(Icons.image_not_supported, size: 100),
               ),
             ),
           ),
