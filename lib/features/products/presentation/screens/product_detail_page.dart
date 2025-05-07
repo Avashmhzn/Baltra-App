@@ -8,7 +8,7 @@ import 'package:baltra/features/products/models/product.dart';
 import 'package:baltra/features/products/models/subcategoryProduct.dart';
 import 'package:baltra/features/products/presentation/screens/review_section.dart';
 import 'package:baltra/features/products/presentation/widgets/function.dart';
-import 'package:cached_network_image/cached_network_image.dart'; // Added import
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_rich_text/easy_rich_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -41,6 +41,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   List<String> thumbnailUrls = [];
   int? _lastProductId;
   int _currentTabIndex = 0;
+  int _selectedColorIndex = 0; // Still needed to track the selected color for the tick mark
 
   @override
   void initState() {
@@ -652,19 +653,19 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     child: Stack(
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0), // Optional: Add rounded corners
+                          borderRadius: BorderRadius.circular(8.0),
                           child: currentMainImage == null || currentMainImage!.isEmpty
                               ? Image.asset(
                             'assets/images/pp.png',
                             height: 300,
                             width: double.infinity,
-                            fit: BoxFit.cover, // Changed to cover to fill the space
+                            fit: BoxFit.cover,
                           )
-                              : CachedNetworkImage(
+                              : CachedNetworkImage( // Removed ColorFiltered widget
                             imageUrl: currentMainImage!,
                             height: 300,
                             width: double.infinity,
-                            fit: BoxFit.fitHeight, // Changed to cover to fill the space
+                            fit: BoxFit.fitHeight,
                             placeholder: (context, url) => Container(
                               height: 300,
                               width: double.infinity,
@@ -674,7 +675,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                               'assets/images/pp.png',
                               height: 300,
                               width: double.infinity,
-                              fit: BoxFit.cover, // Changed to cover to match
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
@@ -803,16 +804,49 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Row(
-                      children: (product.color_styles ?? []).map((hexColor) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2.5),
-                          child: CircleAvatar(
-                            radius: 10,
-                            backgroundColor: hexToColor(hexColor),
-                          ),
-                        );
-                      }).toList(),
+                    child: Container(
+                      height: 40,
+                      child: (product.color_styles == null || product.color_styles!.isEmpty)
+                          ? const Text(
+                        'No colors available',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      )
+                          : ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: product.color_styles!.length,
+                        itemBuilder: (context, index) {
+                          final hexColor = product.color_styles![index];
+                          final isSelected = _selectedColorIndex == index;
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedColorIndex = index;
+                              });
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                  child: CircleAvatar(
+                                    radius: 15,
+                                    backgroundColor: hexToColor(hexColor),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 15),

@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> with SessionManager {
     'assets/images/promotion_3.png',
   ];
   final ProductController productController =
-  Get.put(ProductController(productRepository: ProductRepository()));
+      Get.put(ProductController(productRepository: ProductRepository()));
 
   String name = 'Guest';
   int loyaltyPoint = 0;
@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> with SessionManager {
   List<Product> _getSortedProducts() {
     final products = productController.allProductsList.toList();
     products.sort(
-            (a, b) => (b.id ?? 0).compareTo(a.id ?? 0)); // Sort by id descending
+        (a, b) => (b.id ?? 0).compareTo(a.id ?? 0)); // Sort by id descending
     return products;
   }
 
@@ -123,7 +123,7 @@ class _HomePageState extends State<HomePage> with SessionManager {
                               children: [
                                 SizedBox(
                                   height:
-                                  MediaQuery.of(context).size.height * 0.02,
+                                      MediaQuery.of(context).size.height * 0.02,
                                 ),
                                 RichText(
                                   text: TextSpan(children: [
@@ -164,7 +164,7 @@ class _HomePageState extends State<HomePage> with SessionManager {
                       elevation: 20,
                       child: Container(
                         margin:
-                        const EdgeInsets.only(top: 88, right: 15, left: 15),
+                            const EdgeInsets.only(top: 88, right: 15, left: 15),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 13, vertical: 10),
                         height: MediaQuery.of(context).size.height * 0.15,
@@ -178,7 +178,7 @@ class _HomePageState extends State<HomePage> with SessionManager {
                               children: [
                                 SizedBox(
                                   height:
-                                  MediaQuery.of(context).size.height * 0.1,
+                                      MediaQuery.of(context).size.height * 0.1,
                                   child: Image.asset(
                                     'assets/images/medal.png',
                                     fit: BoxFit.contain,
@@ -213,7 +213,7 @@ class _HomePageState extends State<HomePage> with SessionManager {
                 ),
                 Padding(
                   padding:
-                  const EdgeInsets.only(left: 16.0, bottom: 8, top: 10),
+                      const EdgeInsets.only(left: 16.0, bottom: 8, top: 10),
                   child: Text(
                     "Our Products",
                     softWrap: true,
@@ -236,11 +236,11 @@ class _HomePageState extends State<HomePage> with SessionManager {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 14.0,
-                            mainAxisSpacing: 8.0,
-                            childAspectRatio: 0.5),
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 14.0,
+                                mainAxisSpacing: 8.0,
+                                childAspectRatio: 0.5),
                         itemCount: 4, // Show 4 skeleton cards while loading
                         itemBuilder: (context, index) {
                           return const HomepageCardSkeleton();
@@ -256,28 +256,29 @@ class _HomePageState extends State<HomePage> with SessionManager {
                         children: [
                           Padding(
                             padding:
-                            const EdgeInsets.symmetric(horizontal: 8.0),
+                                const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Column(
                               children: [
                                 GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
                                   gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 14.0,
-                                      mainAxisSpacing: 8.0,
-                                      childAspectRatio: 0.5),
-                                  itemCount: _itemsToShow < sortedProducts.length
-                                      ? _itemsToShow
-                                      : sortedProducts.length,
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          crossAxisSpacing: 14.0,
+                                          mainAxisSpacing: 8.0,
+                                          childAspectRatio: 0.5),
+                                  itemCount:
+                                      _itemsToShow < sortedProducts.length
+                                          ? _itemsToShow
+                                          : sortedProducts.length,
                                   itemBuilder: (context, index) {
                                     final product = sortedProducts[index];
                                     return GestureDetector(
                                       onTap: () {
                                         log("Navigating to Product Detail: ${product.id} - ${product.name}");
-                                        _navigateToProductDetails(
-                                            product.id ?? 0); // Updated navigation
+                                        _navigateToProductDetails(product.id ??
+                                            0); // Updated navigation
                                       },
                                       child: Homepagecard(product: product),
                                     );
@@ -297,11 +298,11 @@ class _HomePageState extends State<HomePage> with SessionManager {
                                             horizontal: 30.0, vertical: 12.0),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                          BorderRadius.circular(30.0),
+                                              BorderRadius.circular(30.0),
                                         ),
                                         elevation: 5,
                                         shadowColor:
-                                        Colors.black.withOpacity(0.3),
+                                            Colors.black.withOpacity(0.3),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,

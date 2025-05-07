@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-
-// final URL = dotenv.env['DEVELOPMENT_URL']!;
-// final CLIENT_ID = dotenv.env['CLIENT_ID']!;
-// final SECRET_KEY = dotenv.env['SECRET_KEY'];
-
 const String URL = 'http://213.136.92.141/api';
 
 extension StringCasingExtension on String {
