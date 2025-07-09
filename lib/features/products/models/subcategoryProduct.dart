@@ -36,7 +36,7 @@ class Subcategoryproduct {
       model_no: json['model_no'] as String? ?? "N/A",
       model_name: json['model_name'] as String? ?? "N/A",
       price: json['price'] as int?,
-      sub_category: json['sub_category'] as String ?? "N/A",
+      sub_category: json['sub_category'] as String,
     );
   }
 

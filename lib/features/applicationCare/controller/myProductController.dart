@@ -10,18 +10,12 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-// Import your global error handler
-
 class Myproductcontroller extends GetxController {
   var isLoading = true.obs;
-
   var myProducts = <Myproduct>[].obs;
   var complaints = <CustomerProduct>[].obs;
-  // var myProduct = Rxn<ProductModel>();
-  var myProduct = Rxn<ProductModel>(); // Observable for product
-  var loyalty = Rxn<LoyaltyRedeem>(); // Observable for product
-
-  // var productList = <Products>[].obs;
+  var myProduct = Rxn<ProductModel>();
+  var loyalty = Rxn<LoyaltyRedeem>();
   var errorMessage = ''.obs;
   var singleMyProduct = Rxn<Myproduct>();
 
@@ -35,36 +29,20 @@ class Myproductcontroller extends GetxController {
     super.onInit();
   }
 
-  /*Future<void> fetchMyProduct() async {
-    isLoading(true);
-    final Either<Exception, List<Myproduct>> result =
-        await productRepository.fetchMyProduct();
-    log(result.toString());
-    result.fold(
-      (failure) {
-        showErrorDialog(Get.context!, failure);
-        errorMessage(failure.toString());
-      },
-      (myProduct) {
-        myProducts.assignAll(myProduct);
-      },
-    );
-    isLoading(false);
-  }*/
   Future<void> fetchMyProduct() async {
     isLoading(true);
     try {
       final Either<Exception, List<Myproduct>> result =
-          await productRepository.fetchMyProduct();
+      await productRepository.fetchMyProduct();
       log(result.toString());
 
       result.fold(
-        (failure) {
+            (failure) {
           showErrorDialog(Get.context!, failure);
           errorMessage(failure.toString());
         },
-        (myProductList) {
-          myProducts.assignAll(myProductList); // Update the products list
+            (myProductList) {
+          myProducts.assignAll(myProductList);
         },
       );
     } catch (e) {
@@ -80,8 +58,8 @@ class Myproductcontroller extends GetxController {
     errorMessage('');
     final result = await productRepository.fetchAllComplaints();
     result.fold(
-      (error) => errorMessage(error.toString()),
-      (data) => complaints.assignAll(data),
+          (error) => errorMessage(error.toString()),
+          (data) => complaints.assignAll(data),
     );
     isLoading(false);
   }
@@ -103,118 +81,91 @@ class Myproductcontroller extends GetxController {
   }
 
   Future<void> fetchWarrantyProduct(int stockId) async {
-    // isLoading(true); // Start loading
+    isLoading(true);
     log("callimg fetch warranty product");
-    // Fetch the single product using stockId
     final Either<Exception, ProductModel> result =
-        await productRepository.getWarranty(stockId);
+    await productRepository.getWarranty(stockId);
 
-    log('Result: ${result.toString()}'); // Log the result for debugging
+    log('Result: ${result.toString()}');
 
     result.fold(
-      (failure) {
-        // Handle error
-        log(failure.toString()); // Log the failure
-        log("callimg fetch warranty product");
-
+          (failure) {
+        log(failure.toString());
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          showErrorDialog(Get.context!, failure); // Show error dialog
-          errorMessage(failure.toString()); // Set the error message
+          showErrorDialog(Get.context!, failure);
+          errorMessage(failure.toString());
         });
-
-        isLoading(false); // Stop loading
+        isLoading(false);
       },
-      (product) {
-        // Handle success
+          (product) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          myProduct.value =
-              product; // Assign the fetched product to the observable
+          myProduct.value = product;
+          log("Product assigned to myProduct: ${product.stockDetails.modelName}");
         });
-
-        isLoading(false); // Stop loading
+        isLoading(false);
       },
     );
   }
 
   Future<void> getLoyalty(int stockId) async {
-    // isLoading(true); // Start loading
+    isLoading(true);
     log("callimg fetch warranty product");
-    // Fetch the single product using stockId
     final Either<Exception, LoyaltyRedeem> result =
-        await productRepository.getCustonerLoyalty(stockId);
+    await productRepository.getCustonerLoyalty(stockId);
 
-    log('Result: ${result.toString()}'); // Log the result for debugging
+    log('Result: ${result.toString()}');
 
     result.fold(
-      (failure) {
-        // Handle error
-        log(failure.toString()); // Log the failure
-        log("callimg fetch warranty product");
-
+          (failure) {
+        log(failure.toString());
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          showErrorDialog(Get.context!, failure); // Show error dialog
-          errorMessage(failure.toString()); // Set the error message
+          showErrorDialog(Get.context!, failure);
+          errorMessage(failure.toString());
         });
-
-        isLoading(false); // Stop loading
+        isLoading(false);
       },
-      (loyaltys) {
-        // Handle success
+          (loyaltys) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          loyalty.value =
-              loyaltys; // Assign the fetched product to the observable
+          loyalty.value = loyaltys;
         });
-
-        isLoading(false); // Stop loading
+        isLoading(false);
       },
     );
   }
 
   Future<void> redeemLoyaltyController(
       int stockId, int duration, double price) async {
-    // isLoading(true); // Start loading
+    isLoading(true);
     log("callimg redeem loyalty of $stockId product in controller");
-    // Fetch the single product using stockId
     final Either<Exception, int> result =
-        await productRepository.redeemLoyalty(stockId, duration, price);
+    await productRepository.redeemLoyalty(stockId, duration, price);
 
-    log('Result*******: ${result}'); // Log the result for debugging
+    log('Result*******: ${result}');
 
     result.fold(
-      (failure) {
-        // Handle error
-        log(failure.toString()); // Log the failure
-        log("callimg fetch warranty product");
-
+          (failure) {
+        log(failure.toString());
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          showErrorDialog(Get.context!, failure); // Show error dialog
-          errorMessage(failure.toString()); // Set the error message
+          showErrorDialog(Get.context!, failure);
+          errorMessage(failure.toString());
         });
-
-        isLoading(false); // Stop loading
+        isLoading(false);
       },
-      (loyaltys) {
+          (loyaltys) {
         log("callimg redeem loyalty of $stockId product in success controller");
-        // Handle success
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          // getx snackbar
-
           Get.snackbar('Success', 'Loyalty points redeemed successfully',
               snackPosition: SnackPosition.BOTTOM,
               colorText: Colors.white,
               backgroundColor: Colors.green);
-          Get.offAll(() => const ButtomNavBar(
-                pageno: 3,
-              ));
+          Get.offAll(() => const ButtomNavBar(pageno: 3));
         });
-
-        isLoading(false); // Stop loading
+        isLoading(false);
       },
     );
   }
 
   void showErrorDialog(BuildContext context, Exception failure) {
-    // Implement your error dialog logic here
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -236,17 +187,15 @@ class Myproductcontroller extends GetxController {
     errorMessage.value = '';
 
     try {
-      // This repository method should return Either<Exception, Myproduct>.
       final Either<Exception, Myproduct> result =
-          await productRepository.fetchSingleMyProduct(id);
+      await productRepository.fetchSingleMyProduct(id);
 
       result.fold(
-        (failure) {
+            (failure) {
           showErrorDialog(Get.context!, failure);
           errorMessage.value = failure.toString();
         },
-        (product) {
-          // If successful, store the product in singleMyProduct
+            (product) {
           singleMyProduct.value = product;
         },
       );

@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:baltra/core/utils/constants.dart';
 import 'package:baltra/features/authetication/models/user.dart';
-import 'package:baltra/features/authetication/presentation/pages/changepassword.dart';
-import 'package:baltra/features/authetication/presentation/pages/profile_page.dart';
 import 'package:baltra/features/authetication/presentation/widgets/profileText.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';

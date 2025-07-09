@@ -5,7 +5,7 @@ import 'package:baltra/features/products/models/subcategoryProduct.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:baltra/features/products/presentation/widgets/prdouct2_skeletion.dart';
 import 'package:baltra/features/products/presentation/widgets/productItem.dart';
-import 'package:baltra/features/products/presentation/widgets/product_detail_loading _page_skeleton.dart';
+import 'package:baltra/features/products/presentation/widgets/product_detail_loading%20_page_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

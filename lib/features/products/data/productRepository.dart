@@ -116,7 +116,6 @@ class ProductRepository {
     }
   }
 
-
   /// Fetch a single product by its ID.
   Future<Either<Exception, Product>> fetchProduct(int id) async {
     try {
@@ -137,7 +136,6 @@ class ProductRepository {
     }
   }
 
-
   /// Fetch all products.
   Future<Either<Exception, List<Product>>> fetchAllProduct() async {
     try {
@@ -151,11 +149,11 @@ class ProductRepository {
         return Right(allProducts);
       } else {
         return Left(Exception(jsonResponse['message'] ?? "Failed to fetch products"));
+        }
+        } on SocketException catch (e) {
+        return Left(e);
+        } catch (e) {
+          return Left(Exception("An error occurred: $e"));
+        }
       }
-    } on SocketException catch (e) {
-      return Left(e);
-    } catch (e) {
-      return Left(Exception("Unknown error occurred: $e"));
-    }
-  }
 }

@@ -20,11 +20,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SessionManager {
-  final List _promotionList = [
-    'assets/images/promotion_1.png',
-    'assets/images/promotion_2.png',
-    'assets/images/promotion_3.png',
-  ];
   final ProductController productController =
       Get.put(ProductController(productRepository: ProductRepository()));
 

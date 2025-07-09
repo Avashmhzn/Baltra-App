@@ -3,6 +3,7 @@ import 'package:baltra/features/applicationCare/presentation/ui/myProduct_page.d
 import 'package:baltra/features/applicationCare/presentation/ui/product_maintainance_page.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApplicationCarePage extends StatefulWidget {
@@ -15,70 +16,101 @@ class ApplicationCarePage extends StatefulWidget {
 Future<String> _getNameFromSharedPrefs() async {
   final prefs = await SharedPreferences.getInstance();
   final name = prefs.getString('name');
-  return 'Hello, $name' ?? 'Hello, Guest';
+  return 'Hello, $name';
 }
 
 class _ApplicationCarePageState extends State<ApplicationCarePage>
     with SessionManager {
   int _selectedIndex = 0;
+
+  // Handle back gesture to switch to home tab or close app
+  bool _canPop() {
+    print('Current index: $_selectedIndex, Can pop: ${Navigator.of(context).canPop()}');
+    if (_selectedIndex != 0) {
+      setState(() {
+        _selectedIndex = 0; // Switch to My Products tab
+      });
+      return false; // Prevent popping
+    }
+    // Force exit if on My Products and can pop (to avoid SplashScreen)
+    if (Navigator.of(context).canPop()) {
+      return false; // Prevent default pop
+    }
+    return true; // Allow exit only when no more routes
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: SafeArea(
-        child: Scaffold(
-            body: Stack(
-          children: [
-            Positioned(top: 0, left: 0, right: 0, child: _buildAppBar()),
-            Positioned(
-              top: _selectedIndex == 2 ? 214 : 144,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: DefaultTabController(
-                length: 2,
-                child: Scaffold(
-                  appBar: AppBar(
-                    flexibleSpace: TabBar(
-                      // padding: EdgeInsets.all(10),
-                      tabs: const [
-                        Tab(
-                          text: 'My Products',
+    return PopScope(
+      canPop: _canPop(), // Determine if the screen can be popped
+      onPopInvoked: (didPop) async {
+        if (didPop) return; // If already popped, do nothing
+        print('onPopInvoked: didPop = $didPop, Current index: $_selectedIndex');
+        if (_selectedIndex != 0) {
+          setState(() {
+            _selectedIndex = 0; // Switch to My Products tab
+          });
+        } else if (Navigator.of(context).canPop()) {
+          // Prevent popping to SplashScreen, force exit instead
+          SystemNavigator.pop(); // Exit the app
+        }
+      },
+      child: DefaultTabController(
+        length: 2,
+        child: SafeArea(
+          child: Scaffold(
+              body: Stack(
+                children: [
+                  Positioned(top: 0, left: 0, right: 0, child: _buildAppBar()),
+                  Positioned(
+                    top: _selectedIndex == 2 ? 214 : 144,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: DefaultTabController(
+                      length: 2,
+                      child: Scaffold(
+                        appBar: AppBar(
+                          automaticallyImplyLeading: false,
+                          flexibleSpace: TabBar(
+                            tabs: const [
+                              Tab(
+                                text: 'My Products',
+                              ),
+                              Tab(
+                                text: 'Tracking',
+                              ),
+                            ],
+                            indicator: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            onTap: (index) {
+                              setState(() {
+                                _selectedIndex = index;
+                              });
+                            },
+                            indicatorSize: TabBarIndicatorSize.tab,
+                            labelColor: Colors.white,
+                            unselectedLabelColor: Colors.black,
+                            labelStyle: const TextStyle(
+                              overflow: TextOverflow.clip,
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
-                        Tab(
-                          text: 'Tracking',
+                        body: const TabBarView(
+                          physics: NeverScrollableScrollPhysics(),
+                          children: [
+                            MyProductPage(),
+                            ProductMaintainancePage(),
+                          ],
                         ),
-                        // add tab here if needed
-                      ],
-                      indicator: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      onTap: (index) {
-                        setState(() {
-                          _selectedIndex = index;
-                        });
-                      },
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.black,
-                      labelStyle: const TextStyle(
-                        overflow: TextOverflow.clip,
-                        fontSize: 14,
                       ),
                     ),
-                  ),
-                  body: const TabBarView(
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      MyProductPage(),
-                      ProductMaintainancePage(),
-                    ],
-                  ),
-                ),
-              ),
-            )
-          ],
-        )),
+                  )
+                ],
+              )),
+        ),
       ),
     );
   }
@@ -92,7 +124,7 @@ class _ApplicationCarePageState extends State<ApplicationCarePage>
             if (snapshot.hasData) {
               final name = snapshot.data!;
               return AppBarWithSVG(
-                title: name ?? 'Hello Guest',
+                title: name,
                 subtitle: 'Check out your Baltra products you own!',
                 backbutton: false,
               );
@@ -106,6 +138,7 @@ class _ApplicationCarePageState extends State<ApplicationCarePage>
           backbutton: false,
           title: 'Track your Products',
           subtitle: 'Know the status of your products.',
+          onBack: null,
         );
       case 2:
         return Stack(
@@ -228,7 +261,9 @@ class _ApplicationCarePageState extends State<ApplicationCarePage>
           ],
         );
       default:
-        return AppBar(title: const Text('Default AppBar'));
+        return AppBar(title: const Text('Default AppBar'),
+          automaticallyImplyLeading: false,
+        );
     }
   }
 }

@@ -333,16 +333,16 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                             children: [
                               GestureDetector(
                                 onTap: () => showFullScreenImage(
-                                    context, product.product_image ?? ''),
+                                    context, product.product_image),
                                 child: Hero(
-                                  tag: product.product_image ?? '',
+                                  tag: product.product_image,
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: SizedBox(
                                       height: 150,
                                       width: screenWidth * 0.8,
                                       child: Image.network(
-                                        product.product_image ?? '',
+                                        product.product_image,
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) =>
@@ -382,7 +382,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                               ),
                               ElevatedButton(
                                 onPressed: () => downloadImage(
-                                    context, product.bill_image_one ?? ''),
+                                    context, product.bill_image_one),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF000000),
                                 ),
@@ -399,16 +399,16 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                             children: [
                               GestureDetector(
                                 onTap: () => showFullScreenImage(
-                                    context, product.bill_image_one ?? ''),
+                                    context, product.bill_image_one),
                                 child: Hero(
-                                  tag: product.bill_image_one ?? '',
+                                  tag: product.bill_image_one,
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: SizedBox(
                                       height: 150,
                                       width: screenWidth * 0.8,
                                       child: Image.network(
-                                        product.bill_image_one ?? '',
+                                        product.bill_image_one,
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) =>
@@ -448,7 +448,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                               ),
                               ElevatedButton(
                                 onPressed: () => downloadImage(
-                                    context, product.warranty_image ?? ''),
+                                    context, product.warranty_image),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF000000),
                                 ),
@@ -465,16 +465,16 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                             children: [
                               GestureDetector(
                                 onTap: () => showFullScreenImage(
-                                    context, product.warranty_image ?? ''),
+                                    context, product.warranty_image),
                                 child: Hero(
-                                  tag: product.warranty_image ?? '',
+                                  tag: product.warranty_image,
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: SizedBox(
                                       height: 150,
                                       width: screenWidth * 0.8,
                                       child: Image.network(
-                                        product.warranty_image ?? '',
+                                        product.warranty_image,
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) =>

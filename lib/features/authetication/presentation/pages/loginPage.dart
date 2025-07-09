@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart'; // For WhatsApp URL
-import 'package:flutter/services.dart'; // For clipboard functionality
+import 'package:flutter/services.dart';
 
 class Loginpage extends StatefulWidget {
   const Loginpage({super.key});
@@ -268,8 +268,42 @@ class _LoginpageState extends State<Loginpage> {
                                 if (status == 200) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      backgroundColor: Colors.green[300],
-                                      content: const Text('User logged in successfully!'),
+                                      content: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green[600], // Darker green for a vibrant look
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(0.2),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.check_circle,
+                                              color: Colors.white,
+                                              size: 24,
+                                            ),
+                                            const SizedBox(width: 12),
+                                            const Text(
+                                              'User logged in successfully!',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      backgroundColor: Colors.transparent, // Make SnackBar background transparent
+                                      elevation: 0, // Remove default elevation
+                                      behavior: SnackBarBehavior.floating, // Allow custom positioning
+                                      margin: const EdgeInsets.only(top: 20, left: 20, right: 20), // Position at top
                                       duration: const Duration(seconds: 2),
                                     ),
                                   );
@@ -351,7 +385,7 @@ class _LoginpageState extends State<Loginpage> {
                           // 24/7 Help & Support Section
                           GestureDetector(
                             onTap: () {
-                              _launchWhatsApp('+9779861315260'); // Directly open WhatsApp
+                              _launchWhatsApp('+9779801200501'); // Directly open WhatsApp
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(

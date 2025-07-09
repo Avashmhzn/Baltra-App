@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 class Resetpassword extends StatelessWidget {
   Resetpassword({super.key, this.phone});
-  int? phone;
+  final int? phone;
   final _formKey = GlobalKey<FormState>();
 
   @override

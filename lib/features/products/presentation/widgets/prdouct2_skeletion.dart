@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:shimmer/shimmer.dart';
 
 class Product2Skeleton extends StatelessWidget {
   const Product2Skeleton({super.key});

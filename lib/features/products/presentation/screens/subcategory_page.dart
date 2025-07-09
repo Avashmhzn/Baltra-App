@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:baltra/features/products/controller/productController.dart';
 import 'package:baltra/features/products/data/productRepository.dart';
@@ -8,7 +7,7 @@ import 'package:baltra/features/products/presentation/widgets/categoryCard.dart'
 import 'package:baltra/features/products/presentation/widgets/sub_catagory_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shimmer/shimmer.dart'; // Kept shimmer import as it's used in SubcategoryItemSkeleton
+// Kept shimmer import as it's used in SubcategoryItemSkeleton
 
 class SubcategoryPage extends StatefulWidget {
   SubcategoryPage({super.key});

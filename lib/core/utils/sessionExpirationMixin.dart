@@ -17,16 +17,33 @@ mixin SessionManager {
   void _showSessionExpiredDialog(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dismissal by tapping outside
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Session Expired'),
-        content: const Text('Your session has expired. Please log in again.'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.lock, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Session Expired', style: TextStyle(fontSize: 20)),
+          ],
+        ),
+        content: Text(
+          'Your session has expired. Please log in again.',
+          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+        ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0)),
+            ),
             onPressed: () {
               Get.offAll(() => const Loginpage());
             },
-            child: const Text('OK'),
+            child: Text('OK', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

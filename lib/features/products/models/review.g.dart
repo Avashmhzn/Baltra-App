@@ -34,18 +34,4 @@ Map<String, dynamic> _$CustomerToJson(Customer instance) => <String, dynamic>{
       'image_url': instance.image_url,
     };
 
-RatingData _$RatingDataFromJson(Map<String, dynamic> json) => RatingData(
-      average_rating: (json['average_rating'] as num).toDouble(),
-      rating_sum: (json['rating_sum'] as num).toInt(),
-      total_reviews: (json['total_reviews'] as num).toInt(),
-      rating_distribution:
-          Map<String, int>.from(json['rating_distribution'] as Map),
-    );
 
-Map<String, dynamic> _$RatingDataToJson(RatingData instance) =>
-    <String, dynamic>{
-      'average_rating': instance.average_rating,
-      'rating_sum': instance.rating_sum,
-      'total_reviews': instance.total_reviews,
-      'rating_distribution': instance.rating_distribution,
-    };

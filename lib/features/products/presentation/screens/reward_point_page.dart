@@ -4,28 +4,33 @@ import 'package:baltra/features/products/presentation/widgets/eligiabilityCard.d
 import 'package:baltra/features/products/presentation/widgets/qnaSection.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart'; // Add this for skeleton effect
 
 class RewardsPage extends StatefulWidget {
   const RewardsPage(
       {super.key,
-      required this.stockId,
-      required this.duration,
-      required this.price});
+        required this.stockId,
+        required this.duration,
+        required this.price});
   final int stockId;
   final int duration;
   final double price;
+
   @override
   State<RewardsPage> createState() => _RewardsPageState();
 }
 
 final Myproductcontroller myproductcontroller =
-    Get.put(Myproductcontroller(productRepository: MyProductRepository()));
+Get.put(Myproductcontroller(productRepository: MyProductRepository()));
 
 class _RewardsPageState extends State<RewardsPage> {
   @override
   void initState() {
     super.initState();
-    myproductcontroller.getLoyalty(widget.stockId);
+    // Delay the fetch until after the first frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      myproductcontroller.getLoyalty(widget.stockId);
+    });
   }
 
   @override
@@ -44,9 +49,7 @@ class _RewardsPageState extends State<RewardsPage> {
                         top: 10, left: 20, right: 20, bottom: 0),
                     decoration: const BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage(
-                            'assets/images/reward.png',
-                          ),
+                          image: AssetImage('assets/images/reward.png'),
                           fit: BoxFit.fill),
                       gradient: LinearGradient(
                           colors: [Color(0xffE91C1C), Color(0xff831010)]),
@@ -102,14 +105,11 @@ class _RewardsPageState extends State<RewardsPage> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Obx(
-                                      () {
-                                        if (myproductcontroller.loyalty.value ==
-                                            null) {
-                                          return const Center(
-                                              child: Text(
-                                                  "No warranty offers available"));
+                                          () {
+                                        if (myproductcontroller.isLoading.value ||
+                                            myproductcontroller.loyalty.value == null) {
+                                          return _buildPointsSkeleton();
                                         }
-
                                         return Text(
                                           '${myproductcontroller.loyalty.value!.reward_points} Points',
                                           style: const TextStyle(
@@ -131,13 +131,11 @@ class _RewardsPageState extends State<RewardsPage> {
                               ],
                             ),
                             Obx(
-                              () {
-                                if (myproductcontroller.loyalty.value == null) {
-                                  return const Center(
-                                      child:
-                                          Text("No warranty offers available"));
+                                  () {
+                                if (myproductcontroller.isLoading.value ||
+                                    myproductcontroller.loyalty.value == null) {
+                                  return _buildRedeemButtonSkeleton();
                                 }
-
                                 return GestureDetector(
                                   onTap: () {
                                     myproductcontroller.redeemLoyaltyController(
@@ -146,10 +144,8 @@ class _RewardsPageState extends State<RewardsPage> {
                                         widget.price);
                                   },
                                   child: Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          vertical: 15),
+                                      margin: const EdgeInsets.symmetric(vertical: 15),
                                       padding: const EdgeInsets.all(10),
-                                      // width: double.infinity,
                                       height: 50,
                                       color: Theme.of(context).primaryColor,
                                       child: Center(
@@ -227,7 +223,7 @@ class _RewardsPageState extends State<RewardsPage> {
                 child: Center(
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                     height: 250,
                     width: 250,
                     color: const Color(0xffFAEAAF),
@@ -272,7 +268,7 @@ class _RewardsPageState extends State<RewardsPage> {
                 child: Center(
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                     height: 250,
                     width: 250,
                     color: const Color(0xffFAEAAF),
@@ -281,9 +277,7 @@ class _RewardsPageState extends State<RewardsPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image(
-                          image: AssetImage(
-                            'assets/images/loyalty2.png',
-                          ),
+                          image: AssetImage('assets/images/loyalty2.png'),
                           height: 160,
                           width: 300,
                         ),
@@ -319,7 +313,7 @@ class _RewardsPageState extends State<RewardsPage> {
                 child: Center(
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                     height: 250,
                     width: 250,
                     color: const Color(0xffFAEAAF),
@@ -394,6 +388,26 @@ class _RewardsPageState extends State<RewardsPage> {
       - Points earned through legitimate actions outlined in the rewards program terms may be redeemed.''',
                 title: '1. Eligibality',
               ),
+              const EligibabilityCard(
+                desc: '''
+      - Upon reaching the threshold, users can utilize their points to purchase warranty directly  from the website/app''',
+                title: '2. Utilization',
+              ),
+              const EligibabilityCard(
+                desc: '''
+      - If users opt not to purchase additional warranty, they must visit the Baltra retail outlet in Teku to redeem their points.''',
+                title: '3. Redeem',
+              ),
+              const EligibabilityCard(
+                desc: '''
+      - Point redemption offers are subject to the discretion of the company and will be determined solely by the company''',
+                title: '4. Offers',
+              ),
+              const EligibabilityCard(
+                desc: '''
+      - Users are not permitted to redeem the entire point balance. A certain portion of points will remain in the user's account and will not be nullified.''',
+                title: '5. Point Balance',
+              ),
               const SizedBox(height: 15),
               const QnaSection(),
               const SizedBox(
@@ -402,6 +416,34 @@ class _RewardsPageState extends State<RewardsPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // Skeleton for points display
+  Widget _buildPointsSkeleton() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        height: 24,
+        width: 100,
+        color: Colors.grey[300],
+      ),
+    );
+  }
+
+  // Skeleton for redeem button
+  Widget _buildRedeemButtonSkeleton() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 15),
+        padding: const EdgeInsets.all(10),
+        height: 50,
+        width: 200,
+        color: Colors.grey[300],
       ),
     );
   }

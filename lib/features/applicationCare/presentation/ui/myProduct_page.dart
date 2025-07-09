@@ -125,11 +125,9 @@ class _MyProductPageState extends State<MyProductPage> {
                             return GestureDetector(
                               onTap: () {
                                 // Navigate if there's a valid product ID
-                                if (myproduct.id != null) {
-                                  Get.to(() => MyProductDetailPage(
-                                      productId: myproduct.id));
-                                }
-                              },
+                                Get.to(() => MyProductDetailPage(
+                                    productId: myproduct.id));
+                                                            },
                               child: MyProdductCard(product: myproduct),
                             );
                           },

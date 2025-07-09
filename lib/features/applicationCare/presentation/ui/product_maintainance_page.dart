@@ -2,7 +2,6 @@ import 'package:baltra/features/applicationCare/controller/crmController.dart';
 import 'package:baltra/features/applicationCare/data/crm.dart';
 import 'package:baltra/features/applicationCare/models/crmModel.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/product_tracking_page.dart';
-import 'package:baltra/features/products/presentation/widgets/baltra_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -238,7 +237,7 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
                                   value: complaint.modelNum),
                               detailRow(
                                   title: 'Job No:',
-                                  value: complaint.jobNo ?? "Not Available"),
+                                  value: complaint.jobNo),
                               detailRow(
                                   title: 'Sent For:',
                                   value: complaint.problemType),
@@ -250,7 +249,7 @@ class _ProductMaintainancePageState extends State<ProductMaintainancePage> {
                               detailRow(
                                   title: 'Complaint Date:',
                                   value: formatDateOnly(complaint.dateJoined)),
-                              if ((complaint.damagedImage ?? "").isNotEmpty)
+                              if ((complaint.damagedImage).isNotEmpty)
                                 Image.network(
                                   complaint.damagedImage,
                                   height: 150,

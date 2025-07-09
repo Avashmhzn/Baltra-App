@@ -95,7 +95,7 @@ class MyProdductCard extends StatelessWidget {
                       context: context,
                       builder: (BuildContext context) {
                         return CustomDeleteDialog(
-                          productName: product.model_name ?? 'Unnamed Product',
+                          productName: product.model_name,
                           onConfirm: () {
                             myproductcontroller.deleteMyProduct(product.id);
                             myproductcontroller.fetchMyProduct();

@@ -1,8 +1,15 @@
 import 'package:baltra/features/applicationCare/presentation/ui/application_care_page.dart';
-import 'package:baltra/features/products/presentation/screens/home_page.dart';
-import 'package:baltra/features/products/presentation/screens/category_page.dart';
+import 'package:baltra/features/applicationCare/presentation/widgets/add_product_dialog.dart';
 import 'package:baltra/features/authetication/presentation/pages/profile_page.dart';
+import 'package:baltra/features/products/presentation/screens/category_page.dart';
+import 'package:baltra/features/products/presentation/screens/home_page.dart';
+import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../../applicationCare/presentation/ui/myProduct_page.dart';
+import 'dart:io'; // Added for SystemNavigator
 
 class ButtomNavBar extends StatefulWidget {
   const ButtomNavBar({super.key, required this.pageno});
@@ -12,50 +19,110 @@ class ButtomNavBar extends StatefulWidget {
   _ButtomNavBarState createState() => _ButtomNavBarState();
 }
 
-class _ButtomNavBarState extends State<ButtomNavBar> {
+class _ButtomNavBarState extends State<ButtomNavBar> with TickerProviderStateMixin {
   int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  late AnimationController _animationController;
+  late Animation<double> _animation;
 
   @override
   void initState() {
-    _selectedIndex = widget.pageno;
     super.initState();
+    _selectedIndex = widget.pageno;
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _animation = Tween<double>(begin: 1.0, end: 1.3).animate(_animationController);
+  }
+
+  void _onItemTapped(int index) {
+    print('Tapped index: $index');
+    setState(() {
+      _selectedIndex = index;
+      if (index == _selectedIndex) {
+        _animationController.forward().then((_) => _animationController.reverse());
+      }
+    });
   }
 
   final screens = [
     const HomePage(),
-    CategoryPage(),
+    const CategoryPage(),
     const ApplicationCarePage(),
     const ProfilePage(),
   ];
 
+  // Handle back button press
+  Future<bool> _onWillPop() async {
+    if (_selectedIndex == 0) {
+      // On HomePage (index 0), exit the app
+      if (Platform.isAndroid) {
+        await SystemNavigator.pop(); // Closes the app on Android
+      } else if (Platform.isIOS) {
+        exit(0);
+      }
+      return false; // Prevent default pop behavior
+    } else {
+      // On other pages, navigate to HomePage (index 0)
+      setState(() {
+        _selectedIndex = 0;
+        _animationController.forward().then((_) => _animationController.reverse());
+      });
+      return false; // Prevent default pop behavior
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: screens[_selectedIndex],
-            ),
-          ],
+    return WillPopScope(
+      onWillPop: _onWillPop, // Handle back button press
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: screens[_selectedIndex],
+              ),
+            ],
+          ),
         ),
-      ),
-
-      bottomNavigationBar: SizedBox(
-        height:
-            55.0,
-        child: CustomBottomAppBar(
-          height: 50.0,
-          curveHeight: 30.0,
-          selectedIndex: _selectedIndex,
-          onItemTapped: _onItemTapped,
+        floatingActionButton: GestureDetector(
+          onTap: () async {
+            await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return QRScannerScreen();
+              },
+            );
+            myproductcontroller.fetchMyProduct();
+          },
+          child: Container(
+            width: 60.0,
+            height: 60.0,
+            decoration: const BoxDecoration(
+              color: Colors.red,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.qr_code, color: Colors.white, size: 40),
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        bottomNavigationBar: SizedBox(
+          height: 55.0,
+          child: CustomBottomAppBar(
+            height: 50.0,
+            curveHeight: 30.0,
+            selectedIndex: _selectedIndex,
+            onItemTapped: _onItemTapped,
+            animation: _animation,
+          ),
         ),
       ),
     );
@@ -67,6 +134,7 @@ class CustomBottomAppBar extends StatelessWidget {
   final double curveHeight;
   final int selectedIndex;
   final Function(int) onItemTapped;
+  final Animation<double> animation;
 
   const CustomBottomAppBar({
     super.key,
@@ -74,6 +142,7 @@ class CustomBottomAppBar extends StatelessWidget {
     required this.curveHeight,
     required this.selectedIndex,
     required this.onItemTapped,
+    required this.animation,
   });
 
   @override
@@ -88,117 +157,58 @@ class CustomBottomAppBar extends StatelessWidget {
             color: Colors.grey.withOpacity(0.1),
             spreadRadius: 8,
             blurRadius: 1,
-            offset: const Offset(0, 3), // changes position of shadow
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          selectedIndex == 0
-              ? GestureDetector(
-                  onTap: () => onItemTapped(0),
-                  child: SizedBox(
-                    width: 110,
-                    child: Image.asset(
-                      'assets/images/home_active.png',
-                      fit: BoxFit.fitWidth,
-                      height: 130,
-                      width: 130,
-                    ),
-                  ))
-              : GestureDetector(
-                  onTap: () => onItemTapped(0),
-                  child: SizedBox(
-                    width: 80,
-                    child: Image.asset(
-                      'assets/images/home_inactive.png',
-                      fit: BoxFit.contain,
-                      height: 40,
-                      width: 50,
-                    ),
-                  )),
-          selectedIndex == 1
-              ? GestureDetector(
-                  onTap: () => onItemTapped(1),
-                  child: SizedBox(
-                    width: 110,
-                    child: Image.asset(
-                      'assets/images/products_active.png',
-                      fit: BoxFit.fitWidth,
-                      height: 130,
-                      width: 130,
-                    ),
-                  ))
-              : GestureDetector(
-                  onTap: () => onItemTapped(1),
-                  child: SizedBox(
-                    width: 80,
-                    child: Image.asset(
-                      'assets/images/products_inactive.png',
-                      fit: BoxFit.contain,
-                      height: 35,
-                      width: 40,
-                    ),
-                  )),
-          selectedIndex == 2
-              ? GestureDetector(
-                  onTap: () => onItemTapped(2),
-                  child: SizedBox(
-                    width: 110,
-                    child: Image.asset(
-                      'assets/images/care_active.png',
-                      fit: BoxFit.fitWidth,
-                      height: 130,
-                      width: 130,
-                    ),
-                  ))
-              : GestureDetector(
-                  onTap: () => onItemTapped(2),
-                  child: SizedBox(
-                    width: 80,
-                    child: Image.asset(
-                      'assets/images/care_inactive.png',
-                      fit: BoxFit.contain,
-                      height: 40,
-                      width: 50,
-                    ),
-                  )),
-          selectedIndex == 3
-              ? GestureDetector(
-                  onTap: () => onItemTapped(3),
-                  child: SizedBox(
-                    width: 110,
-                    child: Image.asset(
-                      'assets/images/profile_active.png',
-                      fit: BoxFit.fitWidth,
-                      height: 130,
-                      width: 130,
-                    ),
-                  ))
-              : GestureDetector(
-                  onTap: () => onItemTapped(3),
-                  child: SizedBox(
-                    width: 80,
-                    child: Image.asset(
-                      'assets/images/profile_unactive.png',
-                      fit: BoxFit.contain,
-                      height: 40,
-                      width: 50,
-                    ),
-                  )),
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(child: _buildNavItem(0, 'assets/icons/home_inactive.svg', 'assets/icons/home_active.svg')),
+          Expanded(child: _buildNavItem(1, 'assets/icons/Product_inactive.svg', 'assets/icons/Product_active.svg')),
+          const SizedBox(width: 60), // Space for QR button
+          Expanded(child: _buildNavItem(2, 'assets/icons/ac_incative.svg', 'assets/icons/ac_active.svg')),
+          Expanded(child: _buildNavItem(3, 'assets/icons/profile_inactive.svg', 'assets/icons/Profile_active.svg')),
         ],
       ),
     );
   }
 
-  BoxDecoration selectedBoxDecoration(BuildContext context) {
-    return BoxDecoration(
-        borderRadius: BorderRadius.circular(50),
-        gradient: RadialGradient(tileMode: TileMode.decal, colors: [
-          Theme.of(context).primaryColor.withOpacity(0.6),
-          Theme.of(context).primaryColor.withOpacity(0.4),
-          Theme.of(context).primaryColor.withOpacity(0.1),
-        ]));
+  Widget _buildNavItem(int index, String inactiveIcon, String activeIcon) {
+    return GestureDetector(
+      onTap: () => onItemTapped(index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: selectedIndex == index ? 120 : 80,
+        child: ScaleTransition(
+          scale: selectedIndex == index
+              ? animation
+              : Tween<double>(begin: 1.0, end: 1.0).animate(
+            AnimationController(
+              vsync: const _NoopTickerProvider(),
+              duration: Duration.zero,
+            ),
+          ),
+          child: SvgPicture.asset(
+            selectedIndex == index ? activeIcon : inactiveIcon,
+            fit: BoxFit.contain,
+            height: selectedIndex == index ? 45 : 40,
+            width: selectedIndex == index ? 45 : 40,
+            placeholderBuilder: (BuildContext context) => const Icon(
+              Icons.error,
+              size: 40,
+              color: Colors.red,
+            ),
+          ),
+        ),
+      ),
+    );
   }
+}
+
+class _NoopTickerProvider extends TickerProvider {
+  const _NoopTickerProvider();
+
+  @override
+  Ticker createTicker(TickerCallback onTick) => Ticker(onTick);
 }

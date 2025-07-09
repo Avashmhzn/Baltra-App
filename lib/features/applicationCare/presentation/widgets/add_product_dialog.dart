@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:baltra/core/utils/constants.dart';
 import 'package:baltra/features/applicationCare/data/productRepository.dart';
-import 'package:baltra/features/applicationCare/presentation/ui/application_care_page.dart';
 import 'package:baltra/features/authetication/presentation/pages/buttomNavbar.dart';
 import 'package:baltra/features/authetication/presentation/widgets/textform.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
@@ -15,7 +14,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../controller/myProductController.dart';
