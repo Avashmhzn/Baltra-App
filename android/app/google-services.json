@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:217594282113:android:f7aab3b29a0a6b08954d80",
         "android_client_info": {
-          "package_name": "com.example.baltra"
+          "package_name": "com.codesc.baltra"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "217594282113-r9gjj8gkn2f05gims59ojt9a7iogou8n.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.baltra",
+            "package_name": "com.codesc.baltra",
             "certificate_hash": "336b47f50c715f6019fc5472e14794bea6e01c14"
           }
         },
@@ -42,7 +42,7 @@
               "client_id": "217594282113-814v9eb9uvrp5427ifikb5mm2f95ponk.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.baltra"
+                "bundle_id": "com.codesc.baltra"
               }
             }
           ]

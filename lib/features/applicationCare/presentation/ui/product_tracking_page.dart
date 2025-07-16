@@ -5,10 +5,8 @@ import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:collection/collection.dart';
 import 'video_preview.dart';
 
 class TrackingPage extends StatefulWidget {
@@ -208,7 +206,7 @@ class _TrackingPageState extends State<TrackingPage> {
         }
 
         final product = controller.customerProduct.value!;
-        final List<dynamic> stepperData = product.stepper ?? [];
+        final List<dynamic> stepperData = product.stepper;
 
         // Build the list of step widgets with arrows inserted between steps.
         List<Widget> stepWidgets = [];
@@ -309,7 +307,7 @@ class _TrackingPageState extends State<TrackingPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            product.modelName ?? "Unknown Model",
+                            product.modelName,
                             style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                             softWrap: true,
@@ -317,7 +315,7 @@ class _TrackingPageState extends State<TrackingPage> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            "Job ID: ${product.jobNo ?? 'N/A'}",
+                            "Job ID: ${product.jobNo}",
                             style: const TextStyle(
                                 fontSize: 16, color: Colors.black87),
                           ),
@@ -329,7 +327,7 @@ class _TrackingPageState extends State<TrackingPage> {
               ),
               // Conditionally display the stepper if a valid Job ID exists.
               (product.jobNo != null &&
-                  product.jobNo!.trim().isNotEmpty &&
+                  product.jobNo.trim().isNotEmpty &&
                   product.jobNo != 'N/A')
                   ? Padding(
                 padding: const EdgeInsets.all(15.0),
@@ -377,11 +375,11 @@ class _TrackingPageState extends State<TrackingPage> {
                           width: 100,
                           child: GestureDetector(
                             onTap: () => showFullScreenImage(
-                                context, product.damagedImage ?? ''),
+                                context, product.damagedImage),
                             child: Hero(
                               tag: "${product.damagedImage}_image",
                               child: Image.network(
-                                product.damagedImage ?? '',
+                                product.damagedImage,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
                                 const Icon(Icons.image_not_supported),
@@ -459,7 +457,7 @@ class _TrackingPageState extends State<TrackingPage> {
                         ),
                         ElevatedButton(
                           onPressed: () => downloadImage(
-                              context, product.damagedImage ?? ''),
+                              context, product.damagedImage),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(
                                 0xFF000000), // Or any color you prefer
@@ -478,16 +476,16 @@ class _TrackingPageState extends State<TrackingPage> {
                       children: [
                         GestureDetector(
                           onTap: () => showFullScreenImage(
-                              context, product.damagedImage ?? ''),
+                              context, product.damagedImage),
                           child: Hero(
-                            tag: product.damagedImage ?? '',
+                            tag: product.damagedImage,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: SizedBox(
                                 height: 150,
                                 width: screenWidth * 0.8,
                                 child: Image.network(
-                                  product.damagedImage ?? '',
+                                  product.damagedImage,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
                                   const Icon(Icons.image_not_supported),
@@ -523,7 +521,7 @@ class _TrackingPageState extends State<TrackingPage> {
                         ),
                         ElevatedButton(
                           onPressed: () => downloadVideo(
-                              context, product.damagedVideo ?? ''),
+                              context, product.damagedVideo),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF000000),
                           ),
@@ -542,7 +540,7 @@ class _TrackingPageState extends State<TrackingPage> {
                           width: MediaQuery.of(context).size.width * 0.8,
                           height: MediaQuery.of(context).size.height * 0.3,
                           child: product.damagedVideo != null &&
-                              product.damagedVideo!.isNotEmpty
+                              product.damagedVideo.isNotEmpty
                               ? GestureDetector(
                             onTap: () {
                               // Open Full-Screen Video Preview
@@ -550,7 +548,7 @@ class _TrackingPageState extends State<TrackingPage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => VideoPreview(
-                                      videoUrl: product.damagedVideo!),
+                                      videoUrl: product.damagedVideo),
                                 ),
                               );
                             },
@@ -563,7 +561,7 @@ class _TrackingPageState extends State<TrackingPage> {
                                 MediaQuery.of(context).size.height *
                                     0.3,
                                 child: VideoPreview(
-                                    videoUrl: product.damagedVideo!),
+                                    videoUrl: product.damagedVideo),
                               ),
                             ),
                           )

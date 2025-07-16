@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionController extends GetxController {
   static const String KEY_LOGIN_TIME = 'login_time';
-  static const int SESSION_DURATION = 8 * 60 * 60; // 8 hours in seconds
+  static const int SESSION_DURATION = 7 * 24 * 60 * 60; // 1 week in seconds
 
   RxBool isLoggedIn = false.obs;
 

@@ -54,11 +54,26 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
               Center(
                 child: Column(
                   children: [
-                    CircleAvatar(
+                    /*CircleAvatar(
                       radius: 60,
                       foregroundImage: CachedNetworkImageProvider(
                         user.image_url ??
                             'https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg',
+                      ),
+                    ),*/
+                    CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.grey.shade200,
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: user.image_url ??
+                              'https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg',
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const CircularProgressIndicator(strokeWidth: 2),
+                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                        ),
                       ),
                     ),
                     Text(
