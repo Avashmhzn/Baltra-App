@@ -50,7 +50,7 @@ class CustomResultDialog extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Color.fromARGB((0.2 * 255).round(), 0, 0, 0),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -98,7 +98,8 @@ class CustomResultDialog extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                   ),
                   child: const Text(
                     'OK',
@@ -199,7 +200,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Camera permission is required to scan QR codes.'),
+                      content: Text(
+                          'Camera permission is required to scan QR codes.'),
                       backgroundColor: Colors.red,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -217,46 +219,47 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   @override
   void dispose() {
     _scanSubscription?.cancel();
-    controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.of(context).pop();
-        return false;
+    return PopScope(
+      canPop: false, // Prevents default pop behavior
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.of(context).pop();
+        }
       },
       child: Scaffold(
         body: _hasCameraPermission
             ? Column(
-          children: [
-            const AppBarWithSVG(
-              backbutton: true,
-              subtitle: 'Scan the QR code from package to add product',
-              title: ' Scan to Add',
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.5,
-                width: MediaQuery.of(context).size.width * 0.7,
-                child: QRView(
-                  key: qrKey,
-                  onQRViewCreated: _onQRViewCreated,
-                  overlay: QrScannerOverlayShape(
-                    borderColor: Theme.of(context).primaryColor,
-                    borderRadius: 10,
-                    borderLength: 30,
-                    borderWidth: 10,
-                    cutOutSize: 700,
+                children: [
+                  const AppBarWithSVG(
+                    backbutton: true,
+                    subtitle: 'Scan the QR code from package to add product',
+                    title: ' Scan to Add',
                   ),
-                ),
-              ),
-            ),
-          ],
-        )
+                  const SizedBox(height: 20),
+                  Center(
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: QRView(
+                        key: qrKey,
+                        onQRViewCreated: _onQRViewCreated,
+                        overlay: QrScannerOverlayShape(
+                          borderColor: Theme.of(context).primaryColor,
+                          borderRadius: 10,
+                          borderLength: 30,
+                          borderWidth: 10,
+                          cutOutSize: 700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
             : const Center(child: CircularProgressIndicator()),
       ),
     );
@@ -380,7 +383,8 @@ class _ResultScreenState extends State<ResultScreen> {
   bool _isLoading = false; // Add loading state
 
   Future<void> _openImagePicker(int index) async {
-    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage =
+        await _picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       setState(() {
         _images[index] = File(pickedImage.path);
@@ -397,7 +401,7 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   final Myproductcontroller myproductcontroller =
-  Get.put(Myproductcontroller(productRepository: MyProductRepository()));
+      Get.put(Myproductcontroller(productRepository: MyProductRepository()));
 
   Future<void> submitForm() async {
     setState(() {
@@ -411,18 +415,22 @@ class _ResultScreenState extends State<ResultScreen> {
     log(serialNumberController.text);
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
-    var request = http.MultipartRequest('POST', Uri.parse('$URL/stocks/myproduct'));
+    var request =
+        http.MultipartRequest('POST', Uri.parse('$URL/stocks/myproduct'));
 
     if (_images[0] != null) {
-      var productImage = await http.MultipartFile.fromPath('product_image', _images[0]!.path);
+      var productImage =
+          await http.MultipartFile.fromPath('product_image', _images[0]!.path);
       request.files.add(productImage);
     }
     if (_images[1] != null) {
-      var warrantyImage = await http.MultipartFile.fromPath('warranty_image', _images[1]!.path);
+      var warrantyImage =
+          await http.MultipartFile.fromPath('warranty_image', _images[1]!.path);
       request.files.add(warrantyImage);
     }
     if (_images[2] != null) {
-      var billImage = await http.MultipartFile.fromPath('bill_image_one', _images[2]!.path);
+      var billImage =
+          await http.MultipartFile.fromPath('bill_image_one', _images[2]!.path);
       request.files.add(billImage);
     }
 
@@ -463,8 +471,9 @@ class _ResultScreenState extends State<ResultScreen> {
             Navigator.pop(context); // Close the dialog
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const ButtomNavBar(pageno: 2)),
-                  (Route<dynamic> route) => false,
+              MaterialPageRoute(
+                  builder: (context) => const ButtomNavBar(pageno: 2)),
+              (Route<dynamic> route) => false,
             );
           },
         ),
@@ -477,7 +486,7 @@ class _ResultScreenState extends State<ResultScreen> {
         builder: (context) => CustomResultDialog(
           title: 'Failed!',
           message: data['message'] ==
-              '{\'serial_number\': [ErrorDetail(string=\'stock with this serial number already exists.\', code=\'unique\')]}'
+                  '{\'serial_number\': [ErrorDetail(string=\'stock with this serial number already exists.\', code=\'unique\')]}'
               ? "This product is already registered by another customer"
               : data['message'],
           isSuccess: false,
@@ -485,8 +494,9 @@ class _ResultScreenState extends State<ResultScreen> {
             Navigator.pop(context); // Close the dialog
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const ButtomNavBar(pageno: 2)),
-                  (Route<dynamic> route) => false,
+              MaterialPageRoute(
+                  builder: (context) => const ButtomNavBar(pageno: 2)),
+              (Route<dynamic> route) => false,
             );
           },
         ),
@@ -619,13 +629,13 @@ class _ResultScreenState extends State<ResultScreen> {
                           child: _images[0] != null
                               ? Image.file(_images[0]!, fit: BoxFit.cover)
                               : const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('Upload Product Image',
-                                  style: TextStyle(color: Colors.grey)),
-                              Icon(Icons.add_a_photo),
-                            ],
-                          ),
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Upload Product Image',
+                                        style: TextStyle(color: Colors.grey)),
+                                    Icon(Icons.add_a_photo),
+                                  ],
+                                ),
                         ),
                       ),
                       const Text('Warranty Card Image'),
@@ -639,13 +649,13 @@ class _ResultScreenState extends State<ResultScreen> {
                           child: _images[1] != null
                               ? Image.file(_images[1]!, fit: BoxFit.cover)
                               : const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('Upload Warranty Card Image',
-                                  style: TextStyle(color: Colors.grey)),
-                              Icon(Icons.add_a_photo),
-                            ],
-                          ),
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Upload Warranty Card Image',
+                                        style: TextStyle(color: Colors.grey)),
+                                    Icon(Icons.add_a_photo),
+                                  ],
+                                ),
                         ),
                       ),
                       const Text('Bill Image'),
@@ -659,21 +669,23 @@ class _ResultScreenState extends State<ResultScreen> {
                           child: _images[2] != null
                               ? Image.file(_images[2]!, fit: BoxFit.cover)
                               : const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Upload Bill Image',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                              Icon(Icons.add_a_photo),
-                            ],
-                          ),
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Upload Bill Image',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                    Icon(Icons.add_a_photo),
+                                  ],
+                                ),
                         ),
                       ),
                       GestureDetector(
-                        onTap: _isLoading ? null : () async {
-                          await submitForm();
-                        }, // Disable button when loading
+                        onTap: _isLoading
+                            ? null
+                            : () async {
+                                await submitForm();
+                              }, // Disable button when loading
                         child: Container(
                           margin: const EdgeInsets.symmetric(vertical: 15),
                           width: double.infinity,
@@ -684,17 +696,17 @@ class _ResultScreenState extends State<ResultScreen> {
                           child: Center(
                             child: _isLoading
                                 ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
                                 : const Text(
-                              'Add product',
-                              style: TextStyle(color: Colors.white),
-                            ),
+                                    'Add product',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                           ),
                         ),
                       ),

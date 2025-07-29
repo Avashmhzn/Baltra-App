@@ -62,7 +62,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
 
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) {
+      if (!_tabController.indexIsChanging && mounted) {
         setState(() {
           _currentTabIndex = _tabController.index;
         });
@@ -75,13 +75,17 @@ class _ProductDetailPageState extends State<ProductDetailPage>
       }
       if (productId != 0) {
         if (widget.relatedProducts == null || widget.relatedProducts!.isEmpty) {
-          print('initState: Fetching related products for product ID: $productId');
+          print(
+              'initState: Fetching related products for product ID: $productId');
           controller.fetchRelatedProducts(productId);
         }
         // Fetch reviews for initial product
         print('initState: Fetching reviews for product ID: $productId');
         reviewController.fetchReviewsAndRatings(productId).then((_) {
-          print('initState: Reviews fetched for product ID: $productId, reviews: ${reviewController.reviews.length}');
+          if (mounted) {
+            print(
+                'initState: Reviews fetched for product ID: $productId, reviews: ${reviewController.reviews.length}');
+          }
         });
       }
     });
@@ -105,7 +109,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
       print('Updating state for product ID: ${product.id}');
       setState(() {
         _lastProductId = product.id;
-        currentMainImage = product.main_image?.isNotEmpty == true ? product.main_image : '';
+        currentMainImage =
+            product.main_image?.isNotEmpty == true ? product.main_image : '';
         _selectedThumbnailIndex = 0;
         thumbnailUrls.clear();
         if (product.main_image != null && product.main_image!.isNotEmpty) {
@@ -127,10 +132,12 @@ class _ProductDetailPageState extends State<ProductDetailPage>
 
   Future<void> navigateToProductDetails(int productId) async {
     if (productId == _lastProductId) {
-      print('navigateToProductDetails: Already on product ID: $productId, skipping navigation');
+      print(
+          'navigateToProductDetails: Already on product ID: $productId, skipping navigation');
       return;
     }
-    print('Navigating to product ID: $productId from current ID: $_lastProductId');
+    print(
+        'Navigating to product ID: $productId from current ID: $_lastProductId');
     controller.isLoading(true);
     try {
       // Clear image cache
@@ -149,19 +156,24 @@ class _ProductDetailPageState extends State<ProductDetailPage>
       // Clear old ReviewController and create new one
       final oldProductId = _lastProductId ?? 0;
       Get.delete<ReviewController>(tag: 'product_$oldProductId', force: true);
-      print('navigateToProductDetails: Cleared review controller for ID: $oldProductId');
-      final newReviewController = Get.put(ReviewController(), tag: 'product_$productId');
+      print(
+          'navigateToProductDetails: Cleared review controller for ID: $oldProductId');
+      final newReviewController =
+          Get.put(ReviewController(), tag: 'product_$productId');
       await newReviewController.fetchReviewsAndRatings(productId);
 
       // Navigate to new ProductDetailPage
       Get.off(() => ProductDetailPage(
-        key: ValueKey('product_$productId'),
-        product: controller.productDetails.value,
-        relatedProducts: List<Subcategoryproduct>.from(controller.relatedProductsList),
-      ));
+            key: ValueKey('product_$productId'),
+            product: controller.productDetails.value,
+            relatedProducts:
+                List<Subcategoryproduct>.from(controller.relatedProductsList),
+          ));
     } catch (e) {
       print('Navigation error for product ID: $productId, error: $e');
-      Get.snackbar("Error", "Failed to load product: $e");
+      if (mounted) {
+        Get.snackbar("Error", "Failed to load product: $e");
+      }
     } finally {
       controller.isLoading(false);
     }
@@ -177,7 +189,9 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         final Uri? uri = Uri.tryParse(productVideoUrl);
         if (uri == null) {
           print("Invalid video URL format");
-          setState(() => _isVideoInitialized = false);
+          if (mounted) {
+            setState(() => _isVideoInitialized = false);
+          }
           return;
         }
 
@@ -201,8 +215,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content:
-                    Text("Error playing video: ${player.value.errorDescription}")),
+                    content: Text(
+                        "Error playing video: ${player.value.errorDescription}")),
               );
               setState(() => _isVideoInitialized = false);
             }
@@ -249,7 +263,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   }
 
   void _togglePlayPause() {
-    if (_videoPlayerController == null) return;
+    if (_videoPlayerController == null || !mounted) return;
     setState(() {
       if (_videoPlayerController!.value.isPlaying) {
         _videoPlayerController!.pause();
@@ -282,11 +296,13 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         _videoPlayerController!.play().catchError((error) {
           print("Error playing video: $error");
         });
-        setState(() {
-          _isPlaying = true;
-          _showPlayPauseButton = true;
-          _startHidePlayPauseTimer();
-        });
+        if (mounted) {
+          setState(() {
+            _isPlaying = true;
+            _showPlayPauseButton = true;
+            _startHidePlayPauseTimer();
+          });
+        }
       }
     } else {
       if (_isPlaying && mounted) {
@@ -335,7 +351,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     });
     _hidePlayPauseTimer?.cancel();
     _scrollController.dispose();
-    Get.delete<ReviewController>(tag: 'product_${_lastProductId ?? 0}', force: true);
+    Get.delete<ReviewController>(
+        tag: 'product_${_lastProductId ?? 0}', force: true);
     super.dispose();
   }
 
@@ -394,7 +411,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     );
   }
 
-  Widget _buildSizingTab(String sizing, List<Map<String, String>> sizingImages) {
+  Widget _buildSizingTab(
+      String sizing, List<Map<String, String>> sizingImages) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -548,17 +566,17 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   }
 
   Widget buildTabSection(
-      BuildContext context, {
-        required TabController tabController,
-        required List<String> specifications,
-        required List<Map<String, String>> specImages,
-        required String sizing,
-        required List<Map<String, String>> sizingImages,
-        required String usage,
-        required List<String> usageItems,
-        required List<Map<String, String>> extraItems,
-        required List<Map<String, String>> usageImages,
-      }) {
+    BuildContext context, {
+    required TabController tabController,
+    required List<String> specifications,
+    required List<Map<String, String>> specImages,
+    required String sizing,
+    required List<Map<String, String>> sizingImages,
+    required String usage,
+    required List<String> usageItems,
+    required List<Map<String, String>> extraItems,
+    required List<Map<String, String>> usageImages,
+  }) {
     final List<String> tabTitles = ['DESCRIPTION', 'SIZING', 'USAGE'];
 
     return Column(
@@ -572,10 +590,12 @@ class _ProductDetailPageState extends State<ProductDetailPage>
               final isSelected = _currentTabIndex == index;
               return GestureDetector(
                 onTap: () {
-                  setState(() {
-                    _currentTabIndex = index;
-                    tabController.index = index;
-                  });
+                  if (mounted) {
+                    setState(() {
+                      _currentTabIndex = index;
+                      tabController.index = index;
+                    });
+                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.only(right: 24.0),
@@ -588,9 +608,10 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                          color:
-                          isSelected ? Colors.black : const Color(0xFF757575),
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? Colors.black
+                              : const Color(0xFF757575),
                         ),
                       ),
                       if (isSelected)
@@ -612,8 +633,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           child: _currentTabIndex == 0
               ? _buildDescriptionTab(specifications, specImages)
               : _currentTabIndex == 1
-              ? _buildSizingTab(sizing, sizingImages)
-              : _buildUsageTab(usage, usageItems, extraItems, usageImages),
+                  ? _buildSizingTab(sizing, sizingImages)
+                  : _buildUsageTab(usage, usageItems, extraItems, usageImages),
         ),
       ],
     );
@@ -645,9 +666,9 @@ class _ProductDetailPageState extends State<ProductDetailPage>
               'build: Related products IDs: ${displayRelatedProducts.map((p) => p.id).toList()}');
 
           List<Map<String, String>> items =
-          parseDimensionsText(product.sizing ?? '');
+              parseDimensionsText(product.sizing ?? '');
           List<String> specifications =
-          extractSpecifications(product.specification ?? '');
+              extractSpecifications(product.specification ?? '');
           List<String> usageItems = extractUsageItems(product.usage ?? '');
           List<Map<String, String>> specImages = [];
           if (product.specification_images != null) {
@@ -672,7 +693,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             controller: _scrollController,
             child: Padding(
               padding:
-              const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -691,31 +712,31 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ],
                   ),
                   Padding(
-                    padding:
-                    const EdgeInsets.only(left: 20.0, top: 8.0, bottom: 8.0),
+                    padding: const EdgeInsets.only(
+                        left: 20.0, top: 8.0, bottom: 8.0),
                     child: Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           product.category?['category_name'] ?? 'Category',
                           style:
-                          const TextStyle(color: Colors.grey, fontSize: 14),
+                              const TextStyle(color: Colors.grey, fontSize: 14),
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 0.0),
-                          child:
-                          Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+                          child: Icon(Icons.chevron_right,
+                              size: 16, color: Colors.grey),
                         ),
                         Text(
                           product.sub_category?['sub_category_name'] ??
                               'Subcategory',
                           style:
-                          const TextStyle(color: Colors.grey, fontSize: 14),
+                              const TextStyle(color: Colors.grey, fontSize: 14),
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 0.0),
-                          child:
-                          Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+                          child: Icon(Icons.chevron_right,
+                              size: 16, color: Colors.grey),
                         ),
                         Text(
                           product.name ?? 'Product',
@@ -736,32 +757,32 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
                           child: currentMainImage == null ||
-                              currentMainImage!.isEmpty
+                                  currentMainImage!.isEmpty
                               ? Image.asset(
-                            'assets/images/pp.png',
-                            height: 300,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          )
-                              : CachedNetworkImage(
-                            imageUrl: currentMainImage!,
-                            cacheKey: '${currentMainImage}_${productId}',
-                            height: 300,
-                            width: double.infinity,
-                            fit: BoxFit.fitHeight,
-                            placeholder: (context, url) => Container(
-                              height: 300,
-                              width: double.infinity,
-                              color: Colors.grey[300],
-                            ),
-                            errorWidget: (context, url, error) =>
-                                Image.asset(
                                   'assets/images/pp.png',
                                   height: 300,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
+                                )
+                              : CachedNetworkImage(
+                                  imageUrl: currentMainImage!,
+                                  cacheKey: '${currentMainImage}_${productId}',
+                                  height: 300,
+                                  width: double.infinity,
+                                  fit: BoxFit.fitHeight,
+                                  placeholder: (context, url) => Container(
+                                    height: 300,
+                                    width: double.infinity,
+                                    color: Colors.grey[300],
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Image.asset(
+                                    'assets/images/pp.png',
+                                    height: 300,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                          ),
                         ),
                         if (product.warranty_icon != null &&
                             product.warranty_icon!.isNotEmpty)
@@ -792,63 +813,72 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   Container(
                     height: 80,
-                    margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 10),
                     child: thumbnailUrls.isEmpty
                         ? const Center(child: Text("No images available"))
                         : ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: thumbnailUrls.length > 0 ? thumbnailUrls.length - 1 : 0,
-                      itemBuilder: (context, index) {
-                        final actualIndex = index + 1;
-                        final imageUrl = thumbnailUrls[actualIndex];
-                        final isSelected = _selectedThumbnailIndex == actualIndex;
-                        return GestureDetector(
-                          onTap: () {
-                            if (imageUrl.isNotEmpty &&
-                                currentMainImage != null &&
-                                currentMainImage!.isNotEmpty) {
-                              setState(() {
-                                final previousMainImage = currentMainImage!;
-                                currentMainImage = imageUrl;
-                                thumbnailUrls[actualIndex] = previousMainImage;
-                                _selectedThumbnailIndex = actualIndex;
-                              });
-                            }
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: isSelected ? Colors.blue : Colors.grey,
-                                width: isSelected ? 2 : 1,
-                              ),
-                              color: isSelected
-                                  ? Colors.blue.withOpacity(0.1)
-                                  : null,
-                            ),
-                            child: CachedNetworkImage(
-                              imageUrl: imageUrl,
-                              cacheKey: '${imageUrl}_${productId}',
-                              fit: BoxFit.contain,
-                              height: 75,
-                              width: 75,
-                              placeholder: (context, url) => Container(
-                                height: 75,
-                                width: 75,
-                                color: Colors.grey[300],
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  Image.asset(
-                                    'assets/images/pp.png',
+                            scrollDirection: Axis.horizontal,
+                            itemCount: thumbnailUrls.length > 0
+                                ? thumbnailUrls.length - 1
+                                : 0,
+                            itemBuilder: (context, index) {
+                              final actualIndex = index + 1;
+                              final imageUrl = thumbnailUrls[actualIndex];
+                              final isSelected =
+                                  _selectedThumbnailIndex == actualIndex;
+                              return GestureDetector(
+                                onTap: () {
+                                  if (imageUrl.isNotEmpty &&
+                                      currentMainImage != null &&
+                                      currentMainImage!.isNotEmpty &&
+                                      mounted) {
+                                    setState(() {
+                                      final previousMainImage =
+                                          currentMainImage!;
+                                      currentMainImage = imageUrl;
+                                      thumbnailUrls[actualIndex] =
+                                          previousMainImage;
+                                      _selectedThumbnailIndex = actualIndex;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? Colors.blue
+                                          : Colors.grey,
+                                      width: isSelected ? 2 : 1,
+                                    ),
+                                    color: isSelected
+                                        ? Color.fromRGBO(33, 150, 243, 0.1)
+                                        : null,
+                                  ),
+                                  child: CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    cacheKey: '${imageUrl}_${productId}',
+                                    fit: BoxFit.contain,
                                     height: 75,
                                     width: 75,
-                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Container(
+                                      height: 75,
+                                      width: 75,
+                                      color: Colors.grey[300],
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Image.asset(
+                                      'assets/images/pp.png',
+                                      height: 75,
+                                      width: 75,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
-                            ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
                   ),
                   const SizedBox(height: 18),
                   Padding(
@@ -899,48 +929,48 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     child: Container(
                       height: 40,
                       child: (product.color_styles == null ||
-                          product.color_styles!.isEmpty)
+                              product.color_styles!.isEmpty)
                           ? const Text(
-                        'No colors available',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      )
+                              'No colors available',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            )
                           : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: product.color_styles!.length,
-                        itemBuilder: (context, index) {
-                          final hexColor = product.color_styles![index];
-                          final isSelected = _selectedColorIndex == index;
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedColorIndex = index;
-                              });
-                            },
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 5.0),
-                                  child: CircleAvatar(
-                                    radius: 15,
-                                    backgroundColor: hexToColor(hexColor),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: product.color_styles!.length,
+                              itemBuilder: (context, index) {
+                                final hexColor = product.color_styles![index];
+                                final isSelected = _selectedColorIndex == index;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedColorIndex = index;
+                                    });
+                                  },
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 5.0),
+                                        child: CircleAvatar(
+                                          radius: 15,
+                                          backgroundColor: hexToColor(hexColor),
+                                        ),
+                                      ),
+                                      if (isSelected)
+                                        const Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                    ],
                                   ),
-                                ),
-                                if (isSelected)
-                                  const Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                              ],
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -970,8 +1000,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   Container(
                     decoration: const BoxDecoration(
                       color: Colors.white,
-                      border:
-                      Border(bottom: BorderSide(color: Colors.grey, width: 1)),
+                      border: Border(
+                          bottom: BorderSide(color: Colors.grey, width: 1)),
                     ),
                   ),
                   Padding(
@@ -992,7 +1022,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                    decoration:
+                        BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: CachedNetworkImage(
                       imageUrl: product.warranty_icon ?? '',
                       cacheKey: '${product.warranty_icon}_${productId}',
@@ -1014,7 +1045,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                    decoration:
+                        BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: CachedNetworkImage(
                       imageUrl: product.galleryimageone ?? '',
                       cacheKey: '${product.galleryimageone}_${productId}',
@@ -1036,7 +1068,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                    decoration:
+                        BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: CachedNetworkImage(
                       imageUrl: product.galleryimagetwo ?? '',
                       cacheKey: '${product.galleryimagetwo}_${productId}',
@@ -1057,7 +1090,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ),
                   ),
                   const SizedBox(height: 10),
-                  if (product.product_video != null && product.product_video!.isNotEmpty)
+                  if (product.product_video != null &&
+                      product.product_video!.isNotEmpty)
                     VisibilityDetector(
                       key: const Key('video-player'),
                       onVisibilityChanged: _onVisibilityChanged,
@@ -1073,31 +1107,38 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              if (_isVideoInitialized && _videoPlayerController != null)
+                              if (_isVideoInitialized &&
+                                  _videoPlayerController != null)
                                 AspectRatio(
-                                  aspectRatio: _videoPlayerController!.value.aspectRatio,
+                                  aspectRatio:
+                                      _videoPlayerController!.value.aspectRatio,
                                   child: VideoPlayer(_videoPlayerController!),
                                 ),
                               if (!_isVideoInitialized)
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const CircularProgressIndicator(color: Colors.white),
+                                    const CircularProgressIndicator(
+                                        color: Colors.white),
                                     const SizedBox(height: 10),
                                     Text(
                                       'Loading video...',
                                       style: TextStyle(
-                                          color: Colors.white.withOpacity(0.7)),
+                                        color:
+                                            Color.fromRGBO(255, 255, 255, 0.7),
+                                      ),
                                     ),
                                   ],
                                 ),
-                              if (_videoPlayerController?.value.hasError ?? false)
+                              if (_videoPlayerController?.value.hasError ??
+                                  false)
                                 Center(
                                   child: Text(
                                     'Error loading video\nTap to retry',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                        color: Colors.white.withOpacity(0.7)),
+                                      color: Color.fromRGBO(255, 255, 255, 0.7),
+                                    ),
                                   ),
                                 ),
                               if (_showPlayPauseButton || !_isPlaying)
@@ -1106,7 +1147,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                                   icon: Icon(
                                     _isPlaying ? Icons.pause : Icons.play_arrow,
                                     size: 50,
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Color.fromARGB(
+                                        (255 * 0.7).round(), 255, 255, 255),
                                   ),
                                 ),
                             ],

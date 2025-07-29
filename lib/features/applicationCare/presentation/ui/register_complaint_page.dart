@@ -653,7 +653,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
   File? _problemVideo;
   final TextEditingController _problemTypeController = TextEditingController();
   final TextEditingController _problemDescriptionController =
-  TextEditingController();
+      TextEditingController();
 
   List<Map<String, dynamic>> zones = [];
   String? selectedZone = null;
@@ -752,7 +752,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
   }
 
   // Redesigned method with SessionManager dialog styling
-  void _showImageSourceDialog(bool isProductImage)   {
+  void _showImageSourceDialog(bool isProductImage) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -810,7 +810,8 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                         Navigator.pop(context);
                         _pickImage(ImageSource.gallery, isProductImage);
                       },
-                      child: Text('Gallery', style: TextStyle(color: Colors.white)),
+                      child: Text('Gallery',
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ),
                   SizedBox(height: 8),
@@ -828,7 +829,8 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                         Navigator.pop(context);
                         _pickImage(ImageSource.camera, isProductImage);
                       },
-                      child: Text('Camera', style: TextStyle(color: Colors.white)),
+                      child:
+                          Text('Camera', style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
@@ -839,7 +841,6 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
       },
     );
   }
-
 
   Future<void> _pickVideo(ImageSource source, bool isProblemVideo) async {
     final pickedFile = await ImagePicker().pickVideo(source: source);
@@ -903,7 +904,8 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
 
       // Customer details - Use correct field names
       request.fields['customerName'] = customerName!;
-      request.fields['customerContact'] = customerContact!; // Changed from 'contact' to 'customerContact'
+      request.fields['customerContact'] =
+          customerContact!; // Changed from 'contact' to 'customerContact'
       request.fields['email'] = email!;
 
       if (selectedZone != null) {
@@ -934,8 +936,9 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
             onConfirm: () {
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => ButtomNavBar(pageno: 2)),
-                    (Route<dynamic> route) => false, // Removes all previous routes
+                MaterialPageRoute(
+                    builder: (context) => ButtomNavBar(pageno: 2)),
+                (Route<dynamic> route) => false, // Removes all previous routes
               );
             },
           ),
@@ -1010,12 +1013,12 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                         child: _productImage != null
                             ? Image.file(_productImage!, fit: BoxFit.cover)
                             : const Center(
-                          child: Text(
-                            'Upload a picture of your damaged product',
-                            style: TextStyle(
-                                fontSize: 14, color: Colors.black),
-                          ),
-                        ),
+                                child: Text(
+                                  'Upload a picture of your damaged product',
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.black),
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -1032,12 +1035,12 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                         child: _warrantyImage != null
                             ? Image.file(_warrantyImage!, fit: BoxFit.cover)
                             : const Center(
-                          child: Text(
-                            'Upload a picture of your warranty card',
-                            style: TextStyle(
-                                fontSize: 14, color: Colors.black),
-                          ),
-                        ),
+                                child: Text(
+                                  'Upload a picture of your warranty card',
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.black),
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -1056,13 +1059,14 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                           ),
                         ),
                         ...zones.map((zone) => DropdownMenuItem<String>(
-                          value: zone['zoneName'],
-                          child: Text(
-                            zone['zoneName'],
-                            style: const TextStyle(
-                                fontWeight: FontWeight.normal, fontSize: 14),
-                          ),
-                        )),
+                              value: zone['zoneName'],
+                              child: Text(
+                                zone['zoneName'],
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 14),
+                              ),
+                            )),
                       ],
                       onChanged: (value) {
                         setState(() {
@@ -1087,14 +1091,16 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                                 fontWeight: FontWeight.normal, fontSize: 14),
                           ),
                         ),
-                        ...availableAreas.map((area) => DropdownMenuItem<String>(
-                          value: area['areaName'],
-                          child: Text(
-                            area['areaName'],
-                            style: const TextStyle(
-                                fontWeight: FontWeight.normal, fontSize: 14),
-                          ),
-                        )),
+                        ...availableAreas
+                            .map((area) => DropdownMenuItem<String>(
+                                  value: area['areaName'],
+                                  child: Text(
+                                    area['areaName'],
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        fontSize: 14),
+                                  ),
+                                )),
                       ],
                       onChanged: (value) {
                         setState(() {
@@ -1167,25 +1173,25 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                         color: Colors.grey[300],
                         child: _problemVideo != null
                             ? const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.video_file,
-                                size: 50, color: Colors.blue),
-                            SizedBox(height: 10),
-                            Text(
-                              'Video Selected',
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.black),
-                            ),
-                          ],
-                        )
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.video_file,
+                                      size: 50, color: Colors.blue),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    'Video Selected',
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.black),
+                                  ),
+                                ],
+                              )
                             : const Center(
-                          child: Text(
-                            'Select the video',
-                            style: TextStyle(
-                                fontSize: 14, color: Colors.black),
-                          ),
-                        ),
+                                child: Text(
+                                  'Select the video',
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.black),
+                                ),
+                              ),
                       ),
                     ),
                     GestureDetector(
@@ -1203,17 +1209,17 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                             : Theme.of(context).primaryColor,
                         child: _isLoading
                             ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
                             : const Text(
-                          'Submit',
-                          style: TextStyle(color: Colors.white),
-                        ),
+                                'Submit',
+                                style: TextStyle(color: Colors.white),
+                              ),
                       ),
                     )
                   ],
@@ -1254,7 +1260,8 @@ class CustomSuccessDialog extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              // color: Colors.black.withOpacity(0.2),
+              color: Color.fromARGB((255 * 0.2).round(), 0, 0, 0),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -1297,7 +1304,8 @@ class CustomSuccessDialog extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
               child: const Text(
                 'OK',

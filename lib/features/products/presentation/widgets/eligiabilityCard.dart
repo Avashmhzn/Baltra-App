@@ -14,7 +14,7 @@ class EligibabilityCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-      color: const Color(0xffece6e6).withOpacity(0.4),
+      color: const Color(0xffece6e6).withValues(alpha: 0.4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

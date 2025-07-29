@@ -28,7 +28,7 @@ class CustomDeleteDialog extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Color.fromARGB((255 * 0.2).round(), 0, 0, 0),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -70,13 +70,15 @@ class CustomDeleteDialog extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: onCancel ?? () => Navigator.pop(context), // Cancel action
+                  onPressed:
+                      onCancel ?? () => Navigator.pop(context), // Cancel action
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                   ),
                   child: const Text(
                     'Cancel',
@@ -96,7 +98,8 @@ class CustomDeleteDialog extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                   ),
                   child: const Text(
                     'Delete',

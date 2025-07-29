@@ -13,7 +13,7 @@ class ProductItemSkeleton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             blurRadius: 5,
             spreadRadius: 2,
             offset: const Offset(0, 2),
@@ -33,7 +33,7 @@ class ProductItemSkeleton extends StatelessWidget {
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(8.0)),
+                      BorderRadius.vertical(top: Radius.circular(8.0)),
                 ),
               ),
             ),

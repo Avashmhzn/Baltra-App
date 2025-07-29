@@ -3,7 +3,6 @@ import 'package:baltra/features/applicationCare/presentation/widgets/add_product
 import 'package:baltra/features/authetication/presentation/pages/profile_page.dart';
 import 'package:baltra/features/products/presentation/screens/category_page.dart';
 import 'package:baltra/features/products/presentation/screens/home_page.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -19,7 +18,8 @@ class ButtomNavBar extends StatefulWidget {
   _ButtomNavBarState createState() => _ButtomNavBarState();
 }
 
-class _ButtomNavBarState extends State<ButtomNavBar> with TickerProviderStateMixin {
+class _ButtomNavBarState extends State<ButtomNavBar>
+    with TickerProviderStateMixin {
   int _selectedIndex = 0;
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -32,7 +32,8 @@ class _ButtomNavBarState extends State<ButtomNavBar> with TickerProviderStateMix
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _animation = Tween<double>(begin: 1.0, end: 1.3).animate(_animationController);
+    _animation =
+        Tween<double>(begin: 1.0, end: 1.3).animate(_animationController);
   }
 
   void _onItemTapped(int index) {
@@ -40,7 +41,9 @@ class _ButtomNavBarState extends State<ButtomNavBar> with TickerProviderStateMix
     setState(() {
       _selectedIndex = index;
       if (index == _selectedIndex) {
-        _animationController.forward().then((_) => _animationController.reverse());
+        _animationController
+            .forward()
+            .then((_) => _animationController.reverse());
       }
     });
   }
@@ -66,7 +69,9 @@ class _ButtomNavBarState extends State<ButtomNavBar> with TickerProviderStateMix
       // On other pages, navigate to HomePage (index 0)
       setState(() {
         _selectedIndex = 0;
-        _animationController.forward().then((_) => _animationController.reverse());
+        _animationController
+            .forward()
+            .then((_) => _animationController.reverse());
       });
       return false; // Prevent default pop behavior
     }
@@ -80,8 +85,17 @@ class _ButtomNavBarState extends State<ButtomNavBar> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop, // Handle back button press
+    return PopScope(
+      canPop: false, // Prevent default pop behavior to mimic custom handling
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          bool shouldPop =
+              await _onWillPop(); // Call existing _onWillPop method
+          if (shouldPop && mounted) {
+            Navigator.of(context).pop();
+          }
+        }
+      },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: SafeArea(
@@ -154,7 +168,7 @@ class CustomBottomAppBar extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(curveHeight)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Color.fromRGBO(158, 158, 158, 0.1),
             spreadRadius: 8,
             blurRadius: 1,
             offset: const Offset(0, 3),
@@ -164,11 +178,19 @@ class CustomBottomAppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Expanded(child: _buildNavItem(0, 'assets/icons/home_inactive.svg', 'assets/icons/home_active.svg')),
-          Expanded(child: _buildNavItem(1, 'assets/icons/Product_inactive.svg', 'assets/icons/Product_active.svg')),
+          Expanded(
+              child: _buildNavItem(0, 'assets/icons/home_inactive.svg',
+                  'assets/icons/home_active.svg')),
+          Expanded(
+              child: _buildNavItem(1, 'assets/icons/Product_inactive.svg',
+                  'assets/icons/Product_active.svg')),
           const SizedBox(width: 60), // Space for QR button
-          Expanded(child: _buildNavItem(2, 'assets/icons/ac_incative.svg', 'assets/icons/ac_active.svg')),
-          Expanded(child: _buildNavItem(3, 'assets/icons/profile_inactive.svg', 'assets/icons/Profile_active.svg')),
+          Expanded(
+              child: _buildNavItem(2, 'assets/icons/ac_incative.svg',
+                  'assets/icons/ac_active.svg')),
+          Expanded(
+              child: _buildNavItem(3, 'assets/icons/profile_inactive.svg',
+                  'assets/icons/Profile_active.svg')),
         ],
       ),
     );
@@ -184,11 +206,11 @@ class CustomBottomAppBar extends StatelessWidget {
           scale: selectedIndex == index
               ? animation
               : Tween<double>(begin: 1.0, end: 1.0).animate(
-            AnimationController(
-              vsync: const _NoopTickerProvider(),
-              duration: Duration.zero,
-            ),
-          ),
+                  AnimationController(
+                    vsync: const _NoopTickerProvider(),
+                    duration: Duration.zero,
+                  ),
+                ),
           child: SvgPicture.asset(
             selectedIndex == index ? activeIcon : inactiveIcon,
             fit: BoxFit.contain,

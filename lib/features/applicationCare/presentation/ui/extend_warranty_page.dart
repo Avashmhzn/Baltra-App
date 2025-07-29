@@ -23,7 +23,7 @@ class _ExtendWarrantyPageState extends State<ExtendWarrantyPage>
   late Animation<double> animation;
 
   final Myproductcontroller myproductcontroller =
-  Get.put(Myproductcontroller(productRepository: MyProductRepository()));
+      Get.put(Myproductcontroller(productRepository: MyProductRepository()));
 
   @override
   void initState() {
@@ -94,7 +94,7 @@ class _ExtendWarrantyPageState extends State<ExtendWarrantyPage>
                               height: 144,
                               width: 144,
                               errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.error),
+                                  const Icon(Icons.error),
                             ),
                             const SizedBox(width: 10),
                             Column(
@@ -143,20 +143,20 @@ class _ExtendWarrantyPageState extends State<ExtendWarrantyPage>
                     }),
                     Center(
                         child: Text(
-                          'Warranty Offers',
-                          style: TextStyle(
-                              fontSize: 24,
-                              color: Theme.of(context).primaryColor,
-                              fontWeight: FontWeight.w700),
-                        )),
+                      'Warranty Offers',
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w700),
+                    )),
                     const Center(
                         child: Text(
-                          'Select the one that suits you best',
-                          style: TextStyle(
-                              fontSize: 15,
-                              color: Color(0xff1a1a1a),
-                              fontWeight: FontWeight.w300),
-                        )),
+                      'Select the one that suits you best',
+                      style: TextStyle(
+                          fontSize: 15,
+                          color: Color(0xff1a1a1a),
+                          fontWeight: FontWeight.w300),
+                    )),
                     Obx(() {
                       if (myproductcontroller.isLoading.value ||
                           myproductcontroller.myProduct.value == null) {
@@ -177,8 +177,7 @@ class _ExtendWarrantyPageState extends State<ExtendWarrantyPage>
                                 stockId: product.stockDetails.id),
                           ],
                           onPageChanged: (int index) {
-                            setState(() {
-                            });
+                            setState(() {});
                           },
                         ),
                       );
@@ -312,7 +311,8 @@ class WarrantyCardWidget extends StatelessWidget {
             '$duration Year',
             style: TextStyle(
               fontSize: 12,
-              color: const Color(0xff0d0d0d).withOpacity(0.7),
+              // color: const Color(0xff0d0d0d).withOpacity(0.7),
+              color: Color.fromARGB((255 * 0.7).round(), 13, 13, 13),
             ),
           ),
           Text(
@@ -365,7 +365,10 @@ class WarrantyCardWidget extends StatelessWidget {
         Text(
           text,
           style: TextStyle(
-              fontSize: 12, color: const Color(0xff0d0d0d).withOpacity(0.9)),
+            // fontSize: 12, color: const Color(0xff0d0d0d).withOpacity(0.9)
+            fontSize: 12,
+            color: Color.fromARGB((255 * 0.9).round(), 13, 13, 13),
+          ),
         ),
       ],
     );

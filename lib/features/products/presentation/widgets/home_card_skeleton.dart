@@ -13,7 +13,7 @@ class HomepageCardSkeleton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             blurRadius: 5,
             spreadRadius: 2,
             offset: const Offset(0, 2),
@@ -29,7 +29,8 @@ class HomepageCardSkeleton extends StatelessWidget {
             // Image placeholder
             Container(
               width: double.infinity,
-              height: 180, // Adjust height to match the product image in HomepageCard
+              height:
+                  180, // Adjust height to match the product image in HomepageCard
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(8.0)),
@@ -64,7 +65,7 @@ class HomepageCardSkeleton extends StatelessWidget {
                   Row(
                     children: List.generate(
                       3, // Assuming 3 color options as in the image
-                          (index) => Padding(
+                      (index) => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2.5),
                         child: CircleAvatar(
                           radius: 10,

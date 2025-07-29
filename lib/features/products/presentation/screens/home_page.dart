@@ -297,7 +297,7 @@ class _HomePageState extends State<HomePage> with SessionManager {
                                         ),
                                         elevation: 5,
                                         shadowColor:
-                                            Colors.black.withOpacity(0.3),
+                                            Color.fromRGBO(0, 0, 0, 0.3),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,

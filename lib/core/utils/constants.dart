@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-const String URL = 'https://dreamline.com.np/api';
+
+const String URL = 'https://np.baltra.in/api';
 
 extension StringCasingExtension on String {
   String toCapitalized() =>

@@ -21,7 +21,8 @@ class _LoginpageState extends State<Loginpage> {
   final loginController = Get.put(Authrepository());
 
   bool _aakha = true;
-  bool _rememberMe = true; // Set to true to make "Remember Me" checked by default
+  bool _rememberMe =
+      true; // Set to true to make "Remember Me" checked by default
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -38,7 +39,8 @@ class _LoginpageState extends State<Loginpage> {
         await Clipboard.setData(ClipboardData(text: phoneNumber));
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Could not launch WhatsApp. Phone number copied to clipboard.'),
+            content: Text(
+                'Could not launch WhatsApp. Phone number copied to clipboard.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -47,7 +49,8 @@ class _LoginpageState extends State<Loginpage> {
       await Clipboard.setData(ClipboardData(text: phoneNumber));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error launching WhatsApp: $e. Phone number copied to clipboard.'),
+          content: Text(
+              'Error launching WhatsApp: $e. Phone number copied to clipboard.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -72,7 +75,8 @@ class _LoginpageState extends State<Loginpage> {
               height: double.infinity,
               width: double.infinity,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 20.0),
                 child: Container(
                   color: Colors.transparent,
                   child: Form(
@@ -134,17 +138,20 @@ class _LoginpageState extends State<Loginpage> {
                                     decoration: InputDecoration(
                                       border: OutlineInputBorder(
                                         borderSide: const BorderSide(
-                                          color: Color(0xffC2C2C2), // Grey when not focused
+                                          color: Color(
+                                              0xffC2C2C2), // Grey when not focused
                                         ),
                                       ),
                                       enabledBorder: OutlineInputBorder(
                                         borderSide: const BorderSide(
-                                          color: Color(0xffC2C2C2), // Grey when enabled but not focused
+                                          color: Color(
+                                              0xffC2C2C2), // Grey when enabled but not focused
                                         ),
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Theme.of(context).primaryColor, // Red when focused
+                                          color: Theme.of(context)
+                                              .primaryColor, // Red when focused
                                         ),
                                       ),
                                       hintText: 'Phone Number',
@@ -194,17 +201,20 @@ class _LoginpageState extends State<Loginpage> {
                               ),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
-                                  color: Color(0xffC2C2C2), // Grey when not focused
+                                  color: Color(
+                                      0xffC2C2C2), // Grey when not focused
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: const BorderSide(
-                                  color: Color(0xffC2C2C2), // Grey when enabled but not focused
+                                  color: Color(
+                                      0xffC2C2C2), // Grey when enabled but not focused
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).primaryColor, // Red when focused
+                                  color: Theme.of(context)
+                                      .primaryColor, // Red when focused
                                 ),
                               ),
                               hintText: 'Password',
@@ -269,13 +279,17 @@ class _LoginpageState extends State<Loginpage> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12.0, horizontal: 16.0),
                                         decoration: BoxDecoration(
-                                          color: Colors.green[600], // Darker green for a vibrant look
-                                          borderRadius: BorderRadius.circular(12),
+                                          color: Colors.green[
+                                              600], // Darker green for a vibrant look
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.black.withOpacity(0.2),
+                                              color:
+                                                  Color.fromRGBO(0, 0, 0, 0.2),
                                               blurRadius: 8,
                                               offset: const Offset(0, 4),
                                             ),
@@ -300,36 +314,50 @@ class _LoginpageState extends State<Loginpage> {
                                           ],
                                         ),
                                       ),
-                                      backgroundColor: Colors.transparent, // Make SnackBar background transparent
+                                      backgroundColor: Colors
+                                          .transparent, // Make SnackBar background transparent
                                       elevation: 0, // Remove default elevation
-                                      behavior: SnackBarBehavior.floating, // Allow custom positioning
-                                      margin: const EdgeInsets.only(top: 20, left: 20, right: 20), // Position at top
+                                      behavior: SnackBarBehavior
+                                          .floating, // Allow custom positioning
+                                      margin: const EdgeInsets.only(
+                                          top: 20,
+                                          left: 20,
+                                          right: 20), // Position at top
                                       duration: const Duration(seconds: 2),
                                     ),
                                   );
                                   Navigator.pushAndRemoveUntil(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const ButtomNavBar(pageno: 0),
+                                      builder: (context) =>
+                                          const ButtomNavBar(pageno: 0),
                                     ),
-                                        (route) => false,
+                                    (route) => false,
                                   );
                                 } else {
                                   // Log for debugging
-                                  print('Login failed - Status: $status, Error: ${loginController.errorMessage.value}');
+                                  print(
+                                      'Login failed - Status: $status, Error: ${loginController.errorMessage.value}');
 
                                   String errorMessage = '';
                                   // Check errorMessage content or assume phone error for common database responses
-                                  if (loginController.errorMessage.value.toLowerCase().contains('user') ||
-                                      loginController.errorMessage.value.toLowerCase().contains('not found') ||
-                                      !RegExp(r'^\d{10}$').hasMatch(phoneController.text.trim())) {
+                                  if (loginController.errorMessage.value
+                                          .toLowerCase()
+                                          .contains('user') ||
+                                      loginController.errorMessage.value
+                                          .toLowerCase()
+                                          .contains('not found') ||
+                                      !RegExp(r'^\d{10}$').hasMatch(
+                                          phoneController.text.trim())) {
                                     errorMessage = 'Phone number is wrong';
                                   } else {
-                                    errorMessage = 'Please Enter Correct Phone and Password !!';
+                                    errorMessage =
+                                        'Please Enter Correct Phone and Password !!';
                                   }
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      backgroundColor: Theme.of(context).primaryColor,
+                                      backgroundColor:
+                                          Theme.of(context).primaryColor,
                                       content: Text(errorMessage),
                                       duration: const Duration(seconds: 2),
                                     ),
@@ -339,7 +367,8 @@ class _LoginpageState extends State<Loginpage> {
                             },
                             child: Obx(() {
                               return Container(
-                                margin: const EdgeInsets.symmetric(vertical: 10),
+                                margin:
+                                    const EdgeInsets.symmetric(vertical: 10),
                                 width: double.infinity,
                                 height: 50,
                                 color: Theme.of(context).primaryColor,
@@ -347,9 +376,9 @@ class _LoginpageState extends State<Loginpage> {
                                   child: loginController.isLoading.value
                                       ? const CustomLoadingIndicator()
                                       : const Text(
-                                    'Login',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                                          'Login',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
                                 ),
                               );
                             }),
@@ -385,7 +414,8 @@ class _LoginpageState extends State<Loginpage> {
                           // 24/7 Help & Support Section
                           GestureDetector(
                             onTap: () {
-                              _launchWhatsApp('+9779801200501'); // Directly open WhatsApp
+                              _launchWhatsApp(
+                                  '+9779801200501'); // Directly open WhatsApp
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
@@ -395,7 +425,8 @@ class _LoginpageState extends State<Loginpage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
@@ -407,7 +438,7 @@ class _LoginpageState extends State<Loginpage> {
                                       const SizedBox(width: 12),
                                       Column(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                         children: [
                                           const Text(
                                             '24/7 Help & Support',
@@ -421,8 +452,8 @@ class _LoginpageState extends State<Loginpage> {
                                           Text(
                                             'Get quick solutions for baltra-related',
                                             style: TextStyle(
-                                              color:
-                                              Colors.white.withOpacity(0.7),
+                                              color: Color.fromRGBO(
+                                                  255, 255, 255, 0.7),
                                               fontSize: 12,
                                             ),
                                           ),
