@@ -132,12 +132,47 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   bool _hasCameraPermission = false;
   bool _isProcessing = false;
   bool _permissionChecked = false;
+  bool _showPermissionDialog = true; // New flag to show initial dialog
   StreamSubscription<Barcode>? _scanSubscription;
 
   @override
   void initState() {
     super.initState();
-    _checkCameraPermission();
+    // Show permission dialog first instead of checking immediately
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showInitialPermissionDialog();
+    });
+  }
+
+  void _showInitialPermissionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Camera Permission'),
+        content: const Text(
+            'This app needs camera access to scan QR codes. Would you like to grant permission?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pop(); // Go back to previous screen
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop(); // Close dialog
+              setState(() {
+                _showPermissionDialog = false;
+              });
+              await _checkCameraPermission();
+            },
+            child: const Text('Allow'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _checkCameraPermission() async {
@@ -323,79 +358,90 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         }
       },
       child: Scaffold(
-        body: !_permissionChecked
+        body: _showPermissionDialog
             ? const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text('Checking camera permissions...'),
+                    Text('Initializing camera...'),
                   ],
                 ),
               )
-            : _hasCameraPermission
-                ? Column(
-                    children: [
-                      const AppBarWithSVG(
-                        backbutton: true,
-                        subtitle:
-                            'Scan the QR code from package to add product',
-                        title: ' Scan to Add',
-                      ),
-                      const SizedBox(height: 20),
-                      Center(
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.5,
-                          width: MediaQuery.of(context).size.width * 0.7,
-                          child: QRView(
-                            key: qrKey,
-                            onQRViewCreated: _onQRViewCreated,
-                            overlay: QrScannerOverlayShape(
-                              borderColor: Theme.of(context).primaryColor,
-                              borderRadius: 10,
-                              borderLength: 30,
-                              borderWidth: 10,
-                              cutOutSize: 700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : Center(
+            : !_permissionChecked
+                ? const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.camera_alt_outlined,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Camera Permission Required',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 32),
-                          child: Text(
-                            'Please grant camera permission to scan QR codes',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: () async {
-                            await _checkCameraPermission();
-                          },
-                          child: const Text('Grant Permission'),
-                        ),
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('Checking camera permissions...'),
                       ],
                     ),
-                  ),
+                  )
+                : _hasCameraPermission
+                    ? Column(
+                        children: [
+                          const AppBarWithSVG(
+                            backbutton: true,
+                            subtitle:
+                                'Scan the QR code from package to add product',
+                            title: ' Scan to Add',
+                          ),
+                          const SizedBox(height: 20),
+                          Center(
+                            child: SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              width: MediaQuery.of(context).size.width * 0.7,
+                              child: QRView(
+                                key: qrKey,
+                                onQRViewCreated: _onQRViewCreated,
+                                overlay: QrScannerOverlayShape(
+                                  borderColor: Theme.of(context).primaryColor,
+                                  borderRadius: 10,
+                                  borderLength: 30,
+                                  borderWidth: 10,
+                                  cutOutSize: 700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.camera_alt_outlined,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Camera Permission Required',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 8),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 32),
+                              child: Text(
+                                'Please grant camera permission to scan QR codes',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              onPressed: () async {
+                                await _checkCameraPermission();
+                              },
+                              child: const Text('Grant Permission'),
+                            ),
+                          ],
+                        ),
+                      ),
       ),
     );
   }
