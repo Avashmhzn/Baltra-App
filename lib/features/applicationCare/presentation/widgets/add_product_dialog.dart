@@ -131,6 +131,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   QRViewController? controller;
   bool _hasCameraPermission = false;
   bool _isProcessing = false;
+  bool _permissionChecked = false;
   StreamSubscription<Barcode>? _scanSubscription;
 
   @override
@@ -140,34 +141,96 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   Future<void> _checkCameraPermission() async {
-    final status = await Permission.camera.status;
-    if (status.isGranted) {
-      setState(() {
-        _hasCameraPermission = true;
-      });
-    } else {
-      final newStatus = await Permission.camera.request();
-      if (newStatus.isGranted || newStatus.isLimited) {
+    try {
+      final status = await Permission.camera.status;
+
+      if (status.isGranted) {
         setState(() {
           _hasCameraPermission = true;
+          _permissionChecked = true;
         });
-      } else if (newStatus.isDenied) {
-        if (mounted) {
-          Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Camera permission is required to scan QR codes.'),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      } else if (newStatus.isPermanentlyDenied) {
+        return;
+      }
+
+      if (status.isLimited) {
+        // iOS limited permission is still usable
+        setState(() {
+          _hasCameraPermission = true;
+          _permissionChecked = true;
+        });
+        return;
+      }
+
+      if (status.isDenied) {
+        final newStatus = await Permission.camera.request();
+        _handlePermissionResult(newStatus);
+      } else if (status.isPermanentlyDenied) {
+        setState(() {
+          _permissionChecked = true;
+        });
         if (mounted) {
           _showSettingsDialog();
         }
       }
+    } catch (e) {
+      // Handle any permission check errors
+      print('Permission check error: $e');
+      setState(() {
+        _permissionChecked = true;
+      });
+      if (mounted) {
+        _showPermissionError();
+      }
     }
+  }
+
+  void _handlePermissionResult(PermissionStatus status) {
+    setState(() {
+      _permissionChecked = true;
+    });
+
+    if (status.isGranted || status.isLimited) {
+      setState(() {
+        _hasCameraPermission = true;
+      });
+    } else if (status.isDenied) {
+      if (mounted) {
+        _showPermissionDeniedDialog();
+      }
+    } else if (status.isPermanentlyDenied) {
+      if (mounted) {
+        _showSettingsDialog();
+      }
+    }
+  }
+
+  void _showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Camera Permission Required'),
+        content: const Text(
+            'Camera access is required to scan QR codes. Would you like to grant permission?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Go back to previous screen
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              final newStatus = await Permission.camera.request();
+              _handlePermissionResult(newStatus);
+            },
+            child: const Text('Grant Permission'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSettingsDialog() {
@@ -177,12 +240,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Camera Permission Denied'),
         content: const Text(
-            'Camera permission is required to scan QR codes. Please enable it in your device settings.'),
+            'Camera permission has been permanently denied. Please enable it in your device settings to scan QR codes.'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Go back to previous screen
             },
             child: const Text('Cancel'),
           ),
@@ -190,26 +253,53 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             onPressed: () async {
               Navigator.of(context).pop();
               await openAppSettings();
-              final status = await Permission.camera.status;
-              if (status.isGranted || status.isLimited) {
-                setState(() {
-                  _hasCameraPermission = true;
-                });
-              } else {
+
+              // Check permission again after returning from settings
+              Future.delayed(const Duration(milliseconds: 500), () async {
                 if (mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                          'Camera permission is required to scan QR codes.'),
-                      backgroundColor: Colors.red,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  final status = await Permission.camera.status;
+                  if (status.isGranted || status.isLimited) {
+                    setState(() {
+                      _hasCameraPermission = true;
+                    });
+                  } else {
+                    Navigator.of(context).pop(); // Go back if still denied
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Camera permission is still required to scan QR codes.'),
+                          backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  }
                 }
-              }
+              });
             },
             child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPermissionError() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Permission Error'),
+        content: const Text(
+            'An error occurred while checking camera permissions. Please try again.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -219,52 +309,98 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   @override
   void dispose() {
     _scanSubscription?.cancel();
+    controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false, // Prevents default pop behavior
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
           Navigator.of(context).pop();
         }
       },
       child: Scaffold(
-        body: _hasCameraPermission
-            ? Column(
-                children: [
-                  const AppBarWithSVG(
-                    backbutton: true,
-                    subtitle: 'Scan the QR code from package to add product',
-                    title: ' Scan to Add',
-                  ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.5,
-                      width: MediaQuery.of(context).size.width * 0.7,
-                      child: QRView(
-                        key: qrKey,
-                        onQRViewCreated: _onQRViewCreated,
-                        overlay: QrScannerOverlayShape(
-                          borderColor: Theme.of(context).primaryColor,
-                          borderRadius: 10,
-                          borderLength: 30,
-                          borderWidth: 10,
-                          cutOutSize: 700,
+        body: !_permissionChecked
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Checking camera permissions...'),
+                  ],
+                ),
+              )
+            : _hasCameraPermission
+                ? Column(
+                    children: [
+                      const AppBarWithSVG(
+                        backbutton: true,
+                        subtitle:
+                            'Scan the QR code from package to add product',
+                        title: ' Scan to Add',
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          child: QRView(
+                            key: qrKey,
+                            onQRViewCreated: _onQRViewCreated,
+                            overlay: QrScannerOverlayShape(
+                              borderColor: Theme.of(context).primaryColor,
+                              borderRadius: 10,
+                              borderLength: 30,
+                              borderWidth: 10,
+                              cutOutSize: 700,
+                            ),
+                          ),
                         ),
                       ),
+                    ],
+                  )
+                : Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.camera_alt_outlined,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Camera Permission Required',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            'Please grant camera permission to scan QR codes',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () async {
+                            await _checkCameraPermission();
+                          },
+                          child: const Text('Grant Permission'),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              )
-            : const Center(child: CircularProgressIndicator()),
       ),
     );
   }
 
+  // Rest of your methods remain the same
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
 
