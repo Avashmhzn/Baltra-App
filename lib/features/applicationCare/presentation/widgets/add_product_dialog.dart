@@ -96,7 +96,8 @@ class CustomResultDialog extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                   ),
                   child: const Text(
                     'OK',
@@ -183,9 +184,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       } else if (cameraStatus.isDenied) {
         log('Camera permission denied');
         if (mounted) {
-          _showPermissionSnackBar('Camera permission is required to scan QR codes. Please try again.');
+          _showPermissionSnackBar(
+              'Camera permission is required to scan QR codes. Please try again.');
         }
-      } else if (cameraStatus.isPermanentlyDenied || cameraStatus.isRestricted) {
+      } else if (cameraStatus.isPermanentlyDenied ||
+          cameraStatus.isRestricted) {
         log('Camera permission permanently denied or restricted');
         if (mounted) {
           _showSettingsDialog();
@@ -193,7 +196,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       } else {
         log('Unexpected camera permission status: $cameraStatus');
         if (mounted) {
-          _showPermissionSnackBar('Unexpected permission status. Please try again or check device settings.');
+          _showPermissionSnackBar(
+              'Unexpected permission status. Please try again or check device settings.');
         }
       }
     } catch (e) {
@@ -262,7 +266,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   void _simulateQRScan() {
     if (!_isSimulator) return;
 
-    const testQRData = 'https://example.com?model_name=TestModel&model_number=TM123&serial_number=SN456789';
+    const testQRData =
+        'https://example.com?model_name=TestModel&model_number=TM123&serial_number=SN456789';
 
     try {
       Uri uri = Uri.parse(testQRData);
@@ -346,7 +351,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               onPressed: _simulateQRScan,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
               child: const Text(
                 'Simulate QR Scan (Test Only)',
@@ -391,7 +397,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               onPressed: _checkCameraPermission,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
               child: const Text(
                 'Request Permission',
@@ -476,7 +483,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           }
         } catch (e) {
           log('QR parsing error: $e');
-          _showError("Invalid QR Code format. Please scan a valid Baltra product QR code.");
+          _showError(
+              "Invalid QR Code format. Please scan a valid Baltra product QR code.");
           _resetProcessing();
         }
       } else {
@@ -560,61 +568,154 @@ class _ResultScreenState extends State<ResultScreen> {
   final List<File?> _images = List.filled(3, null);
   bool _isLoading = false;
 
+  // Future<bool> _checkPhotoPermission() async {
+  //   log('=== PHOTO PERMISSION CHECK START ===');
+  //   try {
+  //     var photoStatus = await Permission.photos.status;
+  //     log('Initial photo permission status: $photoStatus');
+
+  //     if (photoStatus.isGranted || photoStatus.isLimited) {
+  //       log('Photo permission already granted');
+  //       return true;
+  //     } else {
+  //       log('Requesting photo permission...');
+  //       photoStatus = await Permission.photos.request();
+  //       log('New photo permission status: $photoStatus');
+
+  //       if (photoStatus.isGranted || photoStatus.isLimited) {
+  //         log('Photo permission granted after request');
+  //         return true;
+  //       } else if (photoStatus.isDenied) {
+  //         log('Photo permission denied');
+  //         if (mounted) {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             SnackBar(
+  //               content: const Text('Photo library access is required to upload images. Please try again.'),
+  //               backgroundColor: Colors.red,
+  //               behavior: SnackBarBehavior.floating,
+  //               duration: const Duration(seconds: 5),
+  //               action: SnackBarAction(
+  //                 label: 'Retry',
+  //                 textColor: Colors.white,
+  //                 onPressed: () => _checkPhotoPermission(),
+  //               ),
+  //             ),
+  //           );
+  //         }
+  //         return false;
+  //       } else if (photoStatus.isPermanentlyDenied || photoStatus.isRestricted) {
+  //         log('Photo permission permanently denied or restricted');
+  //         if (mounted) {
+  //           _showPhotoSettingsDialog();
+  //         }
+  //         return false;
+  //       } else {
+  //         log('Unexpected photo permission status: $photoStatus');
+  //         if (mounted) {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             SnackBar(
+  //               content: const Text('Unexpected permission status. Please try again or check device settings.'),
+  //               backgroundColor: Colors.red,
+  //               behavior: SnackBarBehavior.floating,
+  //               duration: const Duration(seconds: 5),
+  //             ),
+  //           );
+  //         }
+  //         return false;
+  //       }
+  //     }
+  //   } catch (e) {
+  //     log('Error checking photo permission: $e');
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('Error checking photo permission: $e'),
+  //           backgroundColor: Colors.red,
+  //           behavior: SnackBarBehavior.floating,
+  //           duration: const Duration(seconds: 5),
+  //         ),
+  //       );
+  //     }
+  //     return false;
+  //   } finally {
+  //     log('=== PHOTO PERMISSION CHECK END ===');
+  //   }
+  // }
   Future<bool> _checkPhotoPermission() async {
     log('=== PHOTO PERMISSION CHECK START ===');
     try {
-      var photoStatus = await Permission.photos.status;
-      log('Initial photo permission status: $photoStatus');
+      PermissionStatus photoStatus;
+      if (Platform.isAndroid) {
+        // For Android 13+, use Permission.photos; otherwise, use Permission.storage
+        if (await DeviceInfoPlugin()
+            .androidInfo
+            .then((info) => info.version.sdkInt >= 33)) {
+          photoStatus = await Permission.photos.status;
+          log('Checking Permission.photos for Android 13+: $photoStatus');
+          if (!photoStatus.isGranted && !photoStatus.isLimited) {
+            photoStatus = await Permission.photos.request();
+            log('Requested Permission.photos: $photoStatus');
+          }
+        } else {
+          photoStatus = await Permission.storage.status;
+          log('Checking Permission.storage for Android < 13: $photoStatus');
+          if (!photoStatus.isGranted && !photoStatus.isLimited) {
+            photoStatus = await Permission.storage.request();
+            log('Requested Permission.storage: $photoStatus');
+          }
+        }
+      } else {
+        // iOS: Use Permission.photos
+        photoStatus = await Permission.photos.status;
+        log('Checking Permission.photos for iOS: $photoStatus');
+        if (!photoStatus.isGranted && !photoStatus.isLimited) {
+          photoStatus = await Permission.photos.request();
+          log('Requested Permission.photos for iOS: $photoStatus');
+        }
+      }
 
       if (photoStatus.isGranted || photoStatus.isLimited) {
-        log('Photo permission already granted');
+        log('Photo permission granted');
         return true;
-      } else {
-        log('Requesting photo permission...');
-        photoStatus = await Permission.photos.request();
-        log('New photo permission status: $photoStatus');
-
-        if (photoStatus.isGranted || photoStatus.isLimited) {
-          log('Photo permission granted after request');
-          return true;
-        } else if (photoStatus.isDenied) {
-          log('Photo permission denied');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Photo library access is required to upload images. Please try again.'),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 5),
-                action: SnackBarAction(
-                  label: 'Retry',
-                  textColor: Colors.white,
-                  onPressed: () => _checkPhotoPermission(),
-                ),
+      } else if (photoStatus.isDenied) {
+        log('Photo permission denied');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                  'Photo library access is required to upload images. Please try again.'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: 'Retry',
+                textColor: Colors.white,
+                onPressed: () => _checkPhotoPermission(),
               ),
-            );
-          }
-          return false;
-        } else if (photoStatus.isPermanentlyDenied || photoStatus.isRestricted) {
-          log('Photo permission permanently denied or restricted');
-          if (mounted) {
-            _showPhotoSettingsDialog();
-          }
-          return false;
-        } else {
-          log('Unexpected photo permission status: $photoStatus');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Unexpected permission status. Please try again or check device settings.'),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 5),
-              ),
-            );
-          }
-          return false;
+            ),
+          );
         }
+        return false;
+      } else if (photoStatus.isPermanentlyDenied || photoStatus.isRestricted) {
+        log('Photo permission permanently denied or restricted');
+        if (mounted) {
+          _showPhotoSettingsDialog();
+        }
+        return false;
+      } else {
+        log('Unexpected photo permission status: $photoStatus');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                  'Unexpected permission status. Please try again or check device settings.'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+        return false;
       }
     } catch (e) {
       log('Error checking photo permission: $e');
@@ -760,21 +861,25 @@ class _ResultScreenState extends State<ResultScreen> {
         throw Exception('Authentication token not found. Please login again.');
       }
 
-      var request = http.MultipartRequest('POST', Uri.parse('$URL/stocks/myproduct'));
+      var request =
+          http.MultipartRequest('POST', Uri.parse('$URL/stocks/myproduct'));
 
       // Add images if selected
       if (_images[0] != null) {
-        var productImage = await http.MultipartFile.fromPath('product_image', _images[0]!.path);
+        var productImage = await http.MultipartFile.fromPath(
+            'product_image', _images[0]!.path);
         request.files.add(productImage);
         log('Product image added');
       }
       if (_images[1] != null) {
-        var warrantyImage = await http.MultipartFile.fromPath('warranty_image', _images[1]!.path);
+        var warrantyImage = await http.MultipartFile.fromPath(
+            'warranty_image', _images[1]!.path);
         request.files.add(warrantyImage);
         log('Warranty image added');
       }
       if (_images[2] != null) {
-        var billImage = await http.MultipartFile.fromPath('bill_image_one', _images[2]!.path);
+        var billImage = await http.MultipartFile.fromPath(
+            'bill_image_one', _images[2]!.path);
         request.files.add(billImage);
         log('Bill image added');
       }
@@ -816,7 +921,8 @@ class _ResultScreenState extends State<ResultScreen> {
                 Navigator.pop(context);
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => const ButtomNavBar(pageno: 2)),
+                  MaterialPageRoute(
+                      builder: (context) => const ButtomNavBar(pageno: 2)),
                   (Route<dynamic> route) => false,
                 );
               },
@@ -828,8 +934,10 @@ class _ResultScreenState extends State<ResultScreen> {
 
         if (data != null && data['message'] != null) {
           String apiMessage = data['message'].toString();
-          if (apiMessage.contains('serial_number') && apiMessage.contains('already exists')) {
-            errorMessage = "This product is already registered by another customer";
+          if (apiMessage.contains('serial_number') &&
+              apiMessage.contains('already exists')) {
+            errorMessage =
+                "This product is already registered by another customer";
           } else {
             errorMessage = apiMessage;
           }
@@ -847,7 +955,8 @@ class _ResultScreenState extends State<ResultScreen> {
                 Navigator.pop(context);
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => const ButtomNavBar(pageno: 2)),
+                  MaterialPageRoute(
+                      builder: (context) => const ButtomNavBar(pageno: 2)),
                   (Route<dynamic> route) => false,
                 );
               },
@@ -997,7 +1106,8 @@ class _ResultScreenState extends State<ResultScreen> {
                         },
                       ),
                       const SizedBox(height: 10),
-                      const Text('Product Image (Optional)', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const Text('Product Image (Optional)',
+                          style: TextStyle(fontWeight: FontWeight.w500)),
                       GestureDetector(
                         onTap: () => _openImagePicker(0),
                         child: Container(
@@ -1012,21 +1122,25 @@ class _ResultScreenState extends State<ResultScreen> {
                           child: _images[0] != null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(_images[0]!, fit: BoxFit.cover),
+                                  child: Image.file(_images[0]!,
+                                      fit: BoxFit.cover),
                                 )
                               : const Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+                                    Icon(Icons.add_a_photo,
+                                        size: 40, color: Colors.grey),
                                     SizedBox(height: 8),
                                     Text('Upload Product Image',
-                                        style: TextStyle(color: Colors.grey, fontSize: 16)),
+                                        style: TextStyle(
+                                            color: Colors.grey, fontSize: 16)),
                                   ],
                                 ),
                         ),
                       ),
                       const SizedBox(height: 15),
-                      const Text('Warranty Card Image (Optional)', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const Text('Warranty Card Image (Optional)',
+                          style: TextStyle(fontWeight: FontWeight.w500)),
                       GestureDetector(
                         onTap: () => _openImagePicker(1),
                         child: Container(
@@ -1041,21 +1155,25 @@ class _ResultScreenState extends State<ResultScreen> {
                           child: _images[1] != null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(_images[1]!, fit: BoxFit.cover),
+                                  child: Image.file(_images[1]!,
+                                      fit: BoxFit.cover),
                                 )
                               : const Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+                                    Icon(Icons.add_a_photo,
+                                        size: 40, color: Colors.grey),
                                     SizedBox(height: 8),
                                     Text('Upload Warranty Card Image',
-                                        style: TextStyle(color: Colors.grey, fontSize: 16)),
+                                        style: TextStyle(
+                                            color: Colors.grey, fontSize: 16)),
                                   ],
                                 ),
                         ),
                       ),
                       const SizedBox(height: 15),
-                      const Text('Bill Image (Optional)', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const Text('Bill Image (Optional)',
+                          style: TextStyle(fontWeight: FontWeight.w500)),
                       GestureDetector(
                         onTap: () => _openImagePicker(2),
                         child: Container(
@@ -1070,15 +1188,18 @@ class _ResultScreenState extends State<ResultScreen> {
                           child: _images[2] != null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(_images[2]!, fit: BoxFit.cover),
+                                  child: Image.file(_images[2]!,
+                                      fit: BoxFit.cover),
                                 )
                               : const Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+                                    Icon(Icons.add_a_photo,
+                                        size: 40, color: Colors.grey),
                                     SizedBox(height: 8),
                                     Text('Upload Bill Image',
-                                        style: TextStyle(color: Colors.grey, fontSize: 16)),
+                                        style: TextStyle(
+                                            color: Colors.grey, fontSize: 16)),
                                   ],
                                 ),
                         ),
@@ -1096,7 +1217,9 @@ class _ResultScreenState extends State<ResultScreen> {
                           width: double.infinity,
                           height: 50,
                           decoration: BoxDecoration(
-                            color: _isLoading ? Colors.grey : Theme.of(context).primaryColor,
+                            color: _isLoading
+                                ? Colors.grey
+                                : Theme.of(context).primaryColor,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
