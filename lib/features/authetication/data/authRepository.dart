@@ -48,7 +48,7 @@ class Authrepository extends GetxController {
         } else {
           // Navigate to OTP page if the number is not verified
           Get.to(
-                () => OtpPage(
+            () => OtpPage(
               phone: number,
               reset: false,
             ),
@@ -71,10 +71,10 @@ class Authrepository extends GetxController {
     try {
       final response = await http
           .post(
-        Uri.parse('$URL/customer/verifyotp'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(<String, dynamic>{'contact': number, 'otp': otp}),
-      )
+            Uri.parse('$URL/customer/verifyotp'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(<String, dynamic>{'contact': number, 'otp': otp}),
+          )
           .timeout(Duration(seconds: 10));
 
       log("Verify OTP Response: ${response.body}");
@@ -91,7 +91,7 @@ class Authrepository extends GetxController {
         return response.statusCode;
       } else {
         errorMessage.value =
-        'Failed to login: ${data['message'] ?? "Unknown error"}';
+            'Failed to login: ${data['message'] ?? "Unknown error"}';
         return response.statusCode;
       }
     } on SocketException {
@@ -108,17 +108,17 @@ class Authrepository extends GetxController {
   }
 
   Future<int> registerCustomer(
-      String firstname,
-      String lastName,
-      String email,
-      String password,
-      int phone, {
-        String? gender,
-        String? customerAddress,
-        String? city,
-        String? district,
-        String? dob,
-      }) async {
+    String firstname,
+    String lastName,
+    String email,
+    String password,
+    int phone, {
+    String? gender,
+    String? customerAddress,
+    String? city,
+    String? district,
+    String? dob,
+  }) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final Map<String, dynamic> requestBody = {
@@ -131,9 +131,11 @@ class Authrepository extends GetxController {
 
       // Add optional fields only if provided and non-empty
       if (gender != null && gender.isNotEmpty) requestBody["gender"] = gender;
-      if (customerAddress != null && customerAddress.isNotEmpty) requestBody["customerAddress"] = customerAddress;
+      if (customerAddress != null && customerAddress.isNotEmpty)
+        requestBody["customerAddress"] = customerAddress;
       if (city != null && city.isNotEmpty) requestBody["city"] = city;
-      if (district != null && district.isNotEmpty) requestBody["district"] = district;
+      if (district != null && district.isNotEmpty)
+        requestBody["district"] = district;
       if (dob != null && dob.isNotEmpty) requestBody["dob"] = dob;
 
       final response = await http.post(
@@ -169,7 +171,7 @@ class Authrepository extends GetxController {
         return status;
       } else {
         errorMessage.value =
-        'Failed to create User: ${data['message'] ?? 'Unknown error'}';
+            'Failed to create User: ${data['message'] ?? 'Unknown error'}';
         return response.statusCode;
       }
     } on SocketException catch (_) {
@@ -280,11 +282,11 @@ class Authrepository extends GetxController {
   }
 
   Future<Map<String, dynamic>> changePassword(
-      int number,
-      String oldPassword,
-      String newPassword,
-      String confirmNewPassword,
-      ) async {
+    int number,
+    String oldPassword,
+    String newPassword,
+    String confirmNewPassword,
+  ) async {
     if (number <= 0 ||
         oldPassword.isEmpty ||
         newPassword.isEmpty ||
@@ -317,7 +319,8 @@ class Authrepository extends GetxController {
         Uri.parse('$URL/customer/changepassword'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${prefs.getString('auth_token')}', // Add the token
+          'Authorization':
+              'Bearer ${prefs.getString('auth_token')}', // Add the token
         },
         body: requestBody,
       );
@@ -363,9 +366,9 @@ class Authrepository extends GetxController {
   }
 
   Future<int> loginUser(
-      int phone,
-      String password,
-      ) async {
+    int phone,
+    String password,
+  ) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     isLoading.value = true;
     errorMessage.value = '';

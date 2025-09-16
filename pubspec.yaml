@@ -69,14 +69,14 @@ dependencies:
   # gallery_saver: ^2.3.2
   collection: ^1.16.0
   easy_rich_text: ^2.2.0
-  flutter_lints: ^6.0.0
+  flutter_lints: ^4.0.0
   flutter_inappwebview: ^6.1.5
-  skeletonizer: ^2.0.0
+  skeletonizer: any
   shimmer: ^3.0.0
   sms_autofill: ^2.4.1
-  camera: ^0.11.2
   qr_code_scanner_plus: ^2.0.10+1
   device_info_plus: ^11.5.0
+  jwt_decoder: ^2.0.1
 
 
 
