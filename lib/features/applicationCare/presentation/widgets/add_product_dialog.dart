@@ -474,16 +474,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           } else {
             throw FormatException("Missing required parameters in QR code.");
           }
-        } catch (e) {
-          log('QR parsing error: $e');
-          _showError("Invalid QR Code format. Please scan a valid Baltra product QR code.");
-          _resetProcessing();
-        }
+        }catch (e, stack) {
+  log('QR parsing error: $e');
+  log('Stacktrace: $stack');
+  _showError("Error: $e");
+  _resetProcessing();
+}
+
       } else {
         _showError("QR Code is empty. Please try again.");
         _resetProcessing();
       }
     });
+    
 
     // Resume camera if permission is granted
     if (_hasCameraPermission) {
