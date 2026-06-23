@@ -610,8 +610,10 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
     }
   }
 
-  Future<void> downloadImage(BuildContext context, String imageUrl) async {
-    if (imageUrl.isEmpty) {
+  bool _hasImage(String? imageUrl) => imageUrl != null && imageUrl.isNotEmpty;
+
+  Future<void> downloadImage(BuildContext context, String? imageUrl) async {
+    if (imageUrl == null || imageUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No image URL provided")),
       );
@@ -661,8 +663,8 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
     }
   }
 
-  Future<void> downloadVideo(BuildContext context, String videoUrl) async {
-    if (videoUrl.isEmpty) {
+  Future<void> downloadVideo(BuildContext context, String? videoUrl) async {
+    if (videoUrl == null || videoUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No video URL provided")),
       );
@@ -797,14 +799,14 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: product.product_image.isNotEmpty
+                              child: _hasImage(product.product_image)
                                   ? GestureDetector(
                                       onTap: () => showFullScreenImage(
                                           context, product.product_image),
                                       child: Hero(
                                         tag: "${product.product_image}_image",
                                         child: Image.network(
-                                          product.product_image,
+                                          product.product_image!,
                                           height: 120,
                                           width: 120,
                                           fit: BoxFit.cover,
@@ -890,12 +892,12 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              product.product_image.isNotEmpty
+                              _hasImage(product.product_image)
                                   ? GestureDetector(
                                       onTap: () => showFullScreenImage(
                                           context, product.product_image),
                                       child: Hero(
-                                        tag: product.product_image,
+                                        tag: product.product_image!,
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(10),
@@ -903,7 +905,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                             height: 150,
                                             width: screenWidth * 0.8,
                                             child: Image.network(
-                                              product.product_image,
+                                              product.product_image!,
                                               fit: BoxFit.cover,
                                               errorBuilder: (context, error,
                                                       stackTrace) =>
@@ -959,12 +961,12 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              product.bill_image_one.isNotEmpty
+                              _hasImage(product.bill_image_one)
                                   ? GestureDetector(
                                       onTap: () => showFullScreenImage(
                                           context, product.bill_image_one),
                                       child: Hero(
-                                        tag: product.bill_image_one,
+                                        tag: product.bill_image_one!,
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(10),
@@ -972,7 +974,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                             height: 150,
                                             width: screenWidth * 0.8,
                                             child: Image.network(
-                                              product.bill_image_one,
+                                              product.bill_image_one!,
                                               fit: BoxFit.cover,
                                               errorBuilder: (context, error,
                                                       stackTrace) =>
@@ -1028,12 +1030,12 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              product.warranty_image.isNotEmpty
+                              _hasImage(product.warranty_image)
                                   ? GestureDetector(
                                       onTap: () => showFullScreenImage(
                                           context, product.warranty_image),
                                       child: Hero(
-                                        tag: product.warranty_image,
+                                        tag: product.warranty_image!,
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(10),
@@ -1041,7 +1043,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                             height: 150,
                                             width: screenWidth * 0.8,
                                             child: Image.network(
-                                              product.warranty_image,
+                                              product.warranty_image!,
                                               fit: BoxFit.cover,
                                               errorBuilder: (context, error,
                                                       stackTrace) =>
@@ -1108,8 +1110,8 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
     }
   }
 
-  void showFullScreenImage(BuildContext context, String imageUrl) {
-    if (imageUrl.isEmpty) {
+  void showFullScreenImage(BuildContext context, String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No image URL provided")),
       );

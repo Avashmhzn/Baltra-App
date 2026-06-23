@@ -47,7 +47,8 @@ class _EditProfileState extends State<EditProfile> {
 
   void _initializeData() {
     _phone = widget.data.contact.toString();
-    _fullNameController.text = "${widget.data.firstname} ${widget.data.lastname}";
+    _fullNameController.text =
+        "${widget.data.firstname} ${widget.data.lastname}";
     _emailController.text = widget.data.email;
 
     // Normalize the gender value to match the DropdownMenuItem values (capitalize first letter)
@@ -61,7 +62,8 @@ class _EditProfileState extends State<EditProfile> {
     if (widget.data.dob != null && widget.data.dob!.isNotEmpty) {
       final parsedDate = DateTime.tryParse(widget.data.dob!);
       if (parsedDate != null) {
-        _dobController.text = '${parsedDate.month}/${parsedDate.day}/${parsedDate.year}';
+        _dobController.text =
+            '${parsedDate.month}/${parsedDate.day}/${parsedDate.year}';
         _dob = parsedDate;
       }
     }
@@ -113,7 +115,8 @@ class _EditProfileState extends State<EditProfile> {
             widget.data.lastname = data['lastname'];
             widget.data.email = data['email'];
             // Normalize the fetched gender value
-            widget.data.gender = data['gender'] != null && data['gender'].isNotEmpty
+            widget.data.gender = data['gender'] != null &&
+                    data['gender'].isNotEmpty
                 ? (data['gender'].toLowerCase() == 'male' ? 'Male' : 'Female')
                 : null;
             widget.data.dob = data['dob'];
@@ -121,13 +124,15 @@ class _EditProfileState extends State<EditProfile> {
             widget.data.district = data['district'];
             widget.data.city = data['city'];
 
-            _fullNameController.text = "${widget.data.firstname} ${widget.data.lastname}";
+            _fullNameController.text =
+                "${widget.data.firstname} ${widget.data.lastname}";
             _emailController.text = widget.data.email;
             _dobController.text = widget.data.dob ?? '';
             _AddressController.text = widget.data.address ?? '';
             _districtController.text = widget.data.district ?? '';
             _cityController.text = widget.data.city ?? '';
-            _gender = widget.data.gender; // Update _gender with normalized value
+            _gender =
+                widget.data.gender; // Update _gender with normalized value
           });
         } else {
           log('Failed to fetch profile: ${responseData['message']}');
@@ -143,7 +148,8 @@ class _EditProfileState extends State<EditProfile> {
   Future<void> _loadProfileImage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _profileImagePath = prefs.getString('profile_image_path') ?? widget.data.image_url;
+      _profileImagePath =
+          prefs.getString('profile_image_path') ?? widget.data.image_url;
     });
     log('Loaded profile image path: $_profileImagePath');
   }
@@ -156,7 +162,8 @@ class _EditProfileState extends State<EditProfile> {
       if (pickedFile != null) {
         final appDir = await getApplicationDocumentsDirectory();
         final fileName = pickedFile.name;
-        final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
+        final savedImage =
+            await File(pickedFile.path).copy('${appDir.path}/$fileName');
 
         setState(() {
           _profileImagePath = savedImage.path;
@@ -202,7 +209,8 @@ class _EditProfileState extends State<EditProfile> {
       );
 
       request.headers['Authorization'] = 'Bearer $token';
-      request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
+      request.files
+          .add(await http.MultipartFile.fromPath('image', imageFile.path));
 
       final response = await request.send();
 
@@ -213,11 +221,15 @@ class _EditProfileState extends State<EditProfile> {
         log('Response Data: $responseData');
         log('Image URL from server: ${responseJson['image_url']}');
 
-        final imageUrl = responseJson['data'] != null ? responseJson['data']['image_url'] : null;
+        final imageUrl = responseJson['data'] != null
+            ? responseJson['data']['image_url']
+            : null;
 
         log('Image URL from server: $imageUrl');
 
-        if (imageUrl != null && imageUrl is String && Uri.tryParse(imageUrl)?.isAbsolute == true) {
+        if (imageUrl != null &&
+            imageUrl is String &&
+            Uri.tryParse(imageUrl)?.isAbsolute == true) {
           await prefs.setString('image_url', imageUrl);
           setState(() {
             widget.data.image_url = imageUrl;
@@ -305,7 +317,8 @@ class _EditProfileState extends State<EditProfile> {
 
       final nameParts = _fullNameController.text.split(' ');
       final firstName = nameParts.isNotEmpty ? nameParts.first : '';
-      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+      final lastName =
+          nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
       log('First Name: $firstName, Last Name: $lastName');
 
@@ -324,7 +337,8 @@ class _EditProfileState extends State<EditProfile> {
       log('Sending request to update profile with data: $updatedData');
 
       final encodedData = updatedData.entries
-          .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value ?? '')}')
+          .map((e) =>
+              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value ?? '')}')
           .join('&');
 
       final response = await http.put(
@@ -355,7 +369,8 @@ class _EditProfileState extends State<EditProfile> {
             widget.data.district = updatedUserData['district'];
             widget.data.city = updatedUserData['city'];
 
-            _fullNameController.text = "${widget.data.firstname} ${widget.data.lastname}";
+            _fullNameController.text =
+                "${widget.data.firstname} ${widget.data.lastname}";
             _emailController.text = widget.data.email;
             _dobController.text = widget.data.dob ?? '';
             _AddressController.text = widget.data.address ?? '';
@@ -396,7 +411,7 @@ class _EditProfileState extends State<EditProfile> {
                 pageno: 3,
               ),
             ),
-                (Route<dynamic> route) => false, // This removes all previous routes
+            (Route<dynamic> route) => false, // This removes all previous routes
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -470,11 +485,12 @@ class _EditProfileState extends State<EditProfile> {
                   radius: 60,
                   foregroundImage: _profileImagePath != null
                       ? (_profileImagePath!.startsWith('http')
-                      ? NetworkImage(_profileImagePath!)
-                      : FileImage(File(_profileImagePath!)) as ImageProvider)
+                          ? NetworkImage(_profileImagePath!)
+                          : FileImage(File(_profileImagePath!))
+                              as ImageProvider)
                       : const NetworkImage(
-                    'https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg',
-                  ),
+                          'https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg',
+                        ),
                 ),
               ),
               const SizedBox(
@@ -512,7 +528,8 @@ class _EditProfileState extends State<EditProfile> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your email';
-                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                              .hasMatch(value)) {
                             return 'Please enter a valid email';
                           }
                           return null;
@@ -570,9 +587,11 @@ class _EditProfileState extends State<EditProfile> {
                               borderRadius: BorderRadius.circular(4.0),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.only(bottom: 20, left: 10),
+                              padding:
+                                  const EdgeInsets.only(bottom: 20, left: 10),
                               child: DropdownButtonFormField<String>(
-                                value: _gender, // _gender is now either null, "Male", or "Female"
+                                initialValue:
+                                    _gender, // _gender is now either null, "Male", or "Female"
                                 dropdownColor: Colors.white,
                                 items: const [
                                   DropdownMenuItem(
@@ -601,7 +620,8 @@ class _EditProfileState extends State<EditProfile> {
                                 onChanged: (value) {
                                   setState(() {
                                     _gender = value;
-                                    widget.data.gender = value; // Update the User model
+                                    widget.data.gender =
+                                        value; // Update the User model
                                   });
                                 },
                                 decoration: const InputDecoration(
@@ -612,7 +632,9 @@ class _EditProfileState extends State<EditProfile> {
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black,
                                 ),
-                                validator: (value) => value == null ? 'Please select an option' : null,
+                                validator: (value) => value == null
+                                    ? 'Please select an option'
+                                    : null,
                               ),
                             ),
                           ),
@@ -652,8 +674,10 @@ class _EditProfileState extends State<EditProfile> {
                                 ),
                                 suffixIcon: GestureDetector(
                                   onTap: () async {
-                                    FocusScope.of(context).requestFocus(FocusNode());
-                                    final DateTime? pickedDate = await showDatePicker(
+                                    FocusScope.of(context)
+                                        .requestFocus(FocusNode());
+                                    final DateTime? pickedDate =
+                                        await showDatePicker(
                                       context: context,
                                       initialDate: _dob ?? DateTime.now(),
                                       firstDate: DateTime(1900),
@@ -663,12 +687,15 @@ class _EditProfileState extends State<EditProfile> {
                                       setState(() {
                                         _dob = pickedDate;
                                         _dobController.text =
-                                        '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
-                                        widget.data.dob = pickedDate.toIso8601String().split('T')[0];
+                                            '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
+                                        widget.data.dob = pickedDate
+                                            .toIso8601String()
+                                            .split('T')[0];
                                       });
                                     }
                                   },
-                                  child: Icon(Icons.edit_calendar, color: Colors.grey),
+                                  child: Icon(Icons.edit_calendar,
+                                      color: Colors.grey),
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(4.0),
@@ -697,8 +724,10 @@ class _EditProfileState extends State<EditProfile> {
                                 return null;
                               },
                               onTap: () async {
-                                FocusScope.of(context).requestFocus(FocusNode());
-                                final DateTime? pickedDate = await showDatePicker(
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
+                                final DateTime? pickedDate =
+                                    await showDatePicker(
                                   context: context,
                                   initialDate: _dob ?? DateTime.now(),
                                   firstDate: DateTime(1900),
@@ -707,8 +736,11 @@ class _EditProfileState extends State<EditProfile> {
                                 if (pickedDate != null) {
                                   setState(() {
                                     _dobController.text =
-                                    '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
-                                    widget.data.dob = pickedDate.toLocal().toString().split(' ')[0];
+                                        '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
+                                    widget.data.dob = pickedDate
+                                        .toLocal()
+                                        .toString()
+                                        .split(' ')[0];
                                   });
                                 }
                               },

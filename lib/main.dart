@@ -1,3 +1,4 @@
+import 'package:baltra/core/utils/network_service.dart';
 import 'package:baltra/core/utils/sessionController.dart';
 import 'package:baltra/core/utils/splashScreen.dart';
 import 'package:baltra/features/applicationCare/controller/crmController.dart';
@@ -14,6 +15,7 @@ import 'dart:io' as io;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Get.put(NetworkService(), permanent: true); // ← WiFi/Data monitor
   Get.put(SessionController());
   Get.put(CrmServices());
   Get.put(CrmController(crmService: CrmServices()), permanent: true);

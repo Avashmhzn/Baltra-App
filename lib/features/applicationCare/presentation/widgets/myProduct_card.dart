@@ -43,16 +43,17 @@ class MyProdductCard extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () {
-                  // Navigate to full-screen image with Hero animation
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FullScreenImagePage(
-                        imageUrl: product.product_image,
-                        heroTag: product.id.toString(), // Unique hero tag
+                  if (product.product_image != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FullScreenImagePage(
+                          imageUrl: product.product_image,
+                          heroTag: product.id.toString(),
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 },
                 child: Hero(
                   tag: product.id.toString(),
@@ -61,28 +62,39 @@ class MyProdductCard extends StatelessWidget {
                       topLeft: Radius.circular(10),
                       topRight: Radius.circular(10),
                     ),
-                    child: InteractiveViewer(
-                      panEnabled: true, // Enable panning
-                      boundaryMargin: const EdgeInsets.all(20),
-                      minScale: 0.1, // Minimum zoom scale
-                      maxScale: 4.0, // Maximum zoom scale
-                      child: CachedNetworkImage(
-                        imageUrl: product.product_image,
-                        height: 150,
-                        width: double.infinity,
-                        fit: BoxFit.contain,
-                        placeholder: (context, url) => Skeletonizer(
-                          enabled: true,
-                          child: Container(
+                    child: product.product_image != null
+                        ? InteractiveViewer(
+                            panEnabled: true,
+                            boundaryMargin: const EdgeInsets.all(20),
+                            minScale: 0.1,
+                            maxScale: 4.0,
+                            child: CachedNetworkImage(
+                              imageUrl: product.product_image!,
+                              height: 150,
+                              width: double.infinity,
+                              fit: BoxFit.contain,
+                              placeholder: (context, url) => Skeletonizer(
+                                enabled: true,
+                                child: Container(
+                                  height: 150,
+                                  width: double.infinity,
+                                  color: Colors.grey[300],
+                                ),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  const Center(child: Icon(Icons.error)),
+                            ),
+                          )
+                        : Container(
                             height: 150,
                             width: double.infinity,
-                            color: Colors.grey[300], // Skeleton background
+                            color: Colors.grey[200],
+                            child: const Icon(
+                              Icons.image_not_supported_outlined,
+                              size: 48,
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
-                        errorWidget: (context, url, error) => const Center(
-                            child: Icon(Icons.error)), // Fallback icon
-                      ),
-                    ),
                   ),
                 ),
               ),
@@ -272,13 +284,13 @@ class MyProdductCard extends StatelessWidget {
 }
 
 class FullScreenImagePage extends StatelessWidget {
-  final String imageUrl;
+  final String? imageUrl;
   final String heroTag;
 
   const FullScreenImagePage({
     super.key,
     required this.imageUrl,
-    required this.heroTag, // Make heroTag required
+    required this.heroTag,
   });
 
   @override
@@ -292,25 +304,29 @@ class FullScreenImagePage extends StatelessWidget {
         child: Center(
           child: Hero(
             tag: heroTag,
-            child: InteractiveViewer(
+              child: InteractiveViewer(
               panEnabled: true,
               boundaryMargin: const EdgeInsets.all(20),
               minScale: 0.1,
               maxScale: 4.0,
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.contain,
-                placeholder: (context, url) => Skeletonizer(
-                  enabled: true,
-                  child: Container(
-                    height: double.infinity,
-                    width: double.infinity,
-                    color: Colors.grey[300], // Skeleton background
-                  ),
-                ),
-                errorWidget: (context, url, error) =>
-                const Center(child: Icon(Icons.error)),
-              ),
+              child: imageUrl != null
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl!,
+                      fit: BoxFit.contain,
+                      placeholder: (context, url) => Skeletonizer(
+                        enabled: true,
+                        child: Container(
+                          height: double.infinity,
+                          width: double.infinity,
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                      errorWidget: (context, url, error) =>
+                          const Center(child: Icon(Icons.error)),
+                    )
+                  : const Center(
+                      child: Icon(Icons.image_not_supported_outlined,
+                          size: 64, color: Colors.grey)),
             ),
           ),
         ),

@@ -458,7 +458,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                     GestureDetector(
-                      onTap: () => _pickVideo(ImageSource.gallery, false),
+                      onTap: () => _showVideoSourceDialog(false),
                       child: Container(
                         height: 150,
                         width: double.infinity,
@@ -610,7 +610,7 @@ class CustomSuccessDialog extends StatelessWidget {
       ),
     );
   }
-}*/
+*/
 import 'dart:convert';
 import 'dart:io';
 import 'package:baltra/core/utils/constants.dart';
@@ -618,6 +618,7 @@ import 'package:baltra/features/authetication/controller/profileController.dart'
 import 'package:baltra/features/authetication/models/user.dart';
 import 'package:baltra/features/authetication/presentation/pages/buttomNavbar.dart';
 import 'package:baltra/features/authetication/presentation/widgets/textform.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -751,92 +752,200 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
     }
   }
 
-  // Redesigned method with SessionManager dialog styling
+  // Open a platform-adaptive source picker for gallery or camera
   void _showImageSourceDialog(bool isProductImage) {
-    showDialog(
+    if (Platform.isIOS) {
+      showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext context) => CupertinoActionSheet(
+          title: const Text('Select Image Source'),
+          message: const Text('Choose Camera or Gallery'),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera, isProductImage);
+              },
+              child: const Text('Camera'),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery, isProductImage);
+              },
+              child: const Text('Gallery'),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ),
+      );
+      return;
+    }
+
+    showModalBottomSheet<void>(
       context: context,
-      barrierDismissible: false,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              titlePadding: EdgeInsets.only(left: 16, top: 16, right: 8),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.image, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text(
-                        'Select Image Source',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                    ],
-                  ),
-                  // Close (X) button
-                  AnimatedOpacity(
-                    opacity: 1.0,
-                    duration: Duration(milliseconds: 500),
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Icon(Icons.close, color: Colors.grey),
+        return SafeArea(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Select Image Source',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Choose Camera or Gallery to upload the image.',
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.photo_camera),
+                  label: const Text('Camera'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Choose where to pick the image from:',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                  ),
-                  SizedBox(height: 16),
-                  // Gallery button
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _pickImage(ImageSource.gallery, isProductImage);
-                      },
-                      child: Text('Gallery',
-                          style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.camera, isProductImage);
+                  },
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('Gallery'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
-                  SizedBox(height: 8),
-                  // Camera button
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _pickImage(ImageSource.camera, isProductImage);
-                      },
-                      child:
-                          Text('Camera', style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.gallery, isProductImage);
+                  },
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showVideoSourceDialog(bool isProblemVideo) {
+    if (Platform.isIOS) {
+      showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext context) => CupertinoActionSheet(
+          title: const Text('Select Video Source'),
+          message: const Text('Choose Camera or Gallery'),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+                _pickVideo(ImageSource.camera, isProblemVideo);
+              },
+              child: const Text('Camera'),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+                _pickVideo(ImageSource.gallery, isProblemVideo);
+              },
+              child: const Text('Gallery'),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ),
+      );
+      return;
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Select Video Source',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Choose Camera or Gallery to upload the video.',
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.videocam),
+                  label: const Text('Camera'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
-                ],
-              ),
-            );
-          },
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _pickVideo(ImageSource.camera, isProblemVideo);
+                  },
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.video_library),
+                  label: const Text('Gallery'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _pickVideo(ImageSource.gallery, isProblemVideo);
+                  },
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -1166,7 +1275,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
                       style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                     GestureDetector(
-                      onTap: () => _pickVideo(ImageSource.gallery, false),
+                      onTap: () => _showVideoSourceDialog(false),
                       child: Container(
                         height: 150,
                         width: double.infinity,

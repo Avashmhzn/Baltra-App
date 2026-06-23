@@ -9,6 +9,7 @@ import 'package:baltra/features/authetication/presentation/pages/buttomNavbar.da
 import 'package:baltra/features/authetication/presentation/widgets/textform.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -292,7 +293,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   @override
   void dispose() {
     _scanSubscription?.cancel();
-    controller?.dispose();
+    // controller?.dispose() removed — QRViewController self-disposes when QRView is unmounted
     super.dispose();
   }
 
@@ -483,7 +484,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           }
         } catch (e) {
           log('QR parsing error: $e');
-          _showError("Invalid QR Code format. Please scan a valid Baltra product QR code.");
+          _showError(
+              "Invalid QR Code format. Please scan a valid Baltra product QR code.");
           _resetProcessing();
         }
       } else {
@@ -491,7 +493,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         _resetProcessing();
       }
     });
-    
 
     // Resume camera if permission is granted
     if (_hasCameraPermission) {
@@ -770,7 +771,7 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
-  Future<void> _openImagePicker(int index) async {
+  Future<void> _openImagePicker(int index, ImageSource source) async {
     // Check photo permission before picking image
     final hasPermission = await _checkPhotoPermission();
     if (!hasPermission) {
@@ -780,7 +781,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
     try {
       final XFile? pickedImage = await _picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         maxWidth: 1920,
         maxHeight: 1920,
         imageQuality: 85,
@@ -806,6 +807,105 @@ class _ResultScreenState extends State<ResultScreen> {
         );
       }
     }
+  }
+
+  void _showImageSourceDialogForIndex(int index) {
+    if (Platform.isIOS) {
+      showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext context) => CupertinoActionSheet(
+          title: const Text('Select Image Source'),
+          message: const Text('Choose Camera or Gallery'),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+                _openImagePicker(index, ImageSource.camera);
+              },
+              child: const Text('Camera'),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+                _openImagePicker(index, ImageSource.gallery);
+              },
+              child: const Text('Gallery'),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ),
+      );
+      return;
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Select Image Source',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Choose Camera or Gallery to upload the image.',
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.photo_camera),
+                  label: const Text('Camera'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _openImagePicker(index, ImageSource.camera);
+                  },
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('Gallery'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _openImagePicker(index, ImageSource.gallery);
+                  },
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -1109,7 +1209,7 @@ class _ResultScreenState extends State<ResultScreen> {
                       const Text('Product Image (Optional)',
                           style: TextStyle(fontWeight: FontWeight.w500)),
                       GestureDetector(
-                        onTap: () => _openImagePicker(0),
+                        onTap: () => _showImageSourceDialogForIndex(0),
                         child: Container(
                           margin: const EdgeInsets.only(top: 10),
                           width: double.infinity,
@@ -1142,7 +1242,7 @@ class _ResultScreenState extends State<ResultScreen> {
                       const Text('Warranty Card Image (Optional)',
                           style: TextStyle(fontWeight: FontWeight.w500)),
                       GestureDetector(
-                        onTap: () => _openImagePicker(1),
+                        onTap: () => _showImageSourceDialogForIndex(1),
                         child: Container(
                           margin: const EdgeInsets.only(top: 10),
                           width: double.infinity,
@@ -1175,7 +1275,7 @@ class _ResultScreenState extends State<ResultScreen> {
                       const Text('Bill Image (Optional)',
                           style: TextStyle(fontWeight: FontWeight.w500)),
                       GestureDetector(
-                        onTap: () => _openImagePicker(2),
+                        onTap: () => _showImageSourceDialogForIndex(2),
                         child: Container(
                           margin: const EdgeInsets.only(top: 10),
                           width: double.infinity,

@@ -8,15 +8,15 @@ class Myproduct {
   final String serial_number;
   final String warranty_issue;
   final String? warranty_expiry;
-  final String warranty_image;
+  final String? warranty_image;
   final String store_name;
   final String store_location;
   final String store_number;
   final String model_num;
   final String model_name;
-  final String bill_image_one;
+  final String? bill_image_one;
   final String? warranty_card;
-  final String product_image;
+  final String? product_image;
   final String status;
   final bool is_verified;
   final String created_at;
@@ -31,15 +31,15 @@ class Myproduct {
     required this.serial_number,
     required this.warranty_issue,
     this.warranty_expiry,
-    required this.warranty_image,
+    this.warranty_image,
     required this.store_name,
     required this.store_location,
     required this.store_number,
     required this.model_num,
     required this.model_name,
-    required this.bill_image_one,
+    this.bill_image_one,
     this.warranty_card,
-    required this.product_image,
+    this.product_image,
     required this.status,
     required this.is_verified,
     required this.created_at,
