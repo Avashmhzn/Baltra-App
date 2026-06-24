@@ -29,7 +29,8 @@ class Homepagecard extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: product.main_image!,
                 fit: BoxFit.contain,
-                placeholder: (context, url) => const SizedBox.shrink(), // No visible loader
+                placeholder: (context, url) =>
+                    const SizedBox.shrink(), // No visible loader
                 errorWidget: (context, url, error) => const Center(
                   child: Icon(
                     Icons.error,
@@ -49,7 +50,7 @@ class Homepagecard extends StatelessWidget {
           ),
           Padding(
             padding:
-            const EdgeInsets.only(left: 8.0, right: 8, bottom: 10, top: 8),
+                const EdgeInsets.only(left: 8.0, right: 8, bottom: 10, top: 8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +67,7 @@ class Homepagecard extends StatelessWidget {
                 ),
                 detailRow(
                     title: 'Warranty: ', value: "${product.warranty} Months"),
-                detailRow(title: 'Price: ', value: "${product.price!}"),
+                detailRow(title: 'Price: ', value: "Rs.${product.price!}"),
               ],
             ),
           ),

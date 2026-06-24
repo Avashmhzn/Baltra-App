@@ -18,7 +18,7 @@ class CategoryPage extends StatefulWidget {
 
 class _CategoryPageState extends State<CategoryPage> {
   final ProductController productController =
-  Get.put(ProductController(productRepository: ProductRepository()));
+      Get.put(ProductController(productRepository: ProductRepository()));
   final TextEditingController searchController = TextEditingController();
   final RxList<Category> filteredCategories = <Category>[].obs;
 
@@ -45,7 +45,7 @@ class _CategoryPageState extends State<CategoryPage> {
       filteredCategories.assignAll(
         productController.categoryList
             .where((category) =>
-            category.name.toLowerCase().contains(query.toLowerCase()))
+                category.name!.toLowerCase().contains(query.toLowerCase()))
             .toList(),
       );
     }
@@ -98,7 +98,7 @@ class _CategoryPageState extends State<CategoryPage> {
                             color: Color(0xff545454),
                           ),
                           prefixIcon:
-                          Icon(Icons.search, color: Color(0xff545454)),
+                              Icon(Icons.search, color: Color(0xff545454)),
                           border: InputBorder.none,
                         ),
                         onChanged: searchCategory,
@@ -110,13 +110,15 @@ class _CategoryPageState extends State<CategoryPage> {
                 Obx(() {
                   // Show skeleton while loading or if no categories are available
                   if (productController.isLoading.value) {
-                    const int skeletonCount = 8; // Fixed number of skeletons while loading
+                    const int skeletonCount =
+                        8; // Fixed number of skeletons while loading
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 30.0),
                       child: GridView.builder(
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisSpacing: 16,
                           crossAxisSpacing: 16,
@@ -135,7 +137,7 @@ class _CategoryPageState extends State<CategoryPage> {
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,

@@ -29,14 +29,15 @@ class Subcategoryproduct {
   factory Subcategoryproduct.fromJson(Map<String, dynamic> json) {
     return Subcategoryproduct(
       id: json['id'] as int,
-      name: json['name'] as String? ?? "Unknown",  // Handle null values
-      main_image_url: json['main_image_url'] as String? ?? "", // Provide default
+      name: json['name'] as String? ?? "Unknown", // Handle null values
+      main_image_url:
+          json['main_image_url'] as String? ?? "", // Provide default
       warranty: json['warranty'] as int? ?? 0, // Default to 0 if null
       power: json['power'] as String? ?? "N/A",
       model_no: json['model_no'] as String? ?? "N/A",
       model_name: json['model_name'] as String? ?? "N/A",
       price: json['price'] as int?,
-      sub_category: json['sub_category'] as String,
+      sub_category: json['sub_category'] as String? ?? "",
     );
   }
 

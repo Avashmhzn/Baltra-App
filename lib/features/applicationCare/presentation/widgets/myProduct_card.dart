@@ -17,7 +17,7 @@ class MyProdductCard extends StatelessWidget {
 
   final Myproduct product;
   final Myproductcontroller myproductcontroller =
-  Get.put(Myproductcontroller(productRepository: MyProductRepository()));
+      Get.put(Myproductcontroller(productRepository: MyProductRepository()));
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +107,7 @@ class MyProdductCard extends StatelessWidget {
                       context: context,
                       builder: (BuildContext context) {
                         return CustomDeleteDialog(
-                          productName: product.model_name,
+                          productName: product.model_name ?? '',
                           onConfirm: () {
                             myproductcontroller.deleteMyProduct(product.id);
                             myproductcontroller.fetchMyProduct();
@@ -198,10 +198,10 @@ class MyProdductCard extends StatelessWidget {
                 builder: (BuildContext context) {
                   return ComplaintRegistrationPage(
                     productId: product.id,
-                    serialNo: product.serial_number,
-                    status: product.status,
-                    modelName: product.model_name,
-                    modelNo: product.model_num,
+                    serialNo: product.serial_number ?? '',
+                    status: product.status ?? '',
+                    modelName: product.model_name ?? '',
+                    modelNo: product.model_num ?? '',
                   );
                 },
               );
@@ -304,7 +304,7 @@ class FullScreenImagePage extends StatelessWidget {
         child: Center(
           child: Hero(
             tag: heroTag,
-              child: InteractiveViewer(
+            child: InteractiveViewer(
               panEnabled: true,
               boundaryMargin: const EdgeInsets.all(20),
               minScale: 0.1,

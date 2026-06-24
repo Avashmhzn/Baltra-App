@@ -43,12 +43,45 @@ Product _$ProductFromJson(Map<String, dynamic> json) => Product(
           .toList(),
       galleryimagetwo: json['galleryimagetwo'] as String?,
       galleryimageone: json['galleryimageone'] as String?,
-      category: json['category'] as Map<String, dynamic>?, // Map
+      category: json['category'] as Map<String, dynamic>?,
       sub_category: json['sub_category'] as Map<String, dynamic>?,
     );
 
+Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'sub_heading': instance.sub_heading,
+      'price': instance.price,
+      'power': instance.power,
+      'warranty': instance.warranty,
+      'reward_points': instance.reward_points,
+      'model_name': instance.model_name,
+      'model_num': instance.model_num,
+      'serial_number': instance.serial_number,
+      'packaging': instance.packaging,
+      'sizing': instance.sizing,
+      'specification': instance.specification,
+      'color_styles': instance.color_styles,
+      'usage': instance.usage,
+      'images': instance.images,
+      'sizes': instance.sizes,
+      'product_video': instance.product_video,
+      'main_image': instance.main_image,
+      'specification_images': instance.specification_images,
+      'warranty_icon': instance.warranty_icon,
+      'usage_images': instance.usage_images,
+      'sizing_images': instance.sizing_images,
+      'galleryimagetwo': instance.galleryimagetwo,
+      'galleryimageone': instance.galleryimageone,
+      'category': instance.category,
+      'sub_category': instance.sub_category,
+    };
 
 ImageModel _$ImageModelFromJson(Map<String, dynamic> json) => ImageModel(
       image_url: json['image_url'] as String?,
     );
 
+Map<String, dynamic> _$ImageModelToJson(ImageModel instance) =>
+    <String, dynamic>{
+      'image_url': instance.image_url,
+    };

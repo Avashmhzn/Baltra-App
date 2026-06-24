@@ -1020,29 +1020,29 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       usageImages: usageImageList,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Container(
-                    decoration:
-                        BoxDecoration(border: Border.all(color: Colors.grey)),
-                    child: CachedNetworkImage(
-                      imageUrl: product.warranty_icon ?? '',
-                      cacheKey: '${product.warranty_icon}_${productId}',
-                      height: 300,
-                      width: double.infinity,
-                      fit: BoxFit.contain,
-                      placeholder: (context, url) => Container(
-                        height: 300,
-                        width: double.infinity,
-                        color: Colors.grey[300],
-                      ),
-                      errorWidget: (context, url, error) => Image.asset(
-                        'assets/images/pp.png',
-                        height: 300,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
+                  // const SizedBox(height: 10),
+                  // Container(
+                  //   decoration:
+                  //       BoxDecoration(border: Border.all(color: Colors.grey)),
+                  //   child: CachedNetworkImage(
+                  //     imageUrl: product.warranty_icon ?? '',
+                  //     cacheKey: '${product.warranty_icon}_${productId}',
+                  //     height: 300,
+                  //     width: double.infinity,
+                  //     fit: BoxFit.contain,
+                  //     placeholder: (context, url) => Container(
+                  //       height: 300,
+                  //       width: double.infinity,
+                  //       color: Colors.grey[300],
+                  //     ),
+                  //     errorWidget: (context, url, error) => Image.asset(
+                  //       'assets/images/pp.png',
+                  //       height: 300,
+                  //       width: double.infinity,
+                  //       fit: BoxFit.cover,
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(height: 10),
                   Container(
                     decoration:

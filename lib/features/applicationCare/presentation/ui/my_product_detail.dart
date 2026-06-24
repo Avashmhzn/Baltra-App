@@ -764,7 +764,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            product.model_name,
+                            product.model_name ?? '',
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                             softWrap: true,
@@ -824,7 +824,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    product.model_name,
+                                    product.model_name ?? '',
                                     style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold),

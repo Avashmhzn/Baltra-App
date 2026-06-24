@@ -6,6 +6,18 @@ part of 'subcategoryProduct.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+Subcategoryproduct _$SubcategoryproductFromJson(Map<String, dynamic> json) =>
+    Subcategoryproduct(
+      id: (json['id'] as num).toInt(),
+      name: json['name'] as String,
+      main_image_url: json['main_image_url'] as String,
+      warranty: (json['warranty'] as num).toInt(),
+      power: json['power'] as String,
+      model_no: json['model_no'] as String,
+      model_name: json['model_name'] as String,
+      sub_category: json['sub_category'] as String,
+      price: (json['price'] as num?)?.toInt(),
+    );
 
 Map<String, dynamic> _$SubcategoryproductToJson(Subcategoryproduct instance) =>
     <String, dynamic>{
@@ -14,8 +26,8 @@ Map<String, dynamic> _$SubcategoryproductToJson(Subcategoryproduct instance) =>
       'main_image_url': instance.main_image_url,
       'warranty': instance.warranty,
       'power': instance.power,
-      'model_num': instance.model_no,
+      'model_no': instance.model_no,
       'model_name': instance.model_name,
-      'price': instance.price,
       'sub_category': instance.sub_category,
+      'price': instance.price,
     };
