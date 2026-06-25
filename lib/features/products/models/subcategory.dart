@@ -1,13 +1,6 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'subcategory.g.dart';
-
-@JsonSerializable()
 class Subcategory {
   final int id;
-
   final String name;
-
   final String image_url;
 
   Subcategory({
@@ -15,8 +8,18 @@ class Subcategory {
     required this.name,
     required this.image_url,
   });
-  factory Subcategory.fromJson(Map<String, dynamic> json) =>
-      _$SubcategoryFromJson(json);
 
-  Map<String, dynamic> toJson() => _$SubcategoryToJson(this);
+  factory Subcategory.fromJson(Map<String, dynamic> json) {
+    return Subcategory(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      name: json['name'] as String? ?? "",
+      image_url: json['image_url'] as String? ?? "",
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'image_url': image_url,
+      };
 }

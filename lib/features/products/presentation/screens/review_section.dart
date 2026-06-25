@@ -1,4 +1,4 @@
-import 'package:baltra/features/applicationCare/presentation/widgets/myproduct_details_skeletion.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:baltra/features/products/controller/reviewController.dart';
 import 'package:baltra/features/products/models/review.dart';
 import 'package:baltra/features/products/presentation/widgets/reviewCard.dart';
@@ -88,8 +88,17 @@ class _ReviewsSectionState extends State<ReviewsSection> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (widget.reviewController.isLoading.value) {
-        log('ReviewsSection: Showing ProductDetailSkeleton for product ID: ${widget.productId}');
-        return const Center(child: ProductDetailSkeleton());
+        log('ReviewsSection: Showing ReviewSkeletons for product ID: ${widget.productId}');
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Column(
+            children: List.generate(3, (index) => const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0),
+              child: ReviewSkeleton(),
+            )),
+          ),
+        );
       }
 
       final ratingData = widget.reviewController.ratingData.value;
@@ -234,9 +243,15 @@ class _ReviewsSectionState extends State<ReviewsSection> {
             ),
           ),
           if (widget.reviewController.isLoadingMore.value)
-            const Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Center(child: ProductDetailSkeleton()),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Center(
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: const ReviewSkeleton(),
+                ),
+              ),
             ),
           const SizedBox(height: 20),
         ],
@@ -250,5 +265,87 @@ class _ReviewsSectionState extends State<ReviewsSection> {
     reviewTextController.dispose();
     log('ReviewsSection disposed for product ID: ${widget.productId}');
     super.dispose();
+  }
+}
+
+class ReviewSkeleton extends StatelessWidget {
+  const ReviewSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              width: 120,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.only(left: 15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  ...List.generate(5, (index) {
+                    return const Icon(
+                      Icons.star,
+                      color: Colors.white,
+                      size: 17,
+                    );
+                  }),
+                  const SizedBox(width: 10),
+                  Container(
+                    width: 60,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.7,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 14),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

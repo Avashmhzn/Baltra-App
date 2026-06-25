@@ -1,3 +1,5 @@
+import 'package:baltra/core/utils/constants.dart';
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'product.g.dart';
@@ -31,7 +33,10 @@ class Product {
   String? galleryimageone;
   Map<String, dynamic>? category;
   Map<String, dynamic>? sub_category;
-
+  List<Color> get colorList {
+    if (color_styles == null || color_styles!.isEmpty) return [Colors.grey];
+    return color_styles!.map((c) => hexToColor(c)).toList();
+  }
 
   Product({
     this.id,
@@ -61,7 +66,6 @@ class Product {
     this.galleryimageone,
     this.category,
     this.sub_category,
-
   });
 
   factory Product.fromJson(Map<String, dynamic> json) =>

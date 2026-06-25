@@ -316,7 +316,6 @@
 //     );
 //   }
 // }
-
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -329,7 +328,6 @@ class NetworkService extends GetxService {
 
   StreamSubscription<List<ConnectivityResult>>? _subscription;
 
-  // Tracks whether the no-internet dialog is currently showing
   bool _dialogShowing = false;
 
   @override
@@ -345,14 +343,12 @@ class NetworkService extends GetxService {
     super.onClose();
   }
 
-  // ─── Check current connectivity once on startup ───────────────────────────
   Future<void> _checkInitialConnection() async {
     try {
       final result = await Connectivity().checkConnectivity();
       final connected = _isOnline(result);
       isConnected.value = connected;
       if (!connected) {
-        // Delay slightly so the UI is fully ready before showing dialog
         Future.delayed(
             const Duration(milliseconds: 500), _showNoInternetDialog);
       }
@@ -361,7 +357,6 @@ class NetworkService extends GetxService {
     }
   }
 
-  // ─── Listen for real-time connectivity changes ────────────────────────────
   void _listenToConnectivityChanges() {
     _subscription = Connectivity()
         .onConnectivityChanged
@@ -369,11 +364,9 @@ class NetworkService extends GetxService {
       final connected = _isOnline(results);
 
       if (connected && !isConnected.value) {
-        // Came back online
         isConnected.value = true;
         _dismissDialog();
       } else if (!connected && isConnected.value) {
-        // Went offline
         isConnected.value = false;
         _showNoInternetDialog();
       }
@@ -387,7 +380,6 @@ class NetworkService extends GetxService {
         r == ConnectivityResult.ethernet);
   }
 
-  // ─── Dismiss the dialog if it is open ────────────────────────────────────
   void _dismissDialog() {
     if (_dialogShowing && Get.isDialogOpen == true) {
       Get.back();
@@ -395,7 +387,6 @@ class NetworkService extends GetxService {
     }
   }
 
-  // ─── Show the styled no-internet dialog ──────────────────────────────────
   void _showNoInternetDialog() {
     if (_dialogShowing) return;
     _dialogShowing = true;
@@ -403,7 +394,6 @@ class NetworkService extends GetxService {
     Get.dialog(
       barrierDismissible: false,
       PopScope(
-        // Prevent back-button dismissal
         canPop: false,
         child: Dialog(
           shape:
@@ -449,8 +439,6 @@ class NetworkService extends GetxService {
     }
   }
 }
-
-// ─── Dialog Widget ────────────────────────────────────────────────────────────
 
 class _NoInternetDialogContent extends StatefulWidget {
   final Future<void> Function() onRetry;
@@ -517,7 +505,6 @@ class _NoInternetDialogContentState extends State<_NoInternetDialogContent>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Animated icon ──
           ScaleTransition(
             scale: _pulseAnimation,
             child: Container(
@@ -535,8 +522,6 @@ class _NoInternetDialogContentState extends State<_NoInternetDialogContent>
             ),
           ),
           const SizedBox(height: 20),
-
-          // ── Title ──
           const Text(
             'No Internet Connection',
             textAlign: TextAlign.center,
@@ -548,8 +533,6 @@ class _NoInternetDialogContentState extends State<_NoInternetDialogContent>
             ),
           ),
           const SizedBox(height: 10),
-
-          // ── Subtitle ──
           const Text(
             'Please check your Wi-Fi or mobile data\nand try again.',
             textAlign: TextAlign.center,
@@ -561,8 +544,6 @@ class _NoInternetDialogContentState extends State<_NoInternetDialogContent>
             ),
           ),
           const SizedBox(height: 28),
-
-          // ── Open Wi-Fi Settings button ──
           SizedBox(
             width: double.infinity,
             height: 48,
@@ -588,8 +569,6 @@ class _NoInternetDialogContentState extends State<_NoInternetDialogContent>
             ),
           ),
           const SizedBox(height: 12),
-
-          // ── Retry button ──
           SizedBox(
             width: double.infinity,
             height: 48,

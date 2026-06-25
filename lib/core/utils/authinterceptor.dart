@@ -24,20 +24,14 @@ class AuthInterceptor extends GetConnect {
   }
 
   Future<void> _handleAuthFailure() async {
-    // Guard: only act if we're currently logged in to avoid looping
     try {
       final sessionController = Get.find<SessionController>();
-      if (!sessionController.isLoggedIn.value) return;
-
-      await sessionController.setLoggedOut();
+      sessionController.showSessionExpiredDialog();
     } catch (_) {
-      // SessionController not registered yet — nothing to do
-    }
-
-    // Navigate to login, clearing the entire stack
-    // Using Get.offAllNamed avoids importing the login page here directly.
-    if (Get.currentRoute != '/login') {
-      Get.offAllNamed('/login', arguments: {'reason': 'session_expired'});
+      // Fallback
+      if (Get.currentRoute != '/login' && Get.currentRoute != '/Loginpage') {
+        Get.offAllNamed('/login', arguments: {'reason': 'session_expired'});
+      }
     }
   }
 }

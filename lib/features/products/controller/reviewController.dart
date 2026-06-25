@@ -21,16 +21,26 @@ class RatingData {
   });
 
   factory RatingData.fromJson(Map<String, dynamic> json) {
+    final rawDistribution = json['rating_distribution'] as Map?;
+    final Map<String, int> distribution = {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0};
+    if (rawDistribution != null) {
+      rawDistribution.forEach((key, value) {
+        if (key != null) {
+          distribution[key.toString()] = (value as num?)?.toInt() ?? 0;
+        }
+      });
+    }
+
     double? avgRating = (json['average_rating'] as num?)?.toDouble();
-    if (avgRating != null && (avgRating.isNaN || avgRating.isInfinite)) {
+    if (avgRating == null || avgRating.isNaN || avgRating.isInfinite) {
       avgRating = 0.0;
     }
+
     return RatingData(
       average_rating: avgRating,
-      rating_sum: json['rating_sum'] as int? ?? 0,
-      total_reviews: json['total_reviews'] as int? ?? 0,
-      rating_distribution: (json['rating_distribution'] as Map?)?.cast<String, int>() ??
-          {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0},
+      rating_sum: (json['rating_sum'] as num?)?.toInt() ?? 0,
+      total_reviews: (json['total_reviews'] as num?)?.toInt() ?? 0,
+      rating_distribution: distribution,
     );
   }
 
@@ -182,7 +192,17 @@ class ReviewController extends GetxController {
       if (response.statusCode == 200) {
         _lastProductId = null; // Reset to force refresh
         await fetchReviewsAndRatings(productId);
-        Get.snackbar('Success', 'Review submitted successfully');
+        Future.delayed(Duration.zero, () {
+          if (Get.context != null) {
+            ScaffoldMessenger.of(Get.context!).showSnackBar(
+              const SnackBar(
+                content: Text('Review submitted successfully'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
+        });
         log('Review submitted successfully for product ID: $productId');
       } else {
         _showErrorDialog('Failed to submit review. Status code: ${response.statusCode}');

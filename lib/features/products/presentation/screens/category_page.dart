@@ -45,7 +45,7 @@ class _CategoryPageState extends State<CategoryPage> {
       filteredCategories.assignAll(
         productController.categoryList
             .where((category) =>
-                category.name!.toLowerCase().contains(query.toLowerCase()))
+                category.name.toLowerCase().contains(query.toLowerCase()))
             .toList(),
       );
     }

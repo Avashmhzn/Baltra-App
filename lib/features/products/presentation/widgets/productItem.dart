@@ -30,16 +30,28 @@ class ProductItem extends StatelessWidget {
         children: [
           Flexible(
             flex: 4, // Fix: Increase space for image
-            child: Container(
+            child: SizedBox(
               width: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: CachedNetworkImageProvider(
-                    product.main_image_url,
-                  ),
-                  fit: BoxFit.contain, // Fix: Show full image without cropping
-                ),
-              ),
+              child: product.main_image_url.trim().isEmpty
+                  ? const Center(
+                      child: Icon(
+                        Icons.image_not_supported,
+                        color: Colors.grey,
+                        size: 50,
+                      ),
+                    )
+                  : CachedNetworkImage(
+                      imageUrl: product.main_image_url,
+                      fit: BoxFit.contain, // Fix: Show full image without cropping
+                      placeholder: (context, url) => const SizedBox.shrink(),
+                      errorWidget: (context, url, error) => const Center(
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: Colors.grey,
+                          size: 50,
+                        ),
+                      ),
+                    ),
             ),
           ),
           const Divider(

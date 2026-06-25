@@ -342,6 +342,7 @@
 //     );
 //   }
 // }
+
 import 'dart:developer';
 import 'package:baltra/core/utils/constants.dart';
 import 'package:baltra/core/utils/sessionExpirationMixin.dart';
@@ -604,6 +605,10 @@ class _HomePageState extends State<HomePage> with SessionManager {
 
                       // Get sorted products (latest first)
                       final sortedProducts = _getSortedProducts();
+                      if (sortedProducts.isEmpty) {
+                        return const Center(
+                            child: Text("No products available"));
+                      }
 
                       return SingleChildScrollView(
                         child: Column(

@@ -16,6 +16,8 @@ class Authrepository extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
+  set rememberMe(bool rememberMe) {}
+
   Future<void> requestOTP(int number) async {
     try {
       isLoading.value = true; // Start loading indicator
