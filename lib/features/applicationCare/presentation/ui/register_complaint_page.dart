@@ -1138,11 +1138,15 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
           ),
         );
       } else {
+        String errorMessage = 'Failed to submit complaint: ${response.statusCode}';
+        if (response.statusCode == 400) {
+          errorMessage = 'We are fixing the problem. For now, please use the gallery to upload your video.';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to submit complaint: ${response.statusCode}'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 4),
           ),
         );
         setState(() {
