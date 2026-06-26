@@ -620,6 +620,7 @@ import 'package:baltra/features/authetication/models/user.dart';
 import 'package:baltra/features/authetication/presentation/pages/buttomNavbar.dart';
 import 'package:baltra/features/authetication/presentation/widgets/textform.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1063,8 +1064,29 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
             'warranty_image', _warrantyImage!.path));
       }
       if (_problemVideo != null) {
+        final String fileName = _problemVideo!.path.split('/').last;
+        final String lowerFileName = fileName.toLowerCase();
+        
+        String uploadFileName = fileName;
+        MediaType uploadContentType = MediaType('video', 'mp4'); // Default to video/mp4
+        
+        if (lowerFileName.endsWith('.mov') || lowerFileName.endsWith('.qt')) {
+          uploadFileName = fileName.replaceAll(RegExp(r'\.(mov|qt)$', caseSensitive: false), '.mp4');
+          uploadContentType = MediaType('video', 'mp4');
+        } else if (lowerFileName.endsWith('.3gp')) {
+          uploadContentType = MediaType('video', '3gpp');
+        } else if (lowerFileName.endsWith('.mkv')) {
+          uploadContentType = MediaType('video', 'x-matroska');
+        } else if (lowerFileName.endsWith('.mp4')) {
+          uploadContentType = MediaType('video', 'mp4');
+        }
+
         request.files.add(await http.MultipartFile.fromPath(
-            'damaged_Video', _problemVideo!.path));
+          'damaged_Video',
+          _problemVideo!.path,
+          filename: uploadFileName,
+          contentType: uploadContentType,
+        ));
       }
 
       request.fields['model_name'] = widget.modelName;
