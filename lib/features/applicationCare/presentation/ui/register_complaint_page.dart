@@ -611,6 +611,7 @@ class CustomSuccessDialog extends StatelessWidget {
     );
   }
 */
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:baltra/core/utils/constants.dart';
@@ -740,15 +741,32 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
   }
 
   Future<void> _pickImage(ImageSource source, bool isProductImage) async {
-    final pickedFile = await ImagePicker().pickImage(source: source);
-    if (pickedFile != null) {
-      setState(() {
-        if (isProductImage) {
-          _productImage = File(pickedFile.path);
-        } else {
-          _warrantyImage = File(pickedFile.path);
-        }
-      });
+    try {
+      final pickedFile = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          if (isProductImage) {
+            _productImage = File(pickedFile.path);
+          } else {
+            _warrantyImage = File(pickedFile.path);
+          }
+        });
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error selecting image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -952,11 +970,56 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
   }
 
   Future<void> _pickVideo(ImageSource source, bool isProblemVideo) async {
-    final pickedFile = await ImagePicker().pickVideo(source: source);
-    if (pickedFile != null) {
-      setState(() {
-        _problemVideo = File(pickedFile.path);
-      });
+    try {
+      final pickedFile = await ImagePicker().pickVideo(
+        source: source,
+        maxDuration: const Duration(seconds: 30),
+      );
+      if (pickedFile != null) {
+        final File file = File(pickedFile.path);
+        final int sizeInBytes = await file.length();
+        final double sizeInMb = sizeInBytes / (1024 * 1024);
+
+        if (sizeInMb > 15) {
+          if (mounted) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Video Too Large'),
+                  content: Text(
+                    'The selected video is too large (${sizeInMb.toStringAsFixed(1)} MB).\n\n'
+                    'Please select a video smaller than 15 MB, or record a new short video.',
+                  ),
+                  actions: [
+                    TextButton(
+                      child: const Text('OK'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+          return;
+        }
+
+        setState(() {
+          _problemVideo = file;
+        });
+      }
+    } catch (e) {
+      print('Error picking video: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error selecting video: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -1029,7 +1092,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
       // Debug: Print request fields
       print('Request Fields: ${request.fields}');
 
-      var response = await request.send();
+      var response = await request.send().timeout(const Duration(minutes: 2));
       var responseBody = await response.stream.bytesToString();
       print('Response Body: $responseBody');
 
@@ -1066,11 +1129,23 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
       }
     } catch (error) {
       print('Error: $error');
+      String errorMessage = 'Failed to submit complaint. Please try again.';
+      final String errorStr = error.toString().toLowerCase();
+
+      if (errorStr.contains('socket') ||
+          errorStr.contains('write failed') ||
+          errorStr.contains('connection reset') ||
+          errorStr.contains('broken pipe')) {
+        errorMessage = 'Upload failed. The selected video file might be too large, or your internet is unstable. Please select a video under 15MB.';
+      } else if (error is TimeoutException || errorStr.contains('timeout')) {
+        errorMessage = 'Connection timed out. The video file might be too large. Please select a smaller video.';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error submitting complaint: $error'),
+          content: Text(errorMessage),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 4),
         ),
       );
       setState(() {

@@ -636,43 +636,20 @@ class _ResultScreenState extends State<ResultScreen> {
   //           duration: const Duration(seconds: 5),
   //         ),
   //       );
-  //     }
-  //     return false;
-  //   } finally {
-  //     log('=== PHOTO PERMISSION CHECK END ===');
-  //   }
-  // }
   Future<bool> _checkPhotoPermission() async {
+    if (Platform.isAndroid) {
+      // Android uses native intents/scoped storage for image_picker; no storage permissions are required.
+      return true;
+    }
+
     log('=== PHOTO PERMISSION CHECK START ===');
     try {
-      PermissionStatus photoStatus;
-      if (Platform.isAndroid) {
-        // For Android 13+, use Permission.photos; otherwise, use Permission.storage
-        if (await DeviceInfoPlugin()
-            .androidInfo
-            .then((info) => info.version.sdkInt >= 33)) {
-          photoStatus = await Permission.photos.status;
-          log('Checking Permission.photos for Android 13+: $photoStatus');
-          if (!photoStatus.isGranted && !photoStatus.isLimited) {
-            photoStatus = await Permission.photos.request();
-            log('Requested Permission.photos: $photoStatus');
-          }
-        } else {
-          photoStatus = await Permission.storage.status;
-          log('Checking Permission.storage for Android < 13: $photoStatus');
-          if (!photoStatus.isGranted && !photoStatus.isLimited) {
-            photoStatus = await Permission.storage.request();
-            log('Requested Permission.storage: $photoStatus');
-          }
-        }
-      } else {
-        // iOS: Use Permission.photos
-        photoStatus = await Permission.photos.status;
-        log('Checking Permission.photos for iOS: $photoStatus');
-        if (!photoStatus.isGranted && !photoStatus.isLimited) {
-          photoStatus = await Permission.photos.request();
-          log('Requested Permission.photos for iOS: $photoStatus');
-        }
+      // iOS: Use Permission.photos
+      var photoStatus = await Permission.photos.status;
+      log('Checking Permission.photos for iOS: $photoStatus');
+      if (!photoStatus.isGranted && !photoStatus.isLimited) {
+        photoStatus = await Permission.photos.request();
+        log('Requested Permission.photos for iOS: $photoStatus');
       }
 
       if (photoStatus.isGranted || photoStatus.isLimited) {
@@ -684,7 +661,8 @@ class _ResultScreenState extends State<ResultScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text(
-                  'Photo library access is required to upload images. Please try again.'),
+                'Photo library access is required to upload images. Please try again.',
+              ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 5),
@@ -709,7 +687,8 @@ class _ResultScreenState extends State<ResultScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text(
-                  'Unexpected permission status. Please try again or check device settings.'),
+                'Unexpected permission status. Please try again or check device settings.',
+              ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 5),

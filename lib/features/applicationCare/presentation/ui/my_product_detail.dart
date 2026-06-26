@@ -576,8 +576,9 @@ import 'package:get/get.dart';
 import 'package:baltra/features/applicationCare/controller/myProductController.dart';
 import 'package:baltra/features/applicationCare/models/myProduct.dart';
 import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:gal/gal.dart';
 
 class MyProductDetailPage extends StatefulWidget {
   final int productId;
@@ -621,40 +622,39 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
     }
 
     try {
-      if (await Permission.storage.request().isGranted) {
-        if (await Permission.manageExternalStorage.request().isGranted) {
-          final response = await http.get(Uri.parse(imageUrl));
-
-          if (response.statusCode == 200) {
-            final directory = Directory('/storage/emulated/0/Download');
-            if (!await directory.exists()) {
-              await directory.create(recursive: true);
-            }
-
-            final fileName =
-                'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
-            final file = File('${directory.path}/$fileName');
-
-            await file.writeAsBytes(response.bodyBytes);
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Image saved to Downloads/$fileName"),
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          } else {
-            throw Exception('Failed to download image: ${response.statusCode}');
-          }
-        } else {
+      final hasAccess = await Gal.hasAccess();
+      if (!hasAccess) {
+        final request = await Gal.requestAccess();
+        if (!request) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Storage permission denied")),
+            const SnackBar(content: Text("Gallery permission denied")),
           );
+          return;
         }
-      } else {
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Downloading image..."), duration: Duration(seconds: 1)),
+      );
+
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode == 200) {
+        final tempDir = await getTemporaryDirectory();
+        final tempPath = '${tempDir.path}/temp_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final file = File(tempPath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        await Gal.putImage(tempPath);
+        await file.delete();
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Storage permission denied")),
+          const SnackBar(
+            content: Text("Image saved to gallery successfully!"),
+            duration: Duration(seconds: 3),
+          ),
         );
+      } else {
+        throw Exception('Failed to download image: ${response.statusCode}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -672,40 +672,39 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
     }
 
     try {
-      if (await Permission.storage.request().isGranted) {
-        if (await Permission.manageExternalStorage.request().isGranted) {
-          final response = await http.get(Uri.parse(videoUrl));
-
-          if (response.statusCode == 200) {
-            final directory = Directory('/storage/emulated/0/Download');
-            if (!await directory.exists()) {
-              await directory.create(recursive: true);
-            }
-
-            final fileName =
-                'video_${DateTime.now().millisecondsSinceEpoch}.mp4';
-            final file = File('${directory.path}/$fileName');
-
-            await file.writeAsBytes(response.bodyBytes);
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Video saved to Downloads/$fileName"),
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          } else {
-            throw Exception('Failed to download video: ${response.statusCode}');
-          }
-        } else {
+      final hasAccess = await Gal.hasAccess();
+      if (!hasAccess) {
+        final request = await Gal.requestAccess();
+        if (!request) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Storage permission denied")),
+            const SnackBar(content: Text("Gallery permission denied")),
           );
+          return;
         }
-      } else {
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Downloading video..."), duration: Duration(seconds: 1)),
+      );
+
+      final response = await http.get(Uri.parse(videoUrl));
+      if (response.statusCode == 200) {
+        final tempDir = await getTemporaryDirectory();
+        final tempPath = '${tempDir.path}/temp_video_${DateTime.now().millisecondsSinceEpoch}.mp4';
+        final file = File(tempPath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        await Gal.putVideo(tempPath);
+        await file.delete();
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Storage permission denied")),
+          const SnackBar(
+            content: Text("Video saved to gallery successfully!"),
+            duration: Duration(seconds: 3),
+          ),
         );
+      } else {
+        throw Exception('Failed to download video: ${response.statusCode}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
