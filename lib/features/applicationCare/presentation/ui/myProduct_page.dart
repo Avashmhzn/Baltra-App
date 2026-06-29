@@ -127,7 +127,7 @@ class _MyProductPageState extends State<MyProductPage> {
                                 // Navigate if there's a valid product ID
                                 Get.to(() => MyProductDetailPage(
                                     productId: myproduct.id));
-                                                            },
+                              },
                               child: MyProdductCard(product: myproduct),
                             );
                           },

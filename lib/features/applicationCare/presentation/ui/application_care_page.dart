@@ -270,6 +270,7 @@
 //   }
 // }
 import 'package:baltra/core/utils/sessionExpirationMixin.dart';
+import 'package:baltra/features/applicationCare/presentation/ui/completed_complaints_page.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/myProduct_page.dart';
 import 'package:baltra/features/applicationCare/presentation/ui/product_maintainance_page.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
@@ -329,19 +330,19 @@ class _ApplicationCarePageState extends State<ApplicationCarePage>
         }
       },
       child: DefaultTabController(
-        length: 2,
+        length: 3,
         child: SafeArea(
           child: Scaffold(
               body: Stack(
             children: [
               Positioned(top: 0, left: 0, right: 0, child: _buildAppBar()),
               Positioned(
-                top: _selectedIndex == 2 ? 214 : 144,
+                top: _selectedIndex == 3 ? 214 : 144,
                 left: 0,
                 right: 0,
                 bottom: 0,
                 child: DefaultTabController(
-                  length: 2,
+                  length: 3,
                   child: Scaffold(
                     appBar: AppBar(
                       automaticallyImplyLeading: false,
@@ -352,6 +353,9 @@ class _ApplicationCarePageState extends State<ApplicationCarePage>
                           ),
                           Tab(
                             text: 'Tracking',
+                          ),
+                          Tab(
+                            text: 'Completed',
                           ),
                         ],
                         indicator: BoxDecoration(
@@ -376,6 +380,7 @@ class _ApplicationCarePageState extends State<ApplicationCarePage>
                       children: [
                         MyProductPage(),
                         ProductMaintainancePage(),
+                        CompletedComplaintsPage(),
                       ],
                     ),
                   ),

@@ -13,12 +13,14 @@ class VideoPreview extends StatefulWidget {
 class _VideoPreviewState extends State<VideoPreview> {
   late VideoPlayerController _controller;
   bool _isInitialized = false;
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
       ..initialize().then((_) {
+        if (_isDisposed || !mounted) return;
         setState(() {
           _isInitialized = true;
           _controller.setLooping(true);
@@ -28,6 +30,7 @@ class _VideoPreviewState extends State<VideoPreview> {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _controller.dispose();
     super.dispose();
   }
@@ -37,6 +40,7 @@ class _VideoPreviewState extends State<VideoPreview> {
     return VisibilityDetector(
       key: Key(widget.videoUrl), // Unique key for visibility tracking
       onVisibilityChanged: (VisibilityInfo info) {
+        if (_isDisposed || !mounted) return;
         if (info.visibleFraction > 0.5) {
           // If more than 50% of the video is visible, play
           _controller.play();

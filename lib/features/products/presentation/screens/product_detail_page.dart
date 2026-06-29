@@ -41,6 +41,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   int? _lastProductId;
   int _currentTabIndex = 0;
   int _selectedColorIndex = 0;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -189,7 +190,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         final Uri? uri = Uri.tryParse(productVideoUrl);
         if (uri == null) {
           print("Invalid video URL format");
-          if (mounted) {
+          if (mounted && !_isDisposed) {
             setState(() => _isVideoInitialized = false);
           }
           return;
@@ -207,12 +208,12 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         );
 
         _videoPlayerController!.addListener(() {
-          if (!mounted) return;
+          if (!mounted || _isDisposed) return;
 
           final player = _videoPlayerController!;
           if (player.value.hasError) {
             print("Video player error: ${player.value.errorDescription}");
-            if (mounted) {
+            if (mounted && !_isDisposed) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                     content: Text(
@@ -221,7 +222,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
               setState(() => _isVideoInitialized = false);
             }
           } else if (_isPlaying != player.value.isPlaying) {
-            if (mounted) {
+            if (mounted && !_isDisposed) {
               setState(() => _isPlaying = player.value.isPlaying);
             }
           }
@@ -230,7 +231,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         print("Initializing video player...");
         _videoPlayerController!.initialize().then((_) {
           print("Video player initialized successfully");
-          if (mounted) {
+          if (mounted && !_isDisposed) {
             setState(() {
               _isVideoInitialized = true;
               _videoPlayerController!.setLooping(true);
@@ -240,7 +241,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           }
         }).catchError((error) {
           print("Video initialization error: $error");
-          if (mounted) {
+          if (mounted && !_isDisposed) {
             setState(() => _isVideoInitialized = false);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -252,18 +253,20 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         });
       } catch (e) {
         print("Exception during video controller creation: $e");
-        if (mounted) {
+        if (mounted && !_isDisposed) {
           setState(() => _isVideoInitialized = false);
         }
       }
     } else {
       print("No video URL provided");
-      setState(() => _isVideoInitialized = false);
+      if (mounted && !_isDisposed) {
+        setState(() => _isVideoInitialized = false);
+      }
     }
   }
 
   void _togglePlayPause() {
-    if (_videoPlayerController == null || !mounted) return;
+    if (_videoPlayerController == null || !mounted || _isDisposed) return;
     setState(() {
       if (_videoPlayerController!.value.isPlaying) {
         _videoPlayerController!.pause();
@@ -280,7 +283,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   void _startHidePlayPauseTimer() {
     _hidePlayPauseTimer?.cancel();
     _hidePlayPauseTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         setState(() {
           _showPlayPauseButton = false;
         });
@@ -289,14 +292,14 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   }
 
   void _onVisibilityChanged(VisibilityInfo info) {
-    if (_videoPlayerController == null || !_isVideoInitialized) return;
+    if (_isDisposed || _videoPlayerController == null || !_isVideoInitialized) return;
 
     if (info.visibleFraction > 0.5) {
-      if (!_isPlaying && mounted) {
+      if (!_isPlaying && mounted && !_isDisposed) {
         _videoPlayerController!.play().catchError((error) {
           print("Error playing video: $error");
         });
-        if (mounted) {
+        if (mounted && !_isDisposed) {
           setState(() {
             _isPlaying = true;
             _showPlayPauseButton = true;
@@ -305,14 +308,16 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         }
       }
     } else {
-      if (_isPlaying && mounted) {
+      if (_isPlaying && mounted && !_isDisposed) {
         _videoPlayerController!.pause().catchError((error) {
           print("Error pausing video: $error");
         });
-        setState(() {
-          _isPlaying = false;
-          _showPlayPauseButton = false;
-        });
+        if (mounted && !_isDisposed) {
+          setState(() {
+            _isPlaying = false;
+            _showPlayPauseButton = false;
+          });
+        }
       }
     }
   }
@@ -342,13 +347,10 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   @override
   void dispose() {
     print('Disposing ProductDetailPage for product ID: $_lastProductId');
+    _isDisposed = true;
     _tabController.dispose();
-    _videoPlayerController?.pause().then((_) {
-      _videoPlayerController?.dispose();
-      _videoPlayerController = null;
-    }).catchError((error) {
-      print("Error disposing video controller: $error");
-    });
+    _videoPlayerController?.dispose();
+    _videoPlayerController = null;
     _hidePlayPauseTimer?.cancel();
     _scrollController.dispose();
     Get.delete<ReviewController>(
