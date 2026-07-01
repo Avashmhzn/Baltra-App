@@ -69,6 +69,43 @@ class Authrepository extends GetxController {
     }
   }
 
+  Future<int> resendOTP(int number, bool isReset) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      final urlString = isReset
+          ? '$URL/customer/requestpasswordreset'
+          : '$URL/customer/requestotp';
+
+      final response = await http.post(
+        Uri.parse(urlString),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, int>{'contact': number}),
+      );
+
+      log("Resend OTP Response ($urlString): ${response.body}");
+      final dynamic responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return response.statusCode;
+      } else {
+        errorMessage.value = responseData['message'] ?? 'Failed to resend OTP';
+        return response.statusCode;
+      }
+    } on SocketException catch (_) {
+      errorMessage.value = 'No internet connection';
+      return -1;
+    } catch (e) {
+      errorMessage.value = 'Unexpected error: $e';
+      return -1;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<int> verifyOTP(int number, int otp) async {
     try {
       final response = await http

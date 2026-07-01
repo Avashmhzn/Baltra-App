@@ -237,6 +237,7 @@
 //   }
 // }
 
+import 'dart:async';
 import 'package:baltra/features/authetication/data/authRepository.dart';
 import 'package:baltra/features/authetication/presentation/pages/congratulations_page.dart';
 import 'package:baltra/features/authetication/presentation/pages/resetPassowrd.dart';
@@ -265,14 +266,35 @@ class _OtpPageState extends State<OtpPage> {
   final SmartAuth _smartAuth = SmartAuth.instance;
   bool _autoFilled = false;
 
+  Timer? _timer;
+  int _secondsRemaining = 60;
+
+  void _startResendTimer() {
+    _timer?.cancel();
+    setState(() {
+      _secondsRemaining = 60;
+    });
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsRemaining == 0) {
+        timer.cancel();
+      } else {
+        setState(() {
+          _secondsRemaining--;
+        });
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _startSmsListener();
+    _startResendTimer();
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _smartAuth.removeUserConsentApiListener();
     for (final c in _controllers) c.dispose();
     for (final f in _focusNodes) f.dispose();
@@ -303,6 +325,9 @@ class _OtpPageState extends State<OtpPage> {
 
   void _distribute(String digits, int startIndex) {
     digits = digits.replaceAll(RegExp(r'\D'), '');
+    if (digits.length >= 6) {
+      startIndex = 0;
+    }
     for (int i = 0; i < digits.length && startIndex + i < 6; i++) {
       _controllers[startIndex + i].text = digits[i];
     }
@@ -316,13 +341,16 @@ class _OtpPageState extends State<OtpPage> {
 
   void _verifyOTP() async {
     if (_otp.length != 6) {
-      _showSnack('Please enter a complete 6-digit OTP');
+      _showSnack('Please enter a complete 6-digit OTP', isError: true);
       return;
     }
     try {
+      loginController.isLoading.value = true;
+      loginController.errorMessage.value = '';
+
       final status = widget.reset
-          ? await Authrepository().resetverifyOTP(widget.phone, int.parse(_otp))
-          : await Authrepository().verifyOTP(widget.phone, int.parse(_otp));
+          ? await loginController.resetverifyOTP(widget.phone, int.parse(_otp))
+          : await loginController.verifyOTP(widget.phone, int.parse(_otp));
 
       if (!mounted) return;
 
@@ -337,17 +365,85 @@ class _OtpPageState extends State<OtpPage> {
           (_) => false,
         );
       } else {
-        throw Exception('Verification failed. Code: $status');
+        String msg = loginController.errorMessage.value;
+        if (msg.startsWith('Failed to login: ')) {
+          msg = msg.replaceFirst('Failed to login: ', '');
+        }
+        if (msg.isEmpty ||
+            msg.toLowerCase().contains('unexpected error') ||
+            msg.toLowerCase().contains('invalid response')) {
+          if (status == 400) {
+            msg = 'Invalid or expired OTP. Please try again.';
+          } else {
+            msg = 'Verification failed. Please try again.';
+          }
+        } else if (msg.toLowerCase() == 'verification failed') {
+          msg = 'Invalid or expired OTP. Please try again.';
+        }
+        _showSnack(msg, isError: true);
       }
     } catch (e) {
-      setState(() => _autoFilled = false);
-      _showSnack('Error: $e');
+      if (!mounted) return;
+      _showSnack('Something went wrong. Please try again.', isError: true);
+    } finally {
+      loginController.isLoading.value = false;
+      if (mounted) {
+        setState(() => _autoFilled = false);
+      }
     }
   }
 
-  void _showSnack(String msg) {
+  void _showSnack(String msg, {bool isError = false}) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+
+    // Clear any active snackbars to prevent overlapping/delay
+    ScaffoldMessenger.of(context).clearSnackBars();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+          decoration: BoxDecoration(
+            color: isError
+                ? const Color(0xFFE53935) // Elegant red
+                : const Color(0xFF43A047), // Elegant green
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [
+              BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.15),
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(
+                isError ? Icons.error_outline : Icons.check_circle_outline,
+                color: Colors.white,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  msg,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   // ── OTP box ───────────────────────────────────────────────────────────────
@@ -377,7 +473,7 @@ class _OtpPageState extends State<OtpPage> {
           textAlign: TextAlign.center,
           keyboardType: TextInputType.number,
           // iOS: triggers SMS suggestion banner above keyboard
-          autofillHints: index == 0 ? const [AutofillHints.oneTimeCode] : null,
+          autofillHints: const [AutofillHints.oneTimeCode],
           style: TextStyle(
             fontSize: (width * 0.45).clamp(14.0, 24.0),
             fontWeight: FontWeight.w500,
@@ -391,7 +487,7 @@ class _OtpPageState extends State<OtpPage> {
           ),
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(1),
+            _OtpInputFormatter(),
           ],
           onChanged: (value) {
             if (value.isEmpty) return;
@@ -488,31 +584,70 @@ class _OtpPageState extends State<OtpPage> {
                   const SizedBox(height: 10),
 
                   // ── Resend row ───────────────────────────────────────────
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Didn't receive the code?",
-                        style: TextStyle(fontSize: 14),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          // TODO: call your resend API here
-                          setState(() => _autoFilled = false);
-                          _startSmsListener();
-                        },
-                        style: const ButtonStyle(
-                          padding: WidgetStatePropertyAll(EdgeInsets.zero),
-                          foregroundColor:
-                              WidgetStatePropertyAll(Color(0xff4f4f4f)),
+                  Obx(() {
+                    final isLoading = loginController.isLoading.value;
+                    final isEnabled = _secondsRemaining == 0 && !isLoading;
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Didn't receive the code?",
+                          style: TextStyle(fontSize: 14),
                         ),
-                        child: const Text(
-                          'Resend',
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                        const SizedBox(width: 4),
+                        TextButton(
+                          onPressed: isEnabled
+                              ? () async {
+                                  setState(() => _autoFilled = false);
+
+                                  // Clear all OTP controllers to start fresh
+                                  for (final controller in _controllers) {
+                                    controller.clear();
+                                  }
+                                  FocusScope.of(context)
+                                      .requestFocus(_focusNodes[0]);
+
+                                  // Call the resend API
+                                  final status =
+                                      await loginController.resendOTP(
+                                    widget.phone,
+                                    widget.reset,
+                                  );
+
+                                  if (status == 200) {
+                                    _showSnack('OTP resent successfully!');
+                                    _startResendTimer();
+                                    _startSmsListener();
+                                  } else {
+                                    String msg =
+                                        loginController.errorMessage.value;
+                                    if (msg.isEmpty) {
+                                      msg =
+                                          'Failed to resend OTP. Please try again.';
+                                    }
+                                    _showSnack(msg, isError: true);
+                                  }
+                                }
+                              : null,
+                          style: ButtonStyle(
+                            padding:
+                                const WidgetStatePropertyAll(EdgeInsets.zero),
+                            foregroundColor: WidgetStatePropertyAll(
+                              isEnabled
+                                  ? Theme.of(context).primaryColor
+                                  : const Color(0xff9e9e9e),
+                            ),
+                          ),
+                          child: Text(
+                            _secondsRemaining > 0
+                                ? 'Resend in ${_secondsRemaining}s'
+                                : 'Resend',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  }),
 
                   // ── Proceed button ───────────────────────────────────────
                   GestureDetector(
@@ -545,5 +680,35 @@ class _OtpPageState extends State<OtpPage> {
         ),
       ),
     );
+  }
+}
+
+class _OtpInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+    
+    // If it's a multi-character input (like autofill or paste), allow it
+    if (newValue.text.length > 1) {
+      // If oldValue was 1 char and newValue is 2 chars, it means the user typed a new char
+      // on top of/next to the existing one. Keep only the newly typed character.
+      if (oldValue.text.length == 1 && newValue.text.length == 2) {
+        final newChar = newValue.text.replaceFirst(oldValue.text, '');
+        if (newChar.length == 1) {
+          return TextEditingValue(
+            text: newChar,
+            selection: const TextSelection.collapsed(offset: 1),
+          );
+        }
+      }
+      return newValue;
+    }
+
+    return newValue;
   }
 }
