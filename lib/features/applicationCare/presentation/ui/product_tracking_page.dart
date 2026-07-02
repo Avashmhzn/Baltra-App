@@ -751,6 +751,7 @@ import 'dart:io';
 import 'package:baltra/features/applicationCare/controller/crmController.dart';
 import 'package:baltra/features/applicationCare/models/crmModel.dart';
 import 'package:baltra/features/applicationCare/presentation/widgets/tracking_details_skeletion.dart';
+import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -959,27 +960,41 @@ class _TrackingPageState extends State<TrackingPage> {
 
         return SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(14, 10, 14, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTopBar(context, product),
-                const SizedBox(height: 12),
-                _buildJobInfoCard(product),
-                const SizedBox(height: 14),
-                if (product.jobNo.trim().isNotEmpty && product.jobNo != 'N/A')
-                  _buildTimelineCard(product, stepperData),
-                const SizedBox(height: 14),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: _buildProductDetailsCard(context, product)),
-                    const SizedBox(width: 10),
-                    Expanded(child: _buildStoreDetailsCard(product)),
-                  ],
+                AppBarWithSVG(
+                  subtitle: "Know the status of your product",
+                  title: "Track Your Product",
+                  backbutton: false,
                 ),
-                const SizedBox(height: 14),
-                _buildEvidenceSection(context, product),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTopBar(context, product),
+                      const SizedBox(height: 12),
+                      _buildJobInfoCard(product),
+                      const SizedBox(height: 14),
+                      if (product.jobNo.trim().isNotEmpty && product.jobNo != 'N/A')
+                        _buildTimelineCard(product, stepperData),
+                      const SizedBox(height: 14),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: _buildProductDetailsCard(context, product)),
+                          const SizedBox(width: 10),
+                          Expanded(child: _buildStoreDetailsCard(product)),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      _buildCustomerDetailsCard(product),
+                      const SizedBox(height: 14),
+                      _buildEvidenceSection(context, product),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -1509,6 +1524,62 @@ class _TrackingPageState extends State<TrackingPage> {
           _detailRow("LOCATION", product.storeLocation),
           _detailRow("CONTACT", product.storeNumber),
           _detailRow("SERIAL NO.", product.serialNumber),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Customer details card
+  // ---------------------------------------------------------------------------
+  Widget _buildCustomerDetailsCard(CustomerProduct product) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _borderGrey),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "CUSTOMER DETAILS",
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _detailRow("NAME", product.customerName),
+                    _detailRow("EMAIL", product.email),
+                    _detailRow("ZONE", product.zone),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _detailRow("CONTACT", product.customerContact),
+                    _detailRow("ADDRESS", product.customerAddress),
+                    _detailRow("AREA", product.area),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

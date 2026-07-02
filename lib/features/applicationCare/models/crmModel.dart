@@ -63,6 +63,12 @@ class CustomerProduct {
   final String damagedImage;
   final String damagedVideo;
   final List<Map<String, dynamic>> stepper;
+  final String customerName;
+  final String customerContact;
+  final String email;
+  final String customerAddress;
+  final String zone;
+  final String area;
 
   CustomerProduct({
     required this.id,
@@ -94,6 +100,12 @@ class CustomerProduct {
     required this.damagedImage,
     required this.damagedVideo,
     required this.stepper,
+    required this.customerName,
+    required this.customerContact,
+    required this.email,
+    required this.customerAddress,
+    required this.zone,
+    required this.area,
   });
 
   factory CustomerProduct.fromJson(Map<String, dynamic> json) =>
@@ -127,6 +139,12 @@ class CustomerProduct {
         damagedImage: json["damaged_image"] ?? "",
         damagedVideo: json["damaged_video"] ?? "",
         stepper: List<Map<String, dynamic>>.from(json["stepper"] ?? []),
+        customerName: json["customer_name"] ?? "",
+        customerContact: json["customerContact"]?.toString() ?? json["customer_contact"]?.toString() ?? "",
+        email: json["email"] ?? "",
+        customerAddress: json["customerAddress"] ?? json["customer_address"] ?? "",
+        zone: json["zone"] ?? "",
+        area: json["area"] ?? "",
       );
 
   Map<String, dynamic> toJson() => {
@@ -159,5 +177,11 @@ class CustomerProduct {
         "damaged_image": damagedImage,
         "damaged_video": damagedVideo,
         "tracking_steps": stepper,
+        "customer_name": customerName,
+        "customerContact": customerContact,
+        "email": email,
+        "customerAddress": customerAddress,
+        "zone": zone,
+        "area": area,
       };
 }
