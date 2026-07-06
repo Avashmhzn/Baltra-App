@@ -798,6 +798,8 @@ class _TrackingPageState extends State<TrackingPage> {
     }
   }
 
+  //date format updated
+
   String formatDateOnly(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return "No Date";
     try {
@@ -977,13 +979,16 @@ class _TrackingPageState extends State<TrackingPage> {
                       const SizedBox(height: 12),
                       _buildJobInfoCard(product),
                       const SizedBox(height: 14),
-                      if (product.jobNo.trim().isNotEmpty && product.jobNo != 'N/A')
+                      if (product.jobNo.trim().isNotEmpty &&
+                          product.jobNo != 'N/A')
                         _buildTimelineCard(product, stepperData),
                       const SizedBox(height: 14),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: _buildProductDetailsCard(context, product)),
+                          Expanded(
+                              child:
+                                  _buildProductDetailsCard(context, product)),
                           const SizedBox(width: 10),
                           Expanded(child: _buildStoreDetailsCard(product)),
                         ],
