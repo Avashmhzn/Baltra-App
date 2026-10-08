@@ -64,6 +64,7 @@ import 'package:baltra/features/authetication/presentation/pages/loginPage.dart'
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileController extends GetxController {
   final Rx<User?> userData = Rx<User?>(null);
@@ -113,6 +114,14 @@ class ProfileController extends GetxController {
         User user = User.fromJson(userResponseData);
         userData(user);
         log('ProfileController: User data loaded: ${user.toString()}');
+
+        // Save to SharedPreferences so HomePage can read it
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('name', '${user.firstname} ${user.lastname}');
+        await prefs.setInt('reward_points', user.reward_points ?? 0);
+        if (user.image_url != null && user.image_url!.isNotEmpty) {
+          await prefs.setString('image_url', user.image_url!);
+        }
       } else if (response.statusCode == 400 ||
           response.statusCode == 401 ||
           response.statusCode == 403) {

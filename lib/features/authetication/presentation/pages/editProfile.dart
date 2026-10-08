@@ -16,7 +16,7 @@ import 'buttomNavbar.dart';
 class EditProfile extends StatefulWidget {
   final User data;
 
-  const EditProfile({required this.data, Key? key}) : super(key: key);
+  const EditProfile({required this.data, super.key});
 
   @override
   _EditProfileState createState() => _EditProfileState();
@@ -24,12 +24,12 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfileState extends State<EditProfile> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _fullNameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _dobController = TextEditingController();
-  TextEditingController _AddressController = TextEditingController();
-  TextEditingController _districtController = TextEditingController();
-  TextEditingController _cityController = TextEditingController();
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _AddressController = TextEditingController();
+  final TextEditingController _districtController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
 
   String? _phone;
   String? _profileImagePath;
@@ -188,7 +188,7 @@ class _EditProfileState extends State<EditProfile> {
       if (token == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
+            content: const Text(
               'Error: Missing authentication token',
               style: TextStyle(color: Colors.white),
             ),
@@ -238,7 +238,7 @@ class _EditProfileState extends State<EditProfile> {
           log('Error: Image URL is null or invalid');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
+              content: const Text(
                 'Failed to upload image: Invalid image URL',
                 style: TextStyle(color: Colors.white),
               ),
@@ -256,7 +256,7 @@ class _EditProfileState extends State<EditProfile> {
           SnackBar(
             content: Text(
               'Failed to upload image: ${response.statusCode}',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
@@ -272,7 +272,7 @@ class _EditProfileState extends State<EditProfile> {
         SnackBar(
           content: Text(
             'Error: $e',
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
@@ -407,7 +407,7 @@ class _EditProfileState extends State<EditProfile> {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-              builder: (context) => ButtomNavBar(
+              builder: (context) => const ButtomNavBar(
                 pageno: 3,
               ),
             ),
@@ -418,7 +418,7 @@ class _EditProfileState extends State<EditProfile> {
             SnackBar(
               content: Text(
                 'Failed to update profile: ${responseData['message']}',
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
@@ -434,7 +434,7 @@ class _EditProfileState extends State<EditProfile> {
           SnackBar(
             content: Text(
               'Failed to update profile: ${response.body}',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
@@ -450,7 +450,7 @@ class _EditProfileState extends State<EditProfile> {
         SnackBar(
           content: Text(
             'Error: $e',
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
@@ -567,7 +567,7 @@ class _EditProfileState extends State<EditProfile> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Gender',
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
@@ -575,7 +575,7 @@ class _EditProfileState extends State<EditProfile> {
                               fontSize: 15,
                             ),
                           ),
-                          SizedBox(height: 8.0),
+                          const SizedBox(height: 8.0),
                           Container(
                             height: 45,
                             margin: const EdgeInsets.only(bottom: 15, top: 10),
@@ -640,11 +640,11 @@ class _EditProfileState extends State<EditProfile> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Date of Birth',
                             style: TextStyle(
                               fontSize: 15.0,
@@ -652,7 +652,7 @@ class _EditProfileState extends State<EditProfile> {
                               color: Colors.black54,
                             ),
                           ),
-                          SizedBox(height: 8.0),
+                          const SizedBox(height: 8.0),
                           Container(
                             height: 45,
                             margin: const EdgeInsets.only(bottom: 15, top: 10),
@@ -661,14 +661,14 @@ class _EditProfileState extends State<EditProfile> {
                               readOnly: true,
                               decoration: InputDecoration(
                                 hintText: 'Date of Birth',
-                                hintStyle: TextStyle(
+                                hintStyle: const TextStyle(
                                   color: Colors.grey,
                                   fontWeight: FontWeight.normal,
                                   fontSize: 14,
                                 ),
                                 filled: true,
                                 fillColor: Colors.white,
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10.0,
                                   horizontal: 12.0,
                                 ),
@@ -694,25 +694,25 @@ class _EditProfileState extends State<EditProfile> {
                                       });
                                     }
                                   },
-                                  child: Icon(Icons.edit_calendar,
+                                  child: const Icon(Icons.edit_calendar,
                                       color: Colors.grey),
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(4.0),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Colors.grey,
                                     width: 1.0,
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(4.0),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Colors.red,
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(4.0),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Colors.grey,
                                   ),
                                 ),
@@ -749,7 +749,7 @@ class _EditProfileState extends State<EditProfile> {
                               },
                             ),
                           ),
-                          SizedBox(height: 15),
+                          const SizedBox(height: 15),
                         ],
                       ),
                       Align(

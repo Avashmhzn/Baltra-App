@@ -395,35 +395,37 @@ class MyProductRepository {
     final token = await _getToken();
 
     try {
+      log("Fetching customer loyalty with URL: $URL/stocks/loyaltyredeem/$stockId");
       final response = await http.get(
         Uri.parse('$URL/stocks/loyaltyredeem/$stockId'),
         headers: {
           HttpHeaders.authorizationHeader: 'Bearer $token',
         },
       );
+      log("Loyalty API response status: ${response.statusCode}, body: ${response.body}");
 
       if (await handleAuthFailureIfAny(response)) {
         return const Left(HttpException('Session expired'));
       }
 
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
-      if (jsonResponse['success'] == true && jsonResponse['data'] != null) {
+      if (jsonResponse['data'] != null) {
         final LoyaltyRedeem loyaltys =
             LoyaltyRedeem.fromJson(jsonResponse['data']);
 
-        log("Product fetched successfully");
+        log("Loyalty fetched: ${loyaltys.reward_points} points");
         return Right(loyaltys);
       } else {
         final String errorMessage =
-            jsonResponse['message'] ?? "Unknown error occurred";
+            jsonResponse['message'] ?? jsonResponse['error'] ?? "Unknown error occurred";
         log("Failed to fetch loyalty: $errorMessage");
         return Left(HttpException(errorMessage));
       }
     } on SocketException catch (e) {
       log("SocketException: $e");
       return Left(e);
-    } catch (e) {
-      log("Unknown error occurred: $e");
+    } catch (e, stackTrace) {
+      log("Unknown error occurred: $e, stack: $stackTrace");
       return Left(Exception("Unknown error occurred: $e"));
     }
   }
@@ -464,7 +466,7 @@ class MyProductRepository {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setInt('reward_points', jsonResponse['new_reward_points']);
         const loyaltys = 1;
-        return Right(loyaltys);
+        return const Right(loyaltys);
       } else {
         final String errorMessage =
             jsonResponse['message'] ?? "Unknown error occurred";
@@ -534,7 +536,7 @@ class MyProductRepository {
         final Myproduct product = Myproduct.fromJson(data);
         return Right(product);
       } else {
-        return Left(HttpException("Failed to fetch product details"));
+        return const Left(HttpException("Failed to fetch product details"));
       }
     } on SocketException catch (e) {
       return Left(e);

@@ -366,7 +366,7 @@ class _ButtomNavBarState extends State<ButtomNavBar>
             await showDialog(
               context: context,
               builder: (BuildContext context) {
-                return QRScannerScreen();
+                return const QRScannerScreen();
               },
             );
             myproductcontroller.fetchMyProduct();
@@ -420,12 +420,12 @@ class CustomBottomAppBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(curveHeight)),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Color.fromRGBO(158, 158, 158, 0.1),
             spreadRadius: 8,
             blurRadius: 1,
-            offset: const Offset(0, 3),
+            offset: Offset(0, 3),
           ),
         ],
       ),

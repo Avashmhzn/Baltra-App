@@ -296,8 +296,12 @@ class _OtpPageState extends State<OtpPage> {
   void dispose() {
     _timer?.cancel();
     _smartAuth.removeUserConsentApiListener();
-    for (final c in _controllers) c.dispose();
-    for (final f in _focusNodes) f.dispose();
+    for (final c in _controllers) {
+      c.dispose();
+    }
+    for (final f in _focusNodes) {
+      f.dispose();
+    }
     super.dispose();
   }
 

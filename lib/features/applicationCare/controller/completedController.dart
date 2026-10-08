@@ -32,7 +32,7 @@ class CompletedComplaintsController extends GetxController {
         return;
       }
 
-      final url = '$URL/stocks/getallcomplaintsbycustomer?status=Completed';
+      const url = '$URL/stocks/getallcomplaintsbycustomer?status=Completed';
       log("Fetching completed complaints from: $url");
 
       final response = await http.get(

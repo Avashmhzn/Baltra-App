@@ -22,7 +22,7 @@ bool _handlingAuthFailure = false;
 
 Future<bool> handleAuthFailureIfAny(http.Response response) async {
   final code = response.statusCode;
-  final isAuthFailure = code == 400 || code == 401 || code == 403;
+  final isAuthFailure = code == 401 || code == 403;
 
   if (!isAuthFailure) return false;
 

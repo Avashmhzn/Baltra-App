@@ -3,7 +3,7 @@ import 'package:baltra/features/authetication/presentation/widgets/appbar.dart';
 import 'package:flutter/material.dart';
 
 class CongratulationsPage extends StatefulWidget {
-  const CongratulationsPage({Key? key, required this.phone}) : super(key: key);
+  const CongratulationsPage({super.key, required this.phone});
   final int phone;
 
   @override
@@ -27,7 +27,7 @@ class _CongratulationsPageState extends State<CongratulationsPage> with SingleTi
     _controller.forward();
 
     // Automatically navigate to SignupPage after 5 seconds
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -48,7 +48,7 @@ class _CongratulationsPageState extends State<CongratulationsPage> with SingleTi
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60.0), // Adjust height to minimize gap
+        preferredSize: const Size.fromHeight(60.0), // Adjust height to minimize gap
         child: CustomAppbar(),
       ),
       body: SafeArea(
@@ -67,7 +67,7 @@ class _CongratulationsPageState extends State<CongratulationsPage> with SingleTi
                   fit: BoxFit.cover, // Ensure no transparency in scaling
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'CONGRATULATIONS!',
                   style: TextStyle(
                     fontSize: 24,

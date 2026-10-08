@@ -20,7 +20,7 @@ class AuthInterceptor extends GetConnect {
   }
 
   bool _isAuthFailure(int? statusCode) {
-    return statusCode == 400 || statusCode == 401 || statusCode == 403;
+    return statusCode == 401 || statusCode == 403;
   }
 
   Future<void> _handleAuthFailure() async {

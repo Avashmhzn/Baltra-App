@@ -15,14 +15,14 @@ class CrmServices extends GetxService {
     final String? token = prefs.getString('auth_token');
 
     if (token == null) {
-      return Left("Authentication token not found");
+      return const Left("Authentication token not found");
     }
 
     final String url = '$URL/stocks/getcomplaintbyidcustomer/$stockId';
 
     log("Fetching data from: $url");
     log("Bearer Token (masked): ${token.substring(0, 6)}...${token.substring(token.length - 4)}");
-    log("Bearer Token : ${token}");
+    log("Bearer Token : $token");
 
     try {
       final response = await http.get(
@@ -40,7 +40,7 @@ class CrmServices extends GetxService {
         if (jsonResponse['success']) {
           final CustomerProduct customerProduct =
               CustomerProduct.fromJson(jsonResponse['data']);
-          log('this is cutomer product${customerProduct}');
+          log('this is cutomer product$customerProduct');
           return Right(customerProduct);
         } else {
           return Left(jsonResponse['message'] ?? "Failed to fetch data");
@@ -49,7 +49,7 @@ class CrmServices extends GetxService {
         return Left("HTTP Error: ${response.statusCode}");
       }
     } on SocketException {
-      return Left("No Internet connection");
+      return const Left("No Internet connection");
     } catch (e) {
       return Left("Unknown error occurred: $e");
     }

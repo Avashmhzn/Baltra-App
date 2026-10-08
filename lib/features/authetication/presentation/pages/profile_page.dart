@@ -171,14 +171,14 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ChangePasswordPage(
+                            builder: (context) => const ChangePasswordPage(
                               phone: 9861490173,
                             ),
                           ),
                         );
                       },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12.0),
                         child: Row(
                           children: [
                             Icon(
@@ -186,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                               color: Colors.red,
                               size: 24,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             Text(
                               'Change Password',
                               style: TextStyle(
@@ -199,7 +199,7 @@ class _ProfilePageState extends State<ProfilePage> with SessionManager {
                         ),
                       ),
                     ),
-                    SizedBox(height: 25),
+                    const SizedBox(height: 25),
                     const Text(
                       'Logout from this account',
                       style: TextStyle(

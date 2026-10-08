@@ -164,7 +164,7 @@ class ReviewController extends GetxController {
   }
 
   Future<void> postReview(int productId, String reviewText, int rating) async {
-    final url = '$URL/products/addrating';
+    const url = '$URL/products/addrating';
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
 

@@ -121,7 +121,7 @@ Widget complaintSkeleton() {
 }
 
 class ProductMaintainancePage extends StatefulWidget {
-  const ProductMaintainancePage({Key? key}) : super(key: key);
+  const ProductMaintainancePage({super.key});
 
   @override
   State<ProductMaintainancePage> createState() =>

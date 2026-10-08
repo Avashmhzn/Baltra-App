@@ -114,7 +114,7 @@ class Authrepository extends GetxController {
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode(<String, dynamic>{'contact': number, 'otp': otp}),
           )
-          .timeout(Duration(seconds: 10));
+          .timeout(const Duration(seconds: 10));
 
       log("Verify OTP Response: ${response.body}");
 
@@ -170,11 +170,13 @@ class Authrepository extends GetxController {
 
       // Add optional fields only if provided and non-empty
       if (gender != null && gender.isNotEmpty) requestBody["gender"] = gender;
-      if (customerAddress != null && customerAddress.isNotEmpty)
+      if (customerAddress != null && customerAddress.isNotEmpty) {
         requestBody["customerAddress"] = customerAddress;
+      }
       if (city != null && city.isNotEmpty) requestBody["city"] = city;
-      if (district != null && district.isNotEmpty)
+      if (district != null && district.isNotEmpty) {
         requestBody["district"] = district;
+      }
       if (dob != null && dob.isNotEmpty) requestBody["dob"] = dob;
 
       final response = await http.post(
@@ -206,6 +208,9 @@ class Authrepository extends GetxController {
           'reward_points',
           user.reward_points ?? 0,
         );
+        if (user.image_url != null) {
+          await prefs.setString('image_url', user.image_url!);
+        }
         final int status = response.statusCode;
         return status;
       } else {
@@ -375,7 +380,7 @@ class Authrepository extends GetxController {
         };
       } else if (response.statusCode == 401) {
         errorMessage.value = 'Session expired. Please log in again.';
-        Get.offAll(Loginpage()); // Navigate to login page
+        Get.offAll(const Loginpage()); // Navigate to login page
         return {
           'status': response.statusCode,
           'message': 'Session expired. Please log in again.',
@@ -446,6 +451,9 @@ class Authrepository extends GetxController {
           'reward_points',
           user.reward_points ?? 0,
         );
+        if (user.image_url != null) {
+          await prefs.setString('image_url', user.image_url!);
+        }
         final int status = response.statusCode;
         return status;
       } else {

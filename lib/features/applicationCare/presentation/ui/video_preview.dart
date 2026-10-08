@@ -1,13 +1,14 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class VideoPreview extends StatefulWidget {
   final String videoUrl;
-  const VideoPreview({Key? key, required this.videoUrl}) : super(key: key);
+  const VideoPreview({super.key, required this.videoUrl});
 
   @override
-  _VideoPreviewState createState() => _VideoPreviewState();
+  State<VideoPreview> createState() => _VideoPreviewState();
 }
 
 class _VideoPreviewState extends State<VideoPreview> {
@@ -25,6 +26,9 @@ class _VideoPreviewState extends State<VideoPreview> {
           _isInitialized = true;
           _controller.setLooping(true);
         });
+      }).catchError((e) {
+        log('Video initialization error: $e');
+        if (_isDisposed || !mounted) return;
       });
   }
 

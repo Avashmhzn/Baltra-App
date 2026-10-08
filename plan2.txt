@@ -1,0 +1,25 @@
+Widget Header:
+Container with height ~170. Gradient background.
+Contains "BALTRA SMART CARE" (padding top ~30) and "Dashboard" and Notification SVG.
+
+Stat Cards:
+Row of 3 expanded cards.
+Decoration: White BG, shadow, border radius 12, border color light grey.
+Padding inside: 10px.
+Column: Icon at top left. SizedBox(8), Text Title, Text Value.
+
+3 Step Journey:
+Text title "3 Step Journey" (padding left 16, etc.)
+Row or Column? "Scan QR" is a card. How are they laid out in Image 3?
+Ah, I should check Image 3's description again:
+"3 Step Journey section in detail - three colored step cards: Step 1 (blue bg, "Scan QR" ...), Step 2 (amber/orange bg, "Register Complaint" ...), Step 3 (green bg, "Track" ...)"
+Wait, these step cards... are they horizontally scrolling, or laid out vertically?
+"three colored step cards" - In Image 2, the "3 Step Journey" section shows a card taking up most of the width, indicating they might be a horizontal scroll list `ListView(scrollDirection: Axis.horizontal)` or `SingleChildScrollView(scrollDirection: Axis.horizontal)`. Or perhaps they are vertical? The prompt says "three colored step cards", Image 3 expands to show them. In 99% of such dashboard designs, if they are cards with large text and description, they might be horizontal. Let me just use a `SingleChildScrollView(scrollDirection: Axis.horizontal)` with a row of three cards, each taking about 80-90% of screen width. Or wait, they could be stacked vertically if it's a step-by-step list.
+But the summary says "Image 3: The '3 Step Journey' section in detail - three colored step cards: Step 1 (blue bg), Step 2 (amber bg), Step 3 (green bg)". If Image 3 shows them in detail, they might be in a vertical column, or maybe they are horizontal. Let's make a horizontal PageView or SingleChildScrollView since they are "step cards", like a journey banner. If they are small enough, they might fit in a horizontal row.
+Let's build them as a horizontally scrollable row of wide cards (e.g. width 180 or 250).
+
+Let's check the size of the cards for "3 Step Journey" from the reference text:
+1 (blue bg, "Scan QR" - Scan the QR Code or Enter the Serial No.)
+2 (amber bg, "Register Complaint" - If you have anything to complain)
+3 (green bg, "Track" - Track your Complain)
+I will make them as a `SingleChildScrollView(scrollDirection: Axis.horizontal)` with cards of width 250.

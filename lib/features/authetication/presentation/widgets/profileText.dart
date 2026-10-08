@@ -57,14 +57,14 @@ import 'package:flutter/material.dart';
 
 class ProfileTextField extends StatelessWidget {
   const ProfileTextField({
-    Key? key,
+    super.key,
     required this.title,
     this.readonly = false,
     this.controller,
     this.validator,
     this.onSaved,
     this.initialValue = '',
-  }) : super(key: key);
+  });
 
   final String initialValue;
   final String title;

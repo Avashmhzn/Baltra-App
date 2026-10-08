@@ -5,9 +5,8 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
   @override
   final Size preferredSize;
 
-  CustomAppbar({Key? key, double height = 56.0})
-      : preferredSize = Size.fromHeight(height),
-        super(key: key);
+  CustomAppbar({super.key, double height = 56.0})
+      : preferredSize = Size.fromHeight(height);
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +18,7 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
           gradient: RadialGradient(
             colors: [
               Theme.of(context).primaryColor,
-              Color(0xFF8B0000),
+              const Color(0xFF8B0000),
             ],
             center: Alignment.centerLeft,
             radius: 3.5,

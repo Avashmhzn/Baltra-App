@@ -1,0 +1,7 @@
+1. Update home_page.dart to match new dashboard layout.
+2. Add imports for MyProductController, MyProductRepository, SvgPicture.
+3. In initState of HomePage, initialize and fetch MyProducts & Complaints.
+4. Replace red header section with "BALTRA SMART CARE", "Dashboard" and notification icon.
+5. Create a row of three stat cards (Reward Points, Total Products, Total Complaints) overlapping the header and bottom.
+6. Add the "3 Step Journey" section below the stat cards.
+7. Retain the "Our Products" section.

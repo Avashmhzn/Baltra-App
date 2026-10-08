@@ -9,7 +9,7 @@ part of 'loyaltyRedeem.dart';
 LoyaltyRedeem _$LoyaltyRedeemFromJson(Map<String, dynamic> json) =>
     LoyaltyRedeem(
       reward_points: (json['reward_points'] as num).toInt(),
-      tier_status: json['tier_status'] as String,
+      tier_status: json['tier_status'] as String?,
     );
 
 Map<String, dynamic> _$LoyaltyRedeemToJson(LoyaltyRedeem instance) =>

@@ -820,7 +820,7 @@ class _TrackingPageState extends State<TrackingPage> {
     }
   }
 
-  void showFullScreenImage(BuildContext context, String imageUrl) {
+  void showFullScreenImage(BuildContext context, String imageUrl, String tag) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -828,7 +828,7 @@ class _TrackingPageState extends State<TrackingPage> {
         child: GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Hero(
-            tag: imageUrl,
+            tag: tag,
             child: InteractiveViewer(
               panEnabled: true,
               boundaryMargin: const EdgeInsets.all(20),
@@ -965,7 +965,7 @@ class _TrackingPageState extends State<TrackingPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppBarWithSVG(
+                const AppBarWithSVG(
                   subtitle: "Know the status of your product",
                   title: "Track Your Product",
                   backbutton: false,
@@ -1066,7 +1066,7 @@ class _TrackingPageState extends State<TrackingPage> {
                 color: (product.status.toLowerCase() == 'completed'
                         ? _green
                         : _red)
-                    .withOpacity(0.3),
+                    .withValues(alpha: 0.3),
               ),
             ),
             child: Text(
@@ -1178,7 +1178,7 @@ class _TrackingPageState extends State<TrackingPage> {
                 decoration: BoxDecoration(
                   color: _redLight,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: _red.withOpacity(0.25)),
+                  border: Border.all(color: _red.withValues(alpha: 0.25)),
                 ),
                 child: Text(
                   "JOB ID: ${product.jobNo.isNotEmpty ? product.jobNo : '—'}",
@@ -1312,7 +1312,7 @@ class _TrackingPageState extends State<TrackingPage> {
                       decoration: BoxDecoration(
                         color: _redLight,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: _red.withOpacity(0.2)),
+                        border: Border.all(color: _red.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1678,9 +1678,9 @@ class _TrackingPageState extends State<TrackingPage> {
           aspectRatio: 1,
           child: GestureDetector(
             onTap:
-                url.isNotEmpty ? () => showFullScreenImage(context, url) : null,
+                url.isNotEmpty ? () => showFullScreenImage(context, url, "${url}_evidence_$label") : null,
             child: Hero(
-              tag: "${url}_evidence",
+              tag: "${url}_evidence_$label",
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: url.isEmpty
@@ -1750,27 +1750,29 @@ class _TrackingPageState extends State<TrackingPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => VideoPreview(videoUrl: url),
+                        builder: (context) => Scaffold(
+                          backgroundColor: Colors.black,
+                          appBar: AppBar(
+                            backgroundColor: Colors.transparent,
+                            iconTheme: const IconThemeData(color: Colors.white),
+                          ),
+                          body: Center(
+                            child: VideoPreview(videoUrl: url),
+                          ),
+                        ),
                       ),
                     );
                   },
-                  child: Hero(
-                    tag: "${url}_video",
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          VideoPreview(videoUrl: url),
-                          Container(color: Colors.black26),
-                          const Center(
-                            child: Icon(
-                              Icons.play_circle_fill,
-                              color: Colors.white,
-                              size: 26,
-                            ),
-                          ),
-                        ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      color: Colors.black87,
+                      child: const Center(
+                        child: Icon(
+                          Icons.play_circle_fill,
+                          color: Colors.white,
+                          size: 36,
+                        ),
                       ),
                     ),
                   ),

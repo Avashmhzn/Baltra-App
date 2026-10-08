@@ -5,11 +5,11 @@ part 'loyaltyRedeem.g.dart';
 @JsonSerializable()
 class LoyaltyRedeem {
   final int reward_points;
-  final String tier_status;
+  final String? tier_status;
 
   LoyaltyRedeem({
     required this.reward_points,
-    required this.tier_status,
+    this.tier_status,
   });
 
   factory LoyaltyRedeem.fromJson(Map<String, dynamic> json) =>

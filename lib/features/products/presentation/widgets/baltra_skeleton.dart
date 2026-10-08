@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class BaltraLoadingSkeleton extends StatelessWidget {
-  const BaltraLoadingSkeleton({Key? key}) : super(key: key);
+  const BaltraLoadingSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +127,7 @@ class BaltraLoadingSkeleton extends StatelessWidget {
 
 // Pulsating Baltra Logo
 class PulsatingBaltraLogo extends StatefulWidget {
-  const PulsatingBaltraLogo({Key? key}) : super(key: key);
+  const PulsatingBaltraLogo({super.key});
 
   @override
   _PulsatingBaltraLogoState createState() => _PulsatingBaltraLogoState();

@@ -630,7 +630,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 
 class ComplaintRegistrationPage extends StatefulWidget {
-  ComplaintRegistrationPage({
+  const ComplaintRegistrationPage({
     super.key,
     required this.productId,
     required this.modelName,
@@ -659,7 +659,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
       TextEditingController();
 
   List<Map<String, dynamic>> zones = [];
-  String? selectedZone = null;
+  String? selectedZone;
   String? selectedArea;
 
   String? customerName;
@@ -1038,7 +1038,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
           customerContact == 'Not Available' ||
           email == 'Not Available') {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Customer details are incomplete.'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
@@ -1131,7 +1131,7 @@ class _ComplaintRegistrationPageState extends State<ComplaintRegistrationPage> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ButtomNavBar(pageno: 2)),
+                    builder: (context) => const ButtomNavBar(pageno: 2)),
                 (Route<dynamic> route) => false, // Removes all previous routes
               );
             },

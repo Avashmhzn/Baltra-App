@@ -3,7 +3,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart'; // Import AppBarWithSVG
 
 class ProductDetailSkeleton extends StatelessWidget {
-  const ProductDetailSkeleton({Key? key}) : super(key: key);
+  const ProductDetailSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class ProductDetailSkeleton extends StatelessWidget {
         children: [
           const SizedBox(height: 34),
           // Static AppBar with "Welcome to Registered product's page"
-          AppBarWithSVG(
+          const AppBarWithSVG(
             subtitle: "Registered product's page",
             title: "Welcome to ",
             backbutton: false,
@@ -31,7 +31,7 @@ class ProductDetailSkeleton extends StatelessWidget {
                   child: Container(
                     width: 40,
                     height: 40,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white,
                     ),

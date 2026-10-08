@@ -65,8 +65,8 @@ class HomepageCardSkeleton extends StatelessWidget {
                   Row(
                     children: List.generate(
                       3, // Assuming 3 color options as in the image
-                      (index) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                      (index) => const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 2.5),
                         child: CircleAvatar(
                           radius: 10,
                           backgroundColor: Colors.white,

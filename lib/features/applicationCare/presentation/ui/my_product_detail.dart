@@ -583,8 +583,7 @@ import 'package:gal/gal.dart';
 class MyProductDetailPage extends StatefulWidget {
   final int productId;
 
-  const MyProductDetailPage({Key? key, required this.productId})
-      : super(key: key);
+  const MyProductDetailPage({super.key, required this.productId});
 
   @override
   State<MyProductDetailPage> createState() => _MyProductDetailPageState();
@@ -734,7 +733,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 34),
-              AppBarWithSVG(
+              const AppBarWithSVG(
                 subtitle: "Registered product's page",
                 title: "Welcome to ",
                 backbutton: false,
@@ -751,29 +750,29 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                       ),
                       child: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.arrow_back,
                           color: Colors.red,
                         ),
                       ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             product.model_name ?? '',
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                             softWrap: true,
                             overflow: TextOverflow.visible,
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
                             "Job ID: ${product.job_No}",
                             style:
-                                TextStyle(fontSize: 16, color: Colors.black87),
+                                const TextStyle(fontSize: 16, color: Colors.black87),
                           ),
                         ],
                       ),
@@ -793,7 +792,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                       ),
                       elevation: 4,
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
                             ClipRRect(
@@ -812,28 +811,28 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                                         ),
                                       ),
                                     )
-                                  : Icon(
+                                  : const Icon(
                                       Icons.image_not_supported,
                                       size: 120,
                                     ),
                             ),
-                            SizedBox(width: 16),
+                            const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     product.model_name ?? '',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold),
                                   ),
                                   Text(
                                     'Job ID: ${product.job_No}',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 14, color: Colors.grey),
                                   ),
-                                  SizedBox(height: 10),
+                                  const SizedBox(height: 10),
                                   _buildInfoRow(
                                       "Model Number", product.model_num),
                                   _buildInfoRow(
@@ -852,7 +851,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           vertical: 5, horizontal: 8),
@@ -1126,7 +1125,7 @@ class _MyProductDetailPageState extends State<MyProductDetailPage> {
             tag: imageUrl,
             child: InteractiveViewer(
               panEnabled: true,
-              boundaryMargin: EdgeInsets.all(20),
+              boundaryMargin: const EdgeInsets.all(20),
               minScale: 0.5,
               maxScale: 3.0,
               child: Image.network(

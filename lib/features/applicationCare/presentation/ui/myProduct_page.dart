@@ -70,7 +70,7 @@ class _MyProductPageState extends State<MyProductPage> {
                         await showDialog(
                           context: context,
                           builder: (BuildContext context) {
-                            return QRScannerScreen();
+                            return const QRScannerScreen();
                           },
                         );
                         myproductcontroller

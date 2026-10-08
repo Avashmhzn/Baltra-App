@@ -409,7 +409,7 @@ class Myproductcontroller extends GetxController {
     final Either<Exception, int> result =
         await productRepository.redeemLoyalty(stockId, duration, price);
 
-    log('Myproductcontroller: Redeem loyalty result: ${result}');
+    log('Myproductcontroller: Redeem loyalty result: $result');
 
     result.fold(
       (failure) {

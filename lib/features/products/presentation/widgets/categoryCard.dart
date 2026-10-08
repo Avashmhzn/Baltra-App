@@ -7,14 +7,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 class CategoryCard extends StatelessWidget {
   const CategoryCard({
     super.key,
-    required this.image_url,
+    required this.imageUrl,
     required this.name,
     required this.controller,
     required this.where,
     required this.id,
   });
 
-  final String image_url;
+  final String imageUrl;
   final String name;
   final int id;
   final String where;
@@ -25,21 +25,21 @@ class CategoryCard extends StatelessWidget {
     return GestureDetector(
       onTap: where == "category"
           ? () {
-        controller.fetchSubCategories(id);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SubcategoryPage(),
-            ));
-      }
+              controller.fetchSubCategories(id);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SubcategoryPage(),
+                  ));
+            }
           : () {
-        controller.fetchSubCategoryProducts(id);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProductPage(),
-            ));
-      },
+              controller.fetchSubCategoryProducts(id);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProductPage(),
+                  ));
+            },
       child: Container(
         height: 180,
         width: 175,
@@ -49,7 +49,7 @@ class CategoryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CachedNetworkImage(
-              imageUrl: image_url,
+              imageUrl: imageUrl,
               height: 100,
               width: 135,
               fit: BoxFit.contain,
@@ -68,7 +68,7 @@ class CategoryCard extends StatelessWidget {
                 ),
               ),
               fadeInDuration: const Duration(milliseconds: 300),
-              cacheKey: image_url, // Ensure consistent caching
+              cacheKey: imageUrl, // Ensure consistent caching
               memCacheHeight: 100, // Cache resized image in memory
               memCacheWidth: 135, // Match display size for efficiency
               maxHeightDiskCache: 100, // Limit disk cache size

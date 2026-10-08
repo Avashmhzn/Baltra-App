@@ -249,7 +249,7 @@ class ProductDetailSkeleton extends StatelessWidget {
               ),
               const SizedBox(height: 15),
               // Tabs
-              Container(
+              SizedBox(
                 height: 40,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,

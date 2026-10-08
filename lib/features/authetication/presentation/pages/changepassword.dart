@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   final int phone;
-  const ChangePasswordPage({Key? key, required this.phone}) : super(key: key);
+  const ChangePasswordPage({super.key, required this.phone});
 
   @override
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
@@ -44,7 +44,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           SnackBar(
             content: Text(
               response['message'] ?? 'Password changed successfully.',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
@@ -87,7 +87,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 title: 'My Profile',
                 backbutton: true,
               ),
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
               Container(
                 width: MediaQuery.of(context).size.width,
                 color: Colors.transparent,
@@ -125,13 +125,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                                 });
                               },
                             ),
-                            border: OutlineInputBorder(
-                              borderSide: const BorderSide(
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(
                                 color: Color(0xffC2C2C2),
                               ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
                                 color: Color(0xffC2C2C2),
                               ),
                             ),
@@ -181,13 +181,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                                 });
                               },
                             ),
-                            border: OutlineInputBorder(
-                              borderSide: const BorderSide(
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(
                                 color: Color(0xffC2C2C2),
                               ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
                                 color: Color(0xffC2C2C2),
                               ),
                             ),
@@ -239,13 +239,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                                 });
                               },
                             ),
-                            border: OutlineInputBorder(
-                              borderSide: const BorderSide(
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(
                                 color: Color(0xffC2C2C2),
                               ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
                                 color: Color(0xffC2C2C2),
                               ),
                             ),
@@ -283,8 +283,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                                 ),
                               ),
                               child: isLoading
-                                  ? Center(
-                                child: const SizedBox(
+                                  ? const Center(
+                                child: SizedBox(
                                   width: 20,
                                   height: 20,
                                   child: CircularProgressIndicator(

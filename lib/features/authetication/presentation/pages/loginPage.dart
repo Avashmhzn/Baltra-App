@@ -850,11 +850,11 @@ class _LoginpageState extends State<Loginpage> {
                                       decoration: BoxDecoration(
                                         color: Colors.green[600],
                                         borderRadius: BorderRadius.circular(12),
-                                        boxShadow: [
+                                        boxShadow: const [
                                           BoxShadow(
                                             color: Color.fromRGBO(0, 0, 0, 0.2),
                                             blurRadius: 8,
-                                            offset: const Offset(0, 4),
+                                            offset: Offset(0, 4),
                                           ),
                                         ],
                                       ),
@@ -972,19 +972,19 @@ class _LoginpageState extends State<Loginpage> {
                               color: Theme.of(context).primaryColor,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Row(
+                            child: const Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(Icons.phone,
+                                    Icon(Icons.phone,
                                         color: Colors.white, size: 24),
-                                    const SizedBox(width: 12),
+                                    SizedBox(width: 12),
                                     Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
+                                        Text(
                                           '24/7 Help & Support',
                                           style: TextStyle(
                                             color: Colors.white,
@@ -992,7 +992,7 @@ class _LoginpageState extends State<Loginpage> {
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                        const SizedBox(height: 4),
+                                        SizedBox(height: 4),
                                         Text(
                                           'Get quick solutions for baltra-related',
                                           style: TextStyle(
@@ -1005,7 +1005,7 @@ class _LoginpageState extends State<Loginpage> {
                                     ),
                                   ],
                                 ),
-                                const Icon(Icons.arrow_forward,
+                                Icon(Icons.arrow_forward,
                                     color: Colors.white, size: 24),
                               ],
                             ),

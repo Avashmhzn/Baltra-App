@@ -480,7 +480,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             Navigator.pop(context);
             _navigateToResultScreen(param1, param2, param3);
           } else {
-            throw FormatException("Missing required parameters in QR code.");
+            throw const FormatException("Missing required parameters in QR code.");
           }
         } catch (e) {
           log('QR parsing error: $e');
@@ -685,13 +685,13 @@ class _ResultScreenState extends State<ResultScreen> {
         log('Unexpected photo permission status: $photoStatus');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
+            const SnackBar(
+              content: Text(
                 'Unexpected permission status. Please try again or check device settings.',
               ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 5),
+              duration: Duration(seconds: 5),
             ),
           );
         }

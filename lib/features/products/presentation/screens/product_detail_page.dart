@@ -16,7 +16,7 @@ import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class ProductDetailPage extends StatefulWidget {
-  ProductDetailPage({super.key, this.product, this.relatedProducts});
+  const ProductDetailPage({super.key, this.product, this.relatedProducts});
   final Product? product;
   final List<Subcategoryproduct>? relatedProducts;
 
@@ -393,7 +393,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: CachedNetworkImage(
               imageUrl: specImages[i]['image_url'] ?? '',
-              cacheKey: '${specImages[i]['image_url']}_${_lastProductId}',
+              cacheKey: '${specImages[i]['image_url']}_$_lastProductId',
               width: double.infinity,
               fit: BoxFit.contain,
               placeholder: (context, url) => Container(
@@ -427,15 +427,15 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           child: EasyRichText(
             removeListContent(sizing),
             defaultStyle: const TextStyle(fontSize: 14),
-            patternList: [
+            patternList: const [
               EasyRichTextPattern(
                 targetString: r'\bimportant\b',
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.bold, color: Colors.black),
               ),
               EasyRichTextPattern(
                 targetString: r'\d+',
-                style: const TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.black),
               ),
             ],
             textAlign: TextAlign.justify,
@@ -455,7 +455,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             padding: const EdgeInsets.only(top: 8.0),
             child: CachedNetworkImage(
               imageUrl: sizingImages[i]['image_url'] ?? '',
-              cacheKey: '${sizingImages[i]['image_url']}_${_lastProductId}',
+              cacheKey: '${sizingImages[i]['image_url']}_$_lastProductId',
               width: MediaQuery.of(context).size.width * 0.95,
               fit: BoxFit.contain,
               placeholder: (context, url) => Container(
@@ -502,7 +502,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
         if (usageItems.isNotEmpty)
           for (var i = 0; i < usageItems.length; i++)
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 2.0)
+              padding: const EdgeInsets.symmetric(vertical: 2.0)
                   .copyWith(top: i == 0 ? 0.0 : 2.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -548,7 +548,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
               padding: const EdgeInsets.only(top: 8.0),
               child: CachedNetworkImage(
                 imageUrl: usageImages[i]['image_url'] ?? '',
-                cacheKey: '${usageImages[i]['image_url']}_${_lastProductId}',
+                cacheKey: '${usageImages[i]['image_url']}_$_lastProductId',
                 width: double.infinity,
                 fit: BoxFit.contain,
                 placeholder: (context, url) => Container(
@@ -584,7 +584,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
+        SizedBox(
           height: 40,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -768,7 +768,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                                 )
                               : CachedNetworkImage(
                                   imageUrl: currentMainImage!,
-                                  cacheKey: '${currentMainImage}_${productId}',
+                                  cacheKey: '${currentMainImage}_$productId',
                                   height: 300,
                                   width: double.infinity,
                                   fit: BoxFit.fitHeight,
@@ -793,7 +793,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                             right: 10,
                             child: CachedNetworkImage(
                               imageUrl: product.warranty_icon ?? '',
-                              cacheKey: '${product.warranty_icon}_${productId}',
+                              cacheKey: '${product.warranty_icon}_$productId',
                               height: 50,
                               width: 50,
                               fit: BoxFit.contain,
@@ -821,7 +821,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                         ? const Center(child: Text("No images available"))
                         : ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: thumbnailUrls.length > 0
+                            itemCount: thumbnailUrls.isNotEmpty
                                 ? thumbnailUrls.length - 1
                                 : 0,
                             itemBuilder: (context, index) {
@@ -855,12 +855,12 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                                       width: isSelected ? 2 : 1,
                                     ),
                                     color: isSelected
-                                        ? Color.fromRGBO(33, 150, 243, 0.1)
+                                        ? const Color.fromRGBO(33, 150, 243, 0.1)
                                         : null,
                                   ),
                                   child: CachedNetworkImage(
                                     imageUrl: imageUrl,
-                                    cacheKey: '${imageUrl}_${productId}',
+                                    cacheKey: '${imageUrl}_$productId',
                                     fit: BoxFit.contain,
                                     height: 75,
                                     width: 75,
@@ -928,7 +928,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Container(
+                    child: SizedBox(
                       height: 40,
                       child: (product.color_styles == null ||
                               product.color_styles!.isEmpty)
@@ -1051,7 +1051,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                         BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: CachedNetworkImage(
                       imageUrl: product.galleryimageone ?? '',
-                      cacheKey: '${product.galleryimageone}_${productId}',
+                      cacheKey: '${product.galleryimageone}_$productId',
                       height: 430,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -1074,7 +1074,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                         BoxDecoration(border: Border.all(color: Colors.grey)),
                     child: CachedNetworkImage(
                       imageUrl: product.galleryimagetwo ?? '',
-                      cacheKey: '${product.galleryimagetwo}_${productId}',
+                      cacheKey: '${product.galleryimagetwo}_$productId',
                       height: 430,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -1117,12 +1117,12 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                                   child: VideoPlayer(_videoPlayerController!),
                                 ),
                               if (!_isVideoInitialized)
-                                Column(
+                                const Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const CircularProgressIndicator(
+                                    CircularProgressIndicator(
                                         color: Colors.white),
-                                    const SizedBox(height: 10),
+                                    SizedBox(height: 10),
                                     Text(
                                       'Loading video...',
                                       style: TextStyle(
@@ -1134,7 +1134,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                                 ),
                               if (_videoPlayerController?.value.hasError ??
                                   false)
-                                Center(
+                                const Center(
                                   child: Text(
                                     'Error loading video\nTap to retry',
                                     textAlign: TextAlign.center,

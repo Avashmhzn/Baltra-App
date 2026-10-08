@@ -3,7 +3,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:baltra/features/products/presentation/widgets/appWithSvg.dart'; // Import AppBarWithSVG
 
 class TrackingPageSkeleton extends StatelessWidget {
-  const TrackingPageSkeleton({Key? key}) : super(key: key);
+  const TrackingPageSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class TrackingPageSkeleton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Static AppBar with "Track Your Product"
-            AppBarWithSVG(
+            const AppBarWithSVG(
               subtitle: "Know the status of your product",
               title: "Track Your Product",
               backbutton: false,

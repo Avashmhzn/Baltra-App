@@ -148,7 +148,7 @@ class _RewardsPageState extends State<RewardsPage> {
                                       padding: const EdgeInsets.all(10),
                                       height: 50,
                                       color: Theme.of(context).primaryColor,
-                                      child: Center(
+                                      child: const Center(
                                         child: Text(
                                           'Redeem Warranty',
                                           style: TextStyle(color: Colors.white),
